@@ -1,0 +1,58 @@
+{
+  "name": "@kibisis/embedded-wallet-sdk",
+  "version": "1.0.0",
+  "description": "The core implementation for the embedded wallet SDK that allows dApps to create/import embedded wallets.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kibis-is/embedded-wallet-sdk"
+  },
+  "author": {
+    "name": "Kieran O'Neill",
+    "email": "hello@kieranoneill.com",
+    "url": "https://github.com/kieranroneill"
+  },
+  "license": "CC0-1.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && vite build",
+    "build:dependencies": "exit 0",
+    "clean": "shx rm -rf dist && shx rm -rf tsconfig.*.tsbuildinfo",
+    "generate:index": "tsx ./scripts/generate-index.ts",
+    "lint": "eslint .",
+    "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts}\"",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "algosdk": "^3.x",
+    "chalk": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "globals": "catalog:",
+    "prettier": "catalog:",
+    "shx": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "algosdk": "^3.x"
+  },
+  "dependencies": {
+    "@agoralabs-sh/bytes": "^1.0.0",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.7.1"
+  }
+}
