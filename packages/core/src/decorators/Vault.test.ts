@@ -1,0 +1,130 @@
+import { isEqual } from '@agoralabs-sh/bytes';
+import { generate } from '@agoralabs-sh/uuid';
+import { bytesToHex, randomBytes } from '@noble/hashes/utils';
+import { deleteDB } from 'idb';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+
+// constants
+import { IDB_VAULT_DB_NAME, INITIALIZATION_VECTOR_BYTE_SIZE, SALT_BYTE_SIZE } from '@/constants';
+
+// decorators
+import Vault from './Vault';
+
+// types
+import { Account, Passkey } from '@/types';
+
+// utilities
+import { addressFromPrivateKey, createLogger, generatePrivateKey } from '@/utilities';
+
+describe(Vault.name, () => {
+  const logger = createLogger('silent');
+  let vault: Vault;
+
+  afterEach(() => {
+    vault.close();
+  });
+
+  beforeEach(async () => {
+    await deleteDB(IDB_VAULT_DB_NAME);
+
+    vault = await Vault.create({
+      logger,
+    });
+  });
+
+  describe.only('setPasskey()', () => {
+    test('it should set a new passkey', async () => {
+      const passkey: Passkey = {
+        credentialID: generate(),
+        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        transports: [],
+      };
+      let _passkey: Passkey | null;
+
+      await vault.setPasskey(passkey);
+
+      _passkey = await vault.passkey();
+
+      expect(_passkey).toEqual(passkey);
+    });
+
+    test('it replace an existing passkey', async () => {
+      const passkey: Passkey = {
+        credentialID: generate(),
+        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        transports: [],
+      };
+      let _passkey: Passkey | null;
+
+      await vault.setPasskey({
+        credentialID: generate(),
+        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        transports: [],
+      });
+      await vault.setPasskey(passkey);
+
+      _passkey = await vault.passkey();
+
+      expect(_passkey).toEqual(passkey);
+    });
+  });
+
+  describe('upsertItem()', () => {
+    test('it should add the new item', async () => {
+      const item: Account = {
+        keyData: generatePrivateKey(),
+        name: 'Personal',
+      };
+      let _item: Account | null;
+      let items = await vault.accounts();
+
+      expect(items.size).toBe(0);
+
+      await vault.upsertAccounts(new Map<string, Account>([[addressFromPrivateKey(item.keyData), item]]));
+
+      items = await vault.accounts();
+      _item = items.get(addressFromPrivateKey(item.keyData)) || null;
+
+      expect(_item).toBeDefined();
+      expect(isEqual(_item?.keyData ?? new Uint8Array(), item.keyData)).toBe(true);
+      expect(_item?.name).toBe(item.name);
+    });
+
+    test('it should update an existing item', async () => {
+      const item: Account = {
+        keyData: generatePrivateKey(),
+        name: 'Personal',
+      };
+      let _item: Account | null;
+      let items: Map<string, Account>;
+
+      await vault.upsertAccounts(
+        new Map<string, Account>([
+          [
+            addressFromPrivateKey(item.keyData),
+            {
+              ...item,
+              name: 'Old Personal',
+            },
+          ],
+        ])
+      );
+
+      items = await vault.accounts();
+
+      expect(items.size).toBe(1);
+
+      await vault.upsertAccounts(new Map<string, Account>([[addressFromPrivateKey(item.keyData), item]]));
+
+      items = await vault.accounts();
+      _item = items.get(addressFromPrivateKey(item.keyData)) || null;
+
+      expect(_item).toBeDefined();
+      expect(isEqual(_item?.keyData ?? new Uint8Array(), item.keyData)).toBe(true);
+      expect(_item?.name).toBe(item.name);
+    });
+  });
+});

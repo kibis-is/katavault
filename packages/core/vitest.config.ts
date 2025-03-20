@@ -9,6 +9,7 @@ export default mergeConfig(
     test: {
       dir: 'src',
       passWithNoTests: true,
+      setupFiles: ['fake-indexeddb/auto'],
       testTimeout: 60000,
       watch: false,
     },

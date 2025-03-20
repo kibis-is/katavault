@@ -36,6 +36,7 @@
     "chalk": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
+    "fake-indexeddb": "^6.0.0",
     "globals": "catalog:",
     "prettier": "catalog:",
     "shx": "catalog:",
@@ -52,7 +53,9 @@
   },
   "dependencies": {
     "@agoralabs-sh/bytes": "^1.0.0",
+    "@agoralabs-sh/uuid": "^1.1.0",
     "@noble/curves": "^1.8.1",
-    "@noble/hashes": "^1.7.1"
+    "@noble/hashes": "^1.7.1",
+    "idb": "^8.0.2"
   }
 }

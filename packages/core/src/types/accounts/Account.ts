@@ -1,10 +1,10 @@
 /**
- * @property {string} name - [optional] The human-readable name for the account.
- * @property {string} privateKey - [optional] The hexadecimal-encoded private key for the account.
+ * @property {string} keyData - The encrypted private key.
+ * @property {string} name - [optional] The name of the account.
  */
 interface Account {
+  readonly keyData: Uint8Array;
   name?: string;
-  privateKey: string;
 }
 
 export default Account;

@@ -1,9 +1,11 @@
-// types
-import type { AccountWithPrivateKeyBytes, Logger } from '@/types';
+// decorators
+import { Vault } from '@/decorators';
 
-interface ProviderParameters {
-  accounts: [AccountWithPrivateKeyBytes, ...AccountWithPrivateKeyBytes[]];
-  logger: Logger;
+// types
+import type { CommonParameters } from '@/types';
+
+interface ProviderParameters extends CommonParameters {
+  vault: Vault;
 }
 
 export default ProviderParameters;
