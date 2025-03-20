@@ -1,7 +1,7 @@
 // types
 import type { Passkey } from '@/types';
-import type SerializedAccount from './SerializedAccount';
+import type SerializedPrivateKey from './SerializedPrivateKey';
 
-type VaultSchemas = Passkey | Record<string, SerializedAccount>;
+type VaultSchemas = Passkey | Record<string, SerializedPrivateKey>;
 
 export default VaultSchemas;

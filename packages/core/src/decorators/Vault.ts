@@ -5,7 +5,7 @@ import { type IDBPDatabase, openDB } from 'idb';
 import { IDB_ITEMS_STORE_NAME, IDB_PASSKEY_STORE_NAME, IDB_VAULT_DB_NAME } from '@/constants';
 
 // types
-import type { Account, CommonParameters, Logger, Passkey, VaultParameters, VaultSchemas } from '@/types';
+import type { CommonParameters, Logger, Passkey, PrivateKey, VaultParameters, VaultSchemas } from '@/types';
 
 export default class Vault {
   // private variables
@@ -49,13 +49,21 @@ export default class Vault {
    */
 
   /**
+   * Closes the connection to the indexedDB.
+   * @public
+   */
+  public close(): void {
+    this._db.close();
+  }
+
+  /**
    * Gets the vault items.
-   * @returns {Promise<Map<string, Account>>} A promise that resolves to the vault accounts. The result will be a map
+   * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the vault private keys. The result will be a map
    * containing the keys referenced by the account's address.
    * @public
    */
-  public async accounts(): Promise<Map<string, Account>> {
-    const result = new Map<string, Account>();
+  public async items(): Promise<Map<string, PrivateKey>> {
+    const result = new Map<string, PrivateKey>();
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readonly');
     let cursor = await transaction.store.openCursor();
 
@@ -69,14 +77,6 @@ export default class Vault {
     }
 
     return result;
-  }
-
-  /**
-   * Closes the connection to the indexedDB.
-   * @public
-   */
-  public close(): void {
-    this._db.close();
   }
 
   /**
@@ -128,12 +128,12 @@ export default class Vault {
   }
 
   /**
-   * Upserts accounts into the database. If and of the item addresses already exist, they will be overwritten with the
-   * new account. If any accounts don't exist, they will be added.
-   * @param {Map<string, Account>} items - The accounts to insert and/or update.
-   * @returns {Promise<Map<string, Account>>} A promise that resolves to the inserted and/or updated accounts.
+   * Upserts private keys into the database. If and of the item addresses already exist, they will be overwritten with the
+   * new account. If any private keys don't exist, they will be added.
+   * @param {Map<string, PrivateKey>} items - The private keys to insert and/or update.
+   * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the inserted and/or updated private keys.
    */
-  public async upsertAccounts(items: Map<string, Account>): Promise<Map<string, Account>> {
+  public async upsertItems(items: Map<string, PrivateKey>): Promise<Map<string, PrivateKey>> {
     const __logPrefix = `${Vault.name}#upsertItems`;
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
     const keys = await transaction.store.getAllKeys();
@@ -166,7 +166,9 @@ export default class Vault {
       );
     }
 
-    this._logger.debug(`${__logPrefix}: added "${itemsToAdd.length}" and updated "${itemsToUpdate.length}" accounts`);
+    this._logger.debug(
+      `${__logPrefix}: added "${itemsToAdd.length}" and updated "${itemsToUpdate.length}" private keys`
+    );
 
     return items;
   }

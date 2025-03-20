@@ -11,7 +11,7 @@ import { IDB_VAULT_DB_NAME, INITIALIZATION_VECTOR_BYTE_SIZE, SALT_BYTE_SIZE } fr
 import Vault from './Vault';
 
 // types
-import { Account, Passkey } from '@/types';
+import { PrivateKey, Passkey } from '@/types';
 
 // utilities
 import { addressFromPrivateKey, createLogger, generatePrivateKey } from '@/utilities';
@@ -74,18 +74,18 @@ describe(Vault.name, () => {
 
   describe('upsertItem()', () => {
     test('it should add the new item', async () => {
-      const item: Account = {
+      const item: PrivateKey = {
         keyData: generatePrivateKey(),
         name: 'Personal',
       };
-      let _item: Account | null;
-      let items = await vault.accounts();
+      let _item: PrivateKey | null;
+      let items = await vault.items();
 
       expect(items.size).toBe(0);
 
-      await vault.upsertAccounts(new Map<string, Account>([[addressFromPrivateKey(item.keyData), item]]));
+      await vault.upsertItems(new Map<string, PrivateKey>([[addressFromPrivateKey(item.keyData), item]]));
 
-      items = await vault.accounts();
+      items = await vault.items();
       _item = items.get(addressFromPrivateKey(item.keyData)) || null;
 
       expect(_item).toBeDefined();
@@ -94,15 +94,15 @@ describe(Vault.name, () => {
     });
 
     test('it should update an existing item', async () => {
-      const item: Account = {
+      const item: PrivateKey = {
         keyData: generatePrivateKey(),
         name: 'Personal',
       };
-      let _item: Account | null;
-      let items: Map<string, Account>;
+      let _item: PrivateKey | null;
+      let items: Map<string, PrivateKey>;
 
-      await vault.upsertAccounts(
-        new Map<string, Account>([
+      await vault.upsertItems(
+        new Map<string, PrivateKey>([
           [
             addressFromPrivateKey(item.keyData),
             {
@@ -113,13 +113,13 @@ describe(Vault.name, () => {
         ])
       );
 
-      items = await vault.accounts();
+      items = await vault.items();
 
       expect(items.size).toBe(1);
 
-      await vault.upsertAccounts(new Map<string, Account>([[addressFromPrivateKey(item.keyData), item]]));
+      await vault.upsertItems(new Map<string, PrivateKey>([[addressFromPrivateKey(item.keyData), item]]));
 
-      items = await vault.accounts();
+      items = await vault.items();
       _item = items.get(addressFromPrivateKey(item.keyData)) || null;
 
       expect(_item).toBeDefined();

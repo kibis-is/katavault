@@ -1,11 +1,11 @@
 // types
-import type { Account } from '@/types';
+import type { PrivateKey } from '@/types';
 
 /**
  * @property {string} keyData - The hexadecimal encoded encrypted private key that can be safely serialized.
  */
-interface SerializedAccount extends Omit<Account, 'keyData'> {
+interface SerializedPrivateKey extends Omit<PrivateKey, 'keyData'> {
   keyData: string;
 }
 
-export default SerializedAccount;
+export default SerializedPrivateKey;
