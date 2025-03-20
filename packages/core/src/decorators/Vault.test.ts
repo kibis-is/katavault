@@ -32,7 +32,7 @@ describe(Vault.name, () => {
     });
   });
 
-  describe.only('setPasskey()', () => {
+  describe('setPasskey()', () => {
     test('it should set a new passkey', async () => {
       const passkey: Passkey = {
         credentialID: generate(),

@@ -1,4 +1,4 @@
+export * from './_base';
 export * from './authentication';
-export * from './base';
 export * from './cryptography';
 export * from './vaults';

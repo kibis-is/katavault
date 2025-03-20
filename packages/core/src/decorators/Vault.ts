@@ -71,6 +71,10 @@ export default class Vault {
     return result;
   }
 
+  /**
+   * Closes the connection to the indexedDB.
+   * @public
+   */
   public close(): void {
     this._db.close();
   }

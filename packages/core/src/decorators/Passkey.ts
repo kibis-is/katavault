@@ -252,7 +252,7 @@ export default class Passkey {
 
   /**
    * Decrypts some previously encrypted bytes using the input key material fetched from a passkey.
-   * @param {IDecryptBytesOptions} encryptedBytes - The encrypted bytes.
+   * @param {Uint8Array} encryptedBytes - The encrypted bytes.
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
    * @public
    */
