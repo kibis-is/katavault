@@ -15,7 +15,11 @@ describe('createProvider', () => {
 
     test('should create a provider with a randomly generated account if the seed is not valid', () => {
       const provider = createProvider({
-        seeds: ['not a valid seed'],
+        accounts: [
+          {
+            seed: 'not a valid seed',
+          },
+        ],
       });
 
       expect(provider.addresses().length).least(1);
@@ -24,7 +28,11 @@ describe('createProvider', () => {
     test('should create a provider with a mnemonic seed', () => {
       const privateKey = generatePrivateKey();
       const provider = createProvider({
-        seeds: [mnemonicFromPrivateKey(privateKey)],
+        accounts: [
+          {
+            seed: mnemonicFromPrivateKey(privateKey),
+          },
+        ],
       });
 
       expect(provider.addresses()[0]).toBe(addressFromPrivateKey(privateKey));
@@ -33,7 +41,11 @@ describe('createProvider', () => {
     test('should create a provider with a hexadecimal encoded private key seed', () => {
       const privateKey = generatePrivateKey();
       const provider = createProvider({
-        seeds: [bytesToHex(privateKey)],
+        accounts: [
+          {
+            seed: bytesToHex(privateKey),
+          },
+        ],
       });
 
       expect(provider.addresses()[0]).toBe(addressFromPrivateKey(privateKey));
@@ -42,11 +54,19 @@ describe('createProvider', () => {
     test('should create a provider with a mixed seeds', () => {
       const privateKeys = Array.from({ length: 4 }, () => generatePrivateKey());
       const provider = createProvider({
-        seeds: [
-          bytesToHex(privateKeys[0]),
-          mnemonicFromPrivateKey(privateKeys[1]),
-          mnemonicFromPrivateKey(privateKeys[2]),
-          bytesToHex(privateKeys[3]),
+        accounts: [
+          {
+            seed: bytesToHex(privateKeys[0]),
+          },
+          {
+            seed: mnemonicFromPrivateKey(privateKeys[1]),
+          },
+          {
+            seed: mnemonicFromPrivateKey(privateKeys[2]),
+          },
+          {
+            seed: bytesToHex(privateKeys[3]),
+          },
         ],
       });
 
@@ -56,7 +76,17 @@ describe('createProvider', () => {
     test('should create a provider with unique accounts from duplicate seeds', () => {
       const privateKey = generatePrivateKey();
       const provider = createProvider({
-        seeds: [bytesToHex(privateKey), mnemonicFromPrivateKey(privateKey), bytesToHex(privateKey)],
+        accounts: [
+          {
+            seed: bytesToHex(privateKey),
+          },
+          {
+            seed: mnemonicFromPrivateKey(privateKey),
+          },
+          {
+            seed: bytesToHex(privateKey),
+          },
+        ],
       });
 
       expect(provider.addresses().length).toBe(1);

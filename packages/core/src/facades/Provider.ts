@@ -1,18 +1,16 @@
-import { Account } from 'algosdk';
-
 // utilities
 import { addressFromPrivateKey } from '@/utilities';
 
 // types
-import type { Logger, ProviderParameters } from '@/types';
+import type { AccountWithPrivateKeyBytes, Logger, ProviderParameters } from '@/types';
 
 export default class Provider {
   private readonly _logger: Logger;
-  private readonly _keys: [Uint8Array, ...Uint8Array[]];
+  private readonly _accounts: [AccountWithPrivateKeyBytes, ...AccountWithPrivateKeyBytes[]];
 
-  public constructor({ keys, logger }: ProviderParameters) {
+  public constructor({ accounts, logger }: ProviderParameters) {
+    this._accounts = accounts;
     this._logger = logger;
-    this._keys = keys;
   }
 
   /**
@@ -26,9 +24,9 @@ export default class Provider {
   public addresses(): string[] {
     const __logPrefix = `${Provider.name}#addresses`;
 
-    return this._keys.reduce((acc, key, index) => {
+    return this._accounts.reduce((acc, account, index) => {
       try {
-        return [...acc, addressFromPrivateKey(key)];
+        return [...acc, addressFromPrivateKey(account.privateKey)];
       } catch (error) {
         this._logger.error(`${__logPrefix}: failed to convert key at index "${index}"`);
 
