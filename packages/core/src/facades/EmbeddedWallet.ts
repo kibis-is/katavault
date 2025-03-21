@@ -62,8 +62,8 @@ export default class EmbeddedWallet {
    */
 
   /**
-   * Gets a list of accounts within the vault (indexedDB).
-   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the vault.
+   * Gets a list of accounts within the wallet.
+   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
    * @public
    */
   public async accounts(): Promise<Account[]> {
@@ -79,8 +79,8 @@ export default class EmbeddedWallet {
   }
 
   /**
-   * Generates a new account in the vault.
-   * @param {string} name - [optional] An optional name to give the account. Defaults to undefined.
+   * Generates a new account in the wallet.
+   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
    * @returns {Promise<Account>} A promise that resolves to the created account.
    * @public
    */

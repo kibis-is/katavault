@@ -1,7 +1,7 @@
 {
   "name": "embedded-wallet-sdk",
   "private": true,
-  "description": "The monorepo for the Kibisis' embedded wallet SDK. It includes implementations on vanilla JS, React and more.",
+  "description": "A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kibis-is/embedded-wallet-sdk"
