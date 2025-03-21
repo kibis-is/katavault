@@ -27,7 +27,7 @@ Limit the whole message to 72 characters or less!
 Example:
 
 ```
-build(terraform): burn it all down
+feat(core): add a cool feature
 ```
 
 ### 1.1. Type
@@ -47,7 +47,9 @@ Must be one of the following:
 
 ### 1.2. Scope
 
-A scope may be provided to a commit’s type, to provide additional contextual information and is contained within a parenthesis
+A scope may be provided to a commit's type, to provide additional contextual information and is contained within a parenthesis.
+
+> 💡 **TIP:** Using the targeted package name as the scope helps identify where this commit is intended.
 
 ### 1.3. Subject
 
@@ -64,7 +66,9 @@ The subject contains a succinct description of the change:
 
 1. Create a branch from the `main` branch and use the convention: `<feat|fix|build>/name-of-issue`.
 2. Once the code is ready to be merged into `main`, open a pull request.
-> ⚠️**NOTE:** The title must conform to the conventional commit message format outlined above. This is to ensure the merge commit to the main branch is picked up by the CI and creates an entry in the [CHANGELOG.md](CHANGELOG.md).
+
+> ⚠️**NOTE:** The title must conform to the conventional commit message format outlined above. This is to ensure the merge commit to the main branch is picked up by the CI and creates an entry in the package's `CHANGELOG.md`.
+
 3. To merge the PR, use the "Squash and merge" option. This is to keep the commit history clean and keep the commits on `main` with a 1:1 ratio with previous PRs.
 
 <sup>[Back to top ^](#table-of-contents)</sup>
