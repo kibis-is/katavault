@@ -1,0 +1,31 @@
+@use "palette";
+
+:root {
+  // custom
+  @each $key, $value in palette.$primary-dark-palette {
+    --primary-color-dark-#{$key}: #{$value};
+  }
+  @each $key, $value in palette.$primary-light-palette {
+    --primary-color-light-#{$key}: #{$value};
+  }
+
+  // overrides - light theme
+  --ifm-color-primary: var(--primary-color-light-500);
+  --ifm-color-primary-dark: var(--primary-color-light-600);
+  --ifm-color-primary-darker: var(--primary-color-light-700);
+  --ifm-color-primary-darkest: var(--primary-color-light-800);
+  --ifm-color-primary-light: var(--primary-color-light-400);
+  --ifm-color-primary-lighter: var(--primary-color-light-300);
+  --ifm-color-primary-lightest: var(--primary-color-light-200);
+}
+
+[data-theme='dark'] {
+  // overrides - dark theme
+  --ifm-color-primary: var(--primary-color-dark-500);
+  --ifm-color-primary-dark: var(--primary-color-dark-600);
+  --ifm-color-primary-darker: var(--primary-color-dark-700);
+  --ifm-color-primary-darkest: var(--primary-color-dark-800);
+  --ifm-color-primary-light: var(--primary-color-dark-400);
+  --ifm-color-primary-lighter: var(--primary-color-dark-300);
+  --ifm-color-primary-lightest: var(--primary-color-dark-200);
+}
