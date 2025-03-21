@@ -13,7 +13,12 @@ import {
 } from '@/constants';
 
 // errors
-import { FailedToAuthenticatePasskeyError, FailedToRegisterPasskeyError, PasskeyNotSupportedError } from '@/errors';
+import {
+  FailedToAuthenticatePasskeyError,
+  FailedToRegisterPasskeyError,
+  PasskeyNotSupportedError,
+  UserCanceledPasskeyRequestError,
+} from '@/errors';
 
 // types
 import type {
@@ -82,8 +87,9 @@ export default class PasskeyDecorator {
    * Authenticates with the passkey and fetches the key material that can be used for encryption.
    * @param {AuthenticateParameters} options - passkey credentials and a logger.
    * @returns {Promise<PasskeyDecorator>} A promise that resolves to an initialized passkey.
-   * @throws {FailedToAuthenticatePasskeyError} if the authenticator did not return the public key credentials.
-   * @throws {PasskeyNotSupportedError} if the browser does not support WebAuthn or the authenticator does not support
+   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
+   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * the PRF extension.
    * @public
    * @static
@@ -119,6 +125,10 @@ export default class PasskeyDecorator {
       })) as PublicKeyCredential | null;
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
+
+      if ((error as Error).name === 'NotAllowedError') {
+        throw new UserCanceledPasskeyRequestError('authenticate canceled by user or timed out');
+      }
 
       throw new FailedToAuthenticatePasskeyError(error.message);
     }
@@ -166,8 +176,9 @@ export default class PasskeyDecorator {
    * NOTE: this requires PRF extension support and will throw an error if the authenticator does not support it.
    * @param {RegisterPasskeyParameters} options - The client and user details.
    * @returns {Promise<PasskeyDecorator>} A promise that resolves to a registered passkey.
-   * @throws {FailedToRegisterPasskeyError} if the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support
+   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
+   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * the PRF extension.
    * @public
    * @static
@@ -218,6 +229,10 @@ export default class PasskeyDecorator {
       })) as PublicKeyCredential | null;
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
+
+      if ((error as Error).name === 'NotAllowedError') {
+        throw new UserCanceledPasskeyRequestError('register canceled by user or timed out');
+      }
 
       throw new FailedToRegisterPasskeyError(error.message);
     }

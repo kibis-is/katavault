@@ -90,6 +90,10 @@ export default class EmbeddedWallet {
    * Generates a new account in the wallet.
    * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
    * @returns {Promise<Account>} A promise that resolves to the created account.
+   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
+   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
+   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * @public
    */
   public async generateAccount(name?: string): Promise<Account> {
