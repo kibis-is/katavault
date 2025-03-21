@@ -57,7 +57,7 @@ For full documentation on usage, see [here](https://kibis-is.github.io/embedded-
 
 ### 3.1. Requirements
 
-* Install [Node v22+](https://nodejs.org/en/)
+* Install [Node v20.18.0+](https://nodejs.org/en/)
 * Install [pnpm v10.13.0](https://pnpm.io/installation)
 
 <sup>[Back to top ^][table-of-contents]</sup>

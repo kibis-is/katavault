@@ -55,5 +55,5 @@ jobs:
           GIT_COMMITTER_EMAIL: builders@kibis.is
           # used to push the release commit and create the tags
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release -e semantic-release-monorepo
+        run: pnpm exec semantic-release -e semantic-release-monorepo
         working-directory: ./packages/${{ inputs.package_dir }}
