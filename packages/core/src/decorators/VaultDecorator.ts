@@ -169,6 +169,31 @@ export default class VaultDecorator {
   }
 
   /**
+   * Removes items from the vault.
+   * @param {[string, ...string[]]} keys - A list of keys to remove.
+   * @returns {Promise<string[]>} A promise that resolves to the list of removed keys.
+   * @public
+   */
+  public async removeItems(keys: [string, ...string[]]): Promise<string[]> {
+    const __logPrefix = `${VaultDecorator.displayName}#removeItems`;
+    const removedKeys: string[] = [];
+    const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
+    let _key: IDBValidKey | null;
+
+    for (const key of keys) {
+      _key = (await transaction.store.getKey(key)) || null;
+
+      if (_key) {
+        await transaction.store.delete(key);
+
+        removedKeys.push(key);
+      }
+    }
+
+    return removedKeys;
+  }
+
+  /**
    * Upserts private keys into the database. If and of the item addresses already exist, they will be overwritten with the
    * new account. If any private keys don't exist, they will be added.
    * @param {Map<string, PrivateKey>} items - The private keys to insert and/or update.

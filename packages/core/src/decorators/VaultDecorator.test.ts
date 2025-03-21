@@ -78,6 +78,91 @@ describe(VaultDecorator.displayName, () => {
     });
   });
 
+  describe('removeAccounts()', () => {
+    test('it should remove an account', async () => {
+      const privateKey = generatePrivateKey();
+      const address = addressFromPrivateKey(privateKey);
+      let items: Map<string, PrivateKey>;
+      let result: string[];
+
+      await vault.upsertItems(new Map<string, PrivateKey>([[address, { keyData: privateKey }]]));
+
+      items = await vault.items();
+
+      expect(items.size).toBe(1);
+
+      result = await vault.removeItems([address]);
+      items = await vault.items();
+
+      expect(result).toEqual([address]);
+      expect(items.size).toBe(0);
+    });
+
+    test('it should remove multiple account', async () => {
+      const privateKey1 = generatePrivateKey();
+      const privateKey2 = generatePrivateKey();
+      const address1 = addressFromPrivateKey(privateKey1);
+      const address2 = addressFromPrivateKey(privateKey2);
+      let items: Map<string, PrivateKey>;
+      let result: string[];
+
+      await vault.upsertItems(
+        new Map<string, PrivateKey>([
+          [address1, { keyData: privateKey1 }],
+          [address2, { keyData: privateKey2 }],
+        ])
+      );
+
+      result = await vault.removeItems([address1, address2]);
+      items = await vault.items();
+
+      expect(result).toEqual([address1, address2]);
+      expect(items.size).toBe(0);
+    });
+
+    test('it should remove an account with existing accounts', async () => {
+      const privateKey = generatePrivateKey();
+      const removedPrivateKey = generatePrivateKey();
+      const address = addressFromPrivateKey(removedPrivateKey);
+      let items: Map<string, PrivateKey>;
+      let result: string[];
+
+      await vault.upsertItems(
+        new Map<string, PrivateKey>([
+          [addressFromPrivateKey(privateKey), { keyData: privateKey }],
+          [address, { keyData: removedPrivateKey }],
+        ])
+      );
+
+      items = await vault.items();
+
+      expect(items.size).toBe(2);
+
+      result = await vault.removeItems([address]);
+      items = await vault.items();
+
+      expect(result).toEqual([address]);
+      expect(items.size).toBe(1);
+    });
+
+    test('it should not remove any accounts account does not exist', async () => {
+      const privateKey = generatePrivateKey();
+      const address = addressFromPrivateKey(generatePrivateKey());
+      let items: Map<string, PrivateKey>;
+      let result: string[];
+
+      await vault.upsertItems(
+        new Map<string, PrivateKey>([[addressFromPrivateKey(privateKey), { keyData: privateKey }]])
+      );
+
+      result = await vault.removeItems([address]);
+      items = await vault.items();
+
+      expect(result.length).toBe(0);
+      expect(items.size).toBe(1);
+    });
+  });
+
   describe('upsertItem()', () => {
     test('it should add the new item', async () => {
       const item: PrivateKey = {

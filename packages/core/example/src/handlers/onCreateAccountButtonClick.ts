@@ -1,9 +1,9 @@
 import { EmbeddedWallet, type Logger } from '@kibisis/embedded-wallet-sdk';
 
-// components
-import { updateAccountsTable } from './accounts-table';
+// utilities
+import { updateAccountsTable } from '../utilities';
 
-export function onCreateAccountButtonClick(wallet: EmbeddedWallet, logger: Logger) {
+export default function onCreateAccountButtonClick(wallet: EmbeddedWallet, logger: Logger) {
   return async () => {
     const __logPrefix = 'onCreateAccountButtonClick';
     const account = await wallet.generateAccount();

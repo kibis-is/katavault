@@ -79,6 +79,14 @@ export default class EmbeddedWallet {
   }
 
   /**
+   * Deletes all accounts and settings.
+   * @public
+   */
+  public async clear(): Promise<void> {
+    return await this._vault.clear();
+  }
+
+  /**
    * Generates a new account in the wallet.
    * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
    * @returns {Promise<Account>} A promise that resolves to the created account.
@@ -113,10 +121,19 @@ export default class EmbeddedWallet {
   }
 
   /**
-   * Deletes all accounts and settings.
+   * Removes the account from the wallet for the specified address, if it exists.
+   * @param {string} address - The address of the account to remove from the wallet.
    * @public
    */
-  public async clear(): Promise<void> {
-    return await this._vault.clear();
+  public async removeAccount(address: string): Promise<void> {
+    const __logPrefix = `${EmbeddedWallet.displayName}#removeAccount`;
+    const items = await this._vault.items();
+    let result: string[];
+
+    if (items.has(address)) {
+      result = await this._vault.removeItems([address]);
+
+      this._logger.debug(`${__logPrefix}: removed accounts [${result.map((value) => `"${value}"`).join(',')}]`);
+    }
   }
 }
