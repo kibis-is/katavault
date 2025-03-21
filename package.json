@@ -1,0 +1,32 @@
+{
+  "name": "embedded-wallet-sdk",
+  "private": true,
+  "description": "A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kibis-is/embedded-wallet-sdk"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.3.0",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@anolilab/semantic-release-pnpm": "1.1.8",
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/types": "^19.5.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "catalog:",
+    "semantic-release": "^23.1.1",
+    "semantic-release-monorepo": "^8.0.2"
+  }
+}
