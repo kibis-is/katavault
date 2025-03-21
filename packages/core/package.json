@@ -21,12 +21,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "pnpm run clean && vite build",
+    "build": "pnpm run clean && vite build --config vite.config.ts",
     "build:dependencies": "exit 0",
     "clean": "shx rm -rf dist && shx rm -rf tsconfig.*.tsbuildinfo",
     "generate:index": "tsx ./scripts/generate-index.ts",
     "lint": "eslint .",
     "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts}\"",
+    "start": "vite build --config vite.config.ts && vite dev --config example/vite.config.ts",
+    "start:old": "concurrently --names \"SDK,EXAMPLE\" -c \"yellow.bold,green.bold\" \"vite build --config vite.config.ts --watch\" \"vite dev --config example/vite.config.ts\"",
     "test": "vitest run --config vitest.config.ts"
   },
   "devDependencies": {
@@ -34,6 +36,7 @@
     "@types/node": "catalog:",
     "algosdk": "^3.x",
     "chalk": "catalog:",
+    "concurrently": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "catalog:",
     "fake-indexeddb": "^6.0.0",

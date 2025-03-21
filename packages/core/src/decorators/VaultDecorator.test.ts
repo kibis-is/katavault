@@ -5,30 +5,36 @@ import { deleteDB } from 'idb';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 // constants
-import { IDB_VAULT_DB_NAME, INITIALIZATION_VECTOR_BYTE_SIZE, SALT_BYTE_SIZE } from '@/constants';
+import { INITIALIZATION_VECTOR_BYTE_SIZE, SALT_BYTE_SIZE } from '@/constants';
 
 // decorators
-import Vault from './Vault';
+import VaultDecorator from './VaultDecorator';
 
 // types
-import { PrivateKey, Passkey } from '@/types';
+import { PrivateKey, Passkey, UserInformation } from '@/types';
 
 // utilities
 import { addressFromPrivateKey, createLogger, generatePrivateKey } from '@/utilities';
 
-describe(Vault.name, () => {
+describe(VaultDecorator.displayName, () => {
   const logger = createLogger('silent');
-  let vault: Vault;
+  const user: UserInformation = {
+    username: 'magnetartare',
+  };
+  let vault: VaultDecorator;
 
   afterEach(() => {
     vault.close();
   });
 
   beforeEach(async () => {
-    await deleteDB(IDB_VAULT_DB_NAME);
+    if (vault) {
+      await deleteDB(vault.name());
+    }
 
-    vault = await Vault.create({
+    vault = await VaultDecorator.create({
       logger,
+      user,
     });
   });
 

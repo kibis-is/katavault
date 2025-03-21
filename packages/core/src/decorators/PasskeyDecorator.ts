@@ -27,7 +27,10 @@ import type {
 // utilities
 import { bufferSourceToUint8Array } from '@/utilities';
 
-export default class Passkey {
+export default class PasskeyDecorator {
+  // public static variables
+  public static readonly displayName = 'PasskeyDecorator';
+  // private variables
   private readonly _keyMaterial: Uint8Array;
   private readonly _passkey: IPasskey;
   private readonly _logger: Logger;
@@ -78,15 +81,15 @@ export default class Passkey {
   /**
    * Authenticates with the passkey and fetches the key material that can be used for encryption.
    * @param {AuthenticateParameters} options - passkey credentials and a logger.
-   * @returns {Promise<Passkey>} A promise that resolves to an initialized passkey.
+   * @returns {Promise<PasskeyDecorator>} A promise that resolves to an initialized passkey.
    * @throws {FailedToAuthenticatePasskeyError} if the authenticator did not return the public key credentials.
    * @throws {PasskeyNotSupportedError} if the browser does not support WebAuthn or the authenticator does not support
    * the PRF extension.
    * @public
    * @static
    */
-  public static async authenticate({ logger, passkey }: AuthenticateParameters): Promise<Passkey> {
-    const __logPrefix = `${Passkey.name}#authenticate`;
+  public static async authenticate({ logger, passkey }: AuthenticateParameters): Promise<PasskeyDecorator> {
+    const __logPrefix = `${PasskeyDecorator.displayName}#authenticate`;
     let _error: string;
     let _credential: PublicKeyCredential | null;
     let extensionResults: AuthenticationExtensionsClientOutputs;
@@ -139,7 +142,7 @@ export default class Passkey {
       throw new PasskeyNotSupportedError(_error);
     }
 
-    return new Passkey({
+    return new PasskeyDecorator({
       keyMaterial: bufferSourceToUint8Array(extensionResults.prf.results.first),
       logger,
       passkey,
@@ -162,7 +165,7 @@ export default class Passkey {
    *
    * NOTE: this requires PRF extension support and will throw an error if the authenticator does not support it.
    * @param {RegisterPasskeyParameters} options - The client and user details.
-   * @returns {Promise<Passkey>} A promise that resolves to a registered passkey.
+   * @returns {Promise<PasskeyDecorator>} A promise that resolves to a registered passkey.
    * @throws {FailedToRegisterPasskeyError} if the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support
    * the PRF extension.
@@ -170,13 +173,13 @@ export default class Passkey {
    * @static
    */
   public static async register({ client, logger, user }: RegisterPasskeyParameters): Promise<IPasskey> {
-    const __logPrefix = `${Passkey.name}#register`;
+    const __logPrefix = `${PasskeyDecorator.displayName}#register`;
     const salt = randomBytes(SALT_BYTE_SIZE);
     let _error: string;
     let credential: PublicKeyCredential | null;
     let extensionResults: AuthenticationExtensionsClientOutputs;
 
-    if (!Passkey.isSupported()) {
+    if (!PasskeyDecorator.isSupported()) {
       throw new PasskeyNotSupportedError('webauthn not supported');
     }
 
@@ -203,13 +206,13 @@ export default class Passkey {
             { alg: -257, type: 'public-key' }, // RS256
           ],
           rp: {
-            id: client.origin,
-            name: client.title,
+            id: client.host,
+            name: client.name,
           },
           user: {
             id: new TextEncoder().encode(generate()),
             name: user.username,
-            displayName: user.name,
+            displayName: user.displayName ?? user.username,
           },
         },
       })) as PublicKeyCredential | null;

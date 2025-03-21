@@ -14,6 +14,7 @@ export default mergeConfig(
         fileName: 'index',
       },
       outDir: 'dist',
+      sourcemap: true,
     },
     plugins: [
       dts({

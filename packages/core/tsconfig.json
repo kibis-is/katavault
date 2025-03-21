@@ -16,7 +16,8 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@kibisis/embedded-wallet-sdk": ["dist"]
     },
     "removeComments": false,
     "resolveJsonModule": true,

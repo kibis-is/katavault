@@ -1,13 +1,23 @@
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { bytesToHex, hexToBytes, utf8ToBytes } from '@noble/hashes/utils';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
-import { IDB_ITEMS_STORE_NAME, IDB_PASSKEY_STORE_NAME, IDB_VAULT_DB_NAME } from '@/constants';
+import { IDB_DB_NAME_PREFIX, IDB_ITEMS_STORE_NAME, IDB_PASSKEY_STORE_NAME } from '@/constants';
 
 // types
-import type { CommonParameters, Logger, Passkey, PrivateKey, VaultParameters, VaultSchemas } from '@/types';
+import type {
+  CreateVaultParameters,
+  Logger,
+  Passkey,
+  PrivateKey,
+  SerializedPrivateKey,
+  VaultParameters,
+  VaultSchemas,
+} from '@/types';
 
-export default class Vault {
+export default class VaultDecorator {
+  // public static variables
+  public static readonly displayName = 'VaultDecorator';
   // private variables
   private readonly _db: IDBPDatabase<VaultSchemas>;
   private readonly _logger: Logger;
@@ -21,10 +31,19 @@ export default class Vault {
    * public static methods
    */
 
-  public static async create({ logger }: CommonParameters): Promise<Vault> {
-    const __logPrefix = `${Vault.name}#create`;
-    const db = await openDB<VaultSchemas>(IDB_VAULT_DB_NAME, undefined, {
-      upgrade: (_db, oldVersion, newVersion: number | null, transaction) => {
+  /**
+   * Opens a connection to a vault. The vault to connect to is defined by the provided username and is named by:
+   *
+   * "kibisis_embedded_[hex(username)]"
+   * @param {CreateVaultParameters} parameters - The user details.
+   * @public
+   * @static
+   */
+  public static async create({ logger, user }: CreateVaultParameters): Promise<VaultDecorator> {
+    const __logPrefix = `${VaultDecorator.displayName}#create`;
+    const vaultName = `${IDB_DB_NAME_PREFIX}_${bytesToHex(utf8ToBytes(user.username))}`;
+    const db = await openDB<VaultSchemas>(vaultName, undefined, {
+      upgrade: (_db, oldVersion, newVersion) => {
         // we are creating a new database
         if (oldVersion <= 0 && newVersion && newVersion > 0) {
           // create the stores
@@ -36,9 +55,9 @@ export default class Vault {
       },
     });
 
-    logger.debug(`${__logPrefix}: opened vault with version "${db.version}"`);
+    logger.debug(`${__logPrefix}: opened vault "${vaultName}"`);
 
-    return new Vault({
+    return new VaultDecorator({
       db,
       logger,
     });
@@ -47,6 +66,19 @@ export default class Vault {
   /**
    * public methods
    */
+
+  /**
+   * Clears all private keys and removes the passkey.
+   * @public
+   */
+  public async clear(): Promise<void> {
+    const __logPrefix = `${VaultDecorator.displayName}#clear`;
+
+    await this._db.clear(IDB_PASSKEY_STORE_NAME);
+    await this._db.clear(IDB_ITEMS_STORE_NAME);
+
+    this._logger.debug(`${__logPrefix}: cleared vault`);
+  }
 
   /**
    * Closes the connection to the indexedDB.
@@ -65,18 +97,27 @@ export default class Vault {
   public async items(): Promise<Map<string, PrivateKey>> {
     const result = new Map<string, PrivateKey>();
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readonly');
-    let cursor = await transaction.store.openCursor();
+    const keys = await transaction.store.getAllKeys();
+    let item: SerializedPrivateKey;
 
-    while (cursor && cursor.key && cursor.value) {
-      result.set(cursor.key as string, {
-        keyData: hexToBytes(cursor.value.keyData),
-        name: cursor.value.name,
+    for (const key of keys) {
+      item = await transaction.store.get(key);
+      result.set(key as string, {
+        keyData: hexToBytes(item.keyData),
+        name: item.name,
       });
-
-      await cursor.continue();
     }
 
     return result;
+  }
+
+  /**
+   * Gets the vault name.
+   * @returns {string} The name of the vault.
+   * @public
+   */
+  public name(): string {
+    return this._db.name;
   }
 
   /**
@@ -134,7 +175,7 @@ export default class Vault {
    * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the inserted and/or updated private keys.
    */
   public async upsertItems(items: Map<string, PrivateKey>): Promise<Map<string, PrivateKey>> {
-    const __logPrefix = `${Vault.name}#upsertItems`;
+    const __logPrefix = `${VaultDecorator.displayName}#upsertItems`;
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
     const keys = await transaction.store.getAllKeys();
     const itemsToAdd = items

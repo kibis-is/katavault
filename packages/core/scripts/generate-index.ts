@@ -18,7 +18,6 @@ function main(): void {
     force: true,
   });
 
-  // get utils
   for (const item of readdirSync(srcDir)) {
     stat = statSync(join(srcDir, item));
 
