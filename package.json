@@ -26,7 +26,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "catalog:",
-    "semantic-release": "^23.1.1",
+    "semantic-release": "^24.2.0",
     "semantic-release-monorepo": "^8.0.2"
   }
 }
