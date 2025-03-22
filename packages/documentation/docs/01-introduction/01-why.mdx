@@ -1,19 +1,21 @@
 ---
+sidebar_label: Why
 slug: /
 ---
 
-# Overview
+import SectionBreak from '@site/src/components/SectionBreak';
 
-import TOCInline from '@theme/TOCInline';
+# Why
 
-<TOCInline
-  maxHeadingLevel={4}
-  toc={toc}
-/>
+> A brief preamble on the purpose of an embedded wallet
+
+<SectionBreak />
 
 ## Introduction
 
 Blockchain technology has revolutionized the way we think about digital ownership, security, and decentralized applications (dApps). However, one of the persistent challenges in onboarding users to blockchain-based platforms is the complexity associated with interacting with wallets and signing operations. Traditional wallet solutions often rely on third-party applications or browser extensions, which introduce friction into the user experience. These complexities can deter mainstream adoption and limit the accessibility of dApps.
+
+<SectionBreak />
 
 ## Key challenges
 
@@ -23,6 +25,8 @@ Blockchain technology has revolutionized the way we think about digital ownershi
 * Compatibility issues between wallets and dApps can lead to frustration and limit functionality.
 * Users often need to understand blockchain concepts such as gas fees, network selection, and transaction confirmations to interact with dApps effectively.
 * The blockchain knowledge requirement alienates non-technical users who might otherwise benefit from the application.
+
+<SectionBreak />
 
 ## Approach
 
@@ -36,11 +40,15 @@ The embedded wallet uses the [PRF extension](https://github.com/w3c/webauthn/wik
 
 Storage of these encrypted keys is done using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) as opposed to `localStorage` due to the latter being less secure than the IndexedDB.
 
+<SectionBreak />
+
 ## Why this matters
 
 * Users can interact with the dApp without realizing they are using blockchain technology. They simply use the application as they would any other web app, while the embedded wallet handles all blockchain-related operations in the background. This reduces cognitive load and makes dApps accessible to a broader audience.
 * By embedding the wallet within the dApp, users no longer need to switch between applications or extensions. All interactions happen within a single interface. Signing operations are simplified, allowing users to approve actions intuitively without needing to understand technical details.
 * Users are not required to install or configure external wallets, lowering barriers to entry.
 * Allows developers to focus on creating compelling user experiences while enabling non-technical users to reap the benefits of decentralized applications without needing to understand blockchain mechanics.
+
+<SectionBreak />
 
 In essence, this SDK empowers developers to build dApps that feel like traditional web applications while leveraging the power of blockchain behind the scenes—making decentralization truly invisible yet impactful for end-users.

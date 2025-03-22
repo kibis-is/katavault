@@ -39,7 +39,7 @@ One of these exciting technologies is [Web Authentication](https://developer.moz
 
 The embedded wallet uses the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to extract deterministic encryption key material that can be used to derive an encryption key. This derived encryption key can then apply [AES-GCM](https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf) encryption to the wallet's private keys.
 
-Storage of these encrypted keys is done using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) as opposed to `localStorage` due to the latter being less secure than the IndexedDB.
+These encrypted private keys are then stored using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), as opposed to `localStorage`, due to the latter being less secure than IndexedDB.
 
 ### Why this matters
 
@@ -48,7 +48,7 @@ Storage of these encrypted keys is done using [IndexedDB](https://developer.mozi
 * Users are not required to install or configure external wallets, lowering barriers to entry.
 * Allows developers to focus on creating compelling user experiences while enabling non-technical users to reap the benefits of decentralized applications without needing to understand blockchain mechanics.
 
-In essence, this SDK empowers developers to build dApps that feel like traditional web applications while leveraging the power of blockchain behind the scenes—making decentralization truly invisible yet impactful for end-users.
+In essence, this SDK empowers developers to build dApps that feel like traditional web applications while leveraging the power of blockchain behind the scenes — making decentralization truly invisible yet impactful for end-users.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

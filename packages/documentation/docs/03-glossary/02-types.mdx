@@ -1,0 +1,25 @@
+---
+sidebar_label: Types
+slug: /glossary/types
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# Types
+
+> A glossary of types.
+
+<SectionBreak />
+
+## Account
+
+| Name    | Type     | Required | Default     | Description                                                                                                                      |
+|---------|----------|----------|-------------|----------------------------------------------------------------------------------------------------------------------------------|
+| address | `string` | yes      | -           | A [base32][rfc4648_6] encoded public key with a 4-byte checksum appended as defined in [keys and addresses][keys-and-addresses]. |
+| name    | `string` | no       | `undefined` | A human-readable name for this account.                                                                                          |
+
+<SectionBreak />
+
+<!-- links -->
+[keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses
+[rfc4648_6]: https://datatracker.ietf.org/doc/html/rfc4648#section-6

@@ -1,0 +1,60 @@
+---
+sidebar_label: accounts
+slug: /core/accounts/accounts
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# accounts
+
+> Gets a list of the accounts within the wallet.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createWallet } from '@kibisis/embedded-wallet-sdk';
+
+    const wallet = await createWallet({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    const accounts = await wallet.accounts();
+
+    console.log(accounts);
+    /*
+    [
+      {
+        address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
+        name: 'Account-1',
+      },
+      {
+        address: 'NWANMINCOFDOHXHMXUTP76IOUZQFYHJUYGHSCPOCMX3JHZCC2MWXTZNUAI',
+        name: 'Account-2',
+      },
+    ]
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<Account[]>`](03-glossary/02-types.mdx#Account)
+
+A promise that resolves to the list of accounts stored in the wallet.

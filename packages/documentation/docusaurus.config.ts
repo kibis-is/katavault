@@ -5,16 +5,13 @@ import { themes } from 'prism-react-renderer';
 
 const config: () => Promise<Config> = async () => {
   // directories
-  const docsDir = resolve(__dirname, 'docs');
-  const staticDir = resolve(docsDir, 'static');
-  const scriptsDir = resolve(docsDir, 'scripts');
-  const stylesDir = resolve(docsDir, 'styles');
+  const srcDir = resolve(__dirname, 'src');
   // links
   const organizationName = 'kibis-is';
   const projectName = 'embedded-wallet-sdk';
   const githubLink = `https://github.com/${organizationName}/${projectName}`;
   const npmLink = `https://npmjs.com/package/@kibisis/${projectName}`;
-  const url = 'https://avm-web-provider.agoralabs.sh';
+  const url = 'https://kibis-is.github.io';
   // header
   const tagline = 'A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.';
   const title = 'Embedded Wallet SDK';
@@ -49,7 +46,6 @@ const config: () => Promise<Config> = async () => {
               ],
             ],
             routeBasePath: '/',
-            sidebarPath: resolve(scriptsDir, 'sidebars.js'),
             versions: {
               current: {
                 label: '1.0.0',
@@ -64,13 +60,13 @@ const config: () => Promise<Config> = async () => {
           },
           theme: {
             customCss: [
-              resolve(stylesDir, 'main.scss'),
+              resolve(srcDir, 'styles', 'index.scss'),
             ],
           },
         } satisfies Preset.Options,
       ],
     ],
-    staticDirectories: [staticDir],
+    staticDirectories: [resolve(__dirname, 'public')],
     tagline,
     themeConfig: {
       metadata: [
@@ -82,24 +78,6 @@ const config: () => Promise<Config> = async () => {
       navbar: {
         title,
         items: [
-          {
-            type: 'doc',
-            docId: 'overview',
-            position: 'left',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            docId: 'usage/index',
-            position: 'left',
-            label: 'Usage',
-          },
-          {
-            type: 'doc',
-            docId: 'api-reference/index',
-            position: 'left',
-            label: 'API',
-          },
           // right
           {
             type: 'docsVersionDropdown',
@@ -126,27 +104,6 @@ const config: () => Promise<Config> = async () => {
 </div>
         `,
         links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Overview',
-                to: '/',
-              },
-              {
-                label: 'Usage',
-                to: 'usage',
-              },
-              {
-                label: 'API Reference',
-                to: 'api-reference',
-              },
-              {
-                label: 'Terminology',
-                to: 'terminology',
-              },
-            ],
-          },
           {
             title: 'More',
             items: [

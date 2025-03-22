@@ -1,0 +1,65 @@
+---
+sidebar_label: generateAccount
+slug: /core/accounts/generate-account
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# generateAccount
+
+> Generates a new account in the wallet.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createWallet } from '@kibisis/embedded-wallet-sdk';
+
+    const wallet = await createWallet({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    const account = await wallet.generateAccount('Personal');
+
+    console.log(account);
+    /*
+    {
+      address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
+      name: 'Personal',
+    }
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### name (optional)
+
+* Type: `string`
+* Default: `undefined`
+
+A name for the account.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<Account>`](03-glossary/02-types.mdx#Account)
+
+A promise that resolves to the created account.
