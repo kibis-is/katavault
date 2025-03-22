@@ -2,23 +2,19 @@
 import { VaultDecorator } from '@/decorators';
 
 // facades
-import { EmbeddedWallet } from '@/facades';
+import { Wallet } from '@/facades';
 
 // types
-import type { CreateEmbeddedWalletParameters } from '@/types';
+import type { CreateWalletParameters } from '@/types';
 
 // utilities
 import { createLogger, documentTitle, faviconURL } from '@/utilities';
 
-export default async function createEmbeddedWallet({
-  client,
-  debug = false,
-  user,
-}: CreateEmbeddedWalletParameters): Promise<EmbeddedWallet> {
+export default async function createWallet({ client, debug = false, user }: CreateWalletParameters): Promise<Wallet> {
   const logger = createLogger(debug ? 'debug' : 'error');
   const vault = await VaultDecorator.create({ logger, user });
 
-  return new EmbeddedWallet({
+  return new Wallet({
     client: {
       host: window.location.hostname,
       icon: client?.icon || faviconURL() || undefined,

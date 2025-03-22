@@ -1,4 +1,4 @@
-import { createLogger, createEmbeddedWallet } from '@kibisis/embedded-wallet-sdk';
+import { createLogger, createWallet } from '@kibisis/embedded-wallet-sdk';
 
 // handlers
 import { onCreateAccountButtonClick, onResetButtonClick } from './handlers';
@@ -9,14 +9,13 @@ import { updateAccountsTable } from './utilities';
 async function onDOMContentLoaded() {
   const createAccountButtonElement = document.getElementById('createAccountButton');
   const logger = createLogger('debug');
-  const wallet = await createEmbeddedWallet({
+  const wallet = await createWallet({
     debug: true,
     user: {
       displayName: `Kieran O'Neill`,
       username: `magnetartare`,
     },
   });
-  const removeButtonElement = document.getElementById('removeButton');
   const resetButtonElement = document.getElementById('resetButton');
 
   if (createAccountButtonElement) {

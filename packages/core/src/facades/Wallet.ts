@@ -5,7 +5,7 @@ import { PasskeyDecorator, VaultDecorator } from '@/decorators';
 import type {
   Account,
   ClientInformation,
-  EmbeddedWalletParameters,
+  WalletParameters,
   Logger,
   Passkey,
   PrivateKey,
@@ -15,16 +15,16 @@ import type {
 // utilities
 import { addressFromPrivateKey, generatePrivateKey } from '@/utilities';
 
-export default class EmbeddedWallet {
+export default class Wallet {
   // public static variables
-  public static readonly displayName = 'EmbeddedWallet';
+  public static readonly displayName = 'Wallet';
   // private variables
   private readonly _client: ClientInformation;
   private readonly _logger: Logger;
   private readonly _user: UserInformation;
   private readonly _vault: VaultDecorator;
 
-  public constructor({ client, logger, user, vault }: EmbeddedWalletParameters) {
+  public constructor({ client, logger, user, vault }: WalletParameters) {
     this._client = client;
     this._logger = logger;
     this._user = user;
@@ -36,7 +36,7 @@ export default class EmbeddedWallet {
    */
 
   public async _passkey(): Promise<Passkey> {
-    const __logPrefix = `${EmbeddedWallet.displayName}#_passkey`;
+    const __logPrefix = `${Wallet.displayName}#_passkey`;
     let passkey = await this._vault.passkey();
 
     // if there is no passkey, register a new one
@@ -130,7 +130,7 @@ export default class EmbeddedWallet {
    * @public
    */
   public async removeAccount(address: string): Promise<void> {
-    const __logPrefix = `${EmbeddedWallet.displayName}#removeAccount`;
+    const __logPrefix = `${Wallet.displayName}#removeAccount`;
     const items = await this._vault.items();
     let result: string[];
 

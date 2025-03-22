@@ -1,1 +1,1 @@
-export { default as EmbeddedWallet } from './EmbeddedWallet';
+export { default as Wallet } from './Wallet';
