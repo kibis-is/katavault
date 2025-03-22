@@ -20,6 +20,16 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 <SectionBreak />
 
+## BaseError
+
+| Name                  | Type     | Required | Default | Description                               |
+|-----------------------|----------|----------|---------|-------------------------------------------|
+| message               | `string` | yes      | -       | A message assoiciated with the error.     |
+| isEmbeddedWalletError | `true`   | yes      | -       | Used to determine if this a wallet error. |
+| type                  | `string` | yes      | -       | A reference for this error.               |
+
+<SectionBreak />
+
 <!-- links -->
 [keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses
 [rfc4648_6]: https://datatracker.ietf.org/doc/html/rfc4648#section-6
