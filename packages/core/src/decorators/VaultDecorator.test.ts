@@ -1,6 +1,7 @@
 import { isEqual } from '@agoralabs-sh/bytes';
 import { generate } from '@agoralabs-sh/uuid';
-import { bytesToHex, randomBytes } from '@noble/hashes/utils';
+import { randomBytes } from '@noble/hashes/utils';
+import { encode as encodeHex } from '@stablelib/hex';
 import { deleteDB } from 'idb';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
@@ -42,8 +43,8 @@ describe(VaultDecorator.displayName, () => {
     test('it should set a new passkey', async () => {
       const passkey: Passkey = {
         credentialID: generate(),
-        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
-        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        salt: encodeHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: encodeHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
         transports: [],
       };
       let _passkey: Passkey | null;
@@ -58,16 +59,16 @@ describe(VaultDecorator.displayName, () => {
     test('it replace an existing passkey', async () => {
       const passkey: Passkey = {
         credentialID: generate(),
-        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
-        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        salt: encodeHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: encodeHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
         transports: [],
       };
       let _passkey: Passkey | null;
 
       await vault.setPasskey({
         credentialID: generate(),
-        salt: bytesToHex(randomBytes(SALT_BYTE_SIZE)),
-        initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+        salt: encodeHex(randomBytes(SALT_BYTE_SIZE)),
+        initializationVector: encodeHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
         transports: [],
       });
       await vault.setPasskey(passkey);

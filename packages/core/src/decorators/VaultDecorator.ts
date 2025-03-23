@@ -1,4 +1,5 @@
-import { bytesToHex, hexToBytes, utf8ToBytes } from '@noble/hashes/utils';
+import { decode as decodeHex, encode as encodeHex } from '@stablelib/hex';
+import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
@@ -41,7 +42,7 @@ export default class VaultDecorator {
    */
   public static async create({ logger, user }: CreateVaultParameters): Promise<VaultDecorator> {
     const __logPrefix = `${VaultDecorator.displayName}#create`;
-    const vaultName = `${IDB_DB_NAME_PREFIX}_${bytesToHex(utf8ToBytes(user.username))}`;
+    const vaultName = `${IDB_DB_NAME_PREFIX}_${encodeHex(encodeUTF8(user.username))}`;
     const db = await openDB<VaultSchemas>(vaultName, undefined, {
       upgrade: (_db, oldVersion, newVersion) => {
         // we are creating a new database
@@ -89,7 +90,17 @@ export default class VaultDecorator {
   }
 
   /**
-   * Gets the vault items.
+   * Gets a vault private key by address. If no item exists, null is returned.
+   * @param {string} address - THe address of the private key.
+   * @returns {Promise<PrivateKey | null>} A promise that resolves to the private key or null if it doesn't exist.
+   * @public
+   */
+  public async itemByAddress(address: string): Promise<PrivateKey | null> {
+    return (await this._db.get(IDB_ITEMS_STORE_NAME, address)) || null;
+  }
+
+  /**
+   * Gets the vault private key.
    * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the vault private keys. The result will be a map
    * containing the keys referenced by the account's address.
    * @public
@@ -103,7 +114,7 @@ export default class VaultDecorator {
     for (const key of keys) {
       item = await transaction.store.get(key);
       result.set(key as string, {
-        keyData: hexToBytes(item.keyData),
+        keyData: decodeHex(item.keyData),
         name: item.name,
       });
     }
@@ -169,24 +180,23 @@ export default class VaultDecorator {
   }
 
   /**
-   * Removes items from the vault.
-   * @param {[string, ...string[]]} keys - A list of keys to remove.
-   * @returns {Promise<string[]>} A promise that resolves to the list of removed keys.
+   * Removes a list of private keys from the vault.
+   * @param {[string, ...string[]]} addresses - A list of addresses to remove.
+   * @returns {Promise<string[]>} A promise that resolves to the list of removed private keys.
    * @public
    */
-  public async removeItems(keys: [string, ...string[]]): Promise<string[]> {
-    const __logPrefix = `${VaultDecorator.displayName}#removeItems`;
+  public async removeItems(addresses: [string, ...string[]]): Promise<string[]> {
     const removedKeys: string[] = [];
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
     let _key: IDBValidKey | null;
 
-    for (const key of keys) {
-      _key = (await transaction.store.getKey(key)) || null;
+    for (const address of addresses) {
+      _key = (await transaction.store.getKey(address)) || null;
 
       if (_key) {
-        await transaction.store.delete(key);
+        await transaction.store.delete(address);
 
-        removedKeys.push(key);
+        removedKeys.push(address);
       }
     }
 
@@ -198,24 +208,25 @@ export default class VaultDecorator {
    * new account. If any private keys don't exist, they will be added.
    * @param {Map<string, PrivateKey>} items - The private keys to insert and/or update.
    * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the inserted and/or updated private keys.
+   * @public
    */
   public async upsertItems(items: Map<string, PrivateKey>): Promise<Map<string, PrivateKey>> {
     const __logPrefix = `${VaultDecorator.displayName}#upsertItems`;
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
-    const keys = await transaction.store.getAllKeys();
+    const addresses = await transaction.store.getAllKeys();
     const itemsToAdd = items
       .entries()
-      .filter(([key]) => !keys.some((value) => value === key))
+      .filter(([key]) => !addresses.some((value) => value === key))
       .toArray();
     const itemsToUpdate = items
       .entries()
-      .filter(([key]) => keys.some((value) => value === key))
+      .filter(([key]) => addresses.some((value) => value === key))
       .toArray();
 
     for (const [address, item] of itemsToAdd) {
       await transaction.store.add(
         {
-          keyData: bytesToHex(item.keyData),
+          keyData: encodeHex(item.keyData),
           name: item.name,
         },
         address
@@ -225,7 +236,7 @@ export default class VaultDecorator {
     for (const [address, item] of itemsToUpdate) {
       await transaction.store.put(
         {
-          keyData: bytesToHex(item.keyData),
+          keyData: encodeHex(item.keyData),
           name: item.name,
         },
         address

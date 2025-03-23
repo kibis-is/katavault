@@ -1,5 +1,6 @@
 import { generate } from '@agoralabs-sh/uuid';
-import { bytesToHex, hexToBytes, randomBytes } from '@noble/hashes/utils';
+import { randomBytes } from '@noble/hashes/utils';
+import { decode as decodeHex, encode as encodeHex } from '@stablelib/hex';
 
 // constants
 import {
@@ -65,7 +66,7 @@ export default class PasskeyDecorator {
     return await crypto.subtle.deriveKey(
       {
         name: DERIVATION_KEY_ALGORITHM,
-        info: hexToBytes(this._passkey.credentialID),
+        info: decodeHex(this._passkey.credentialID),
         salt: new Uint8Array(), // use an empty salt
         hash: DERIVATION_KEY_HASH_ALGORITHM,
       },
@@ -105,7 +106,7 @@ export default class PasskeyDecorator {
         publicKey: {
           allowCredentials: [
             {
-              id: hexToBytes(passkey.credentialID),
+              id: decodeHex(passkey.credentialID),
               transports: passkey.transports,
               type: 'public-key',
             },
@@ -116,7 +117,7 @@ export default class PasskeyDecorator {
             // @ts-ignore
             prf: {
               eval: {
-                first: hexToBytes(passkey.salt),
+                first: decodeHex(passkey.salt),
               },
             },
           },
@@ -257,9 +258,9 @@ export default class PasskeyDecorator {
     }
 
     return {
-      credentialID: bytesToHex(new Uint8Array(credential.rawId)),
-      initializationVector: bytesToHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
-      salt: bytesToHex(salt),
+      credentialID: encodeHex(new Uint8Array(credential.rawId)),
+      initializationVector: encodeHex(randomBytes(INITIALIZATION_VECTOR_BYTE_SIZE)),
+      salt: encodeHex(salt),
       transports: (credential.response as AuthenticatorAttestationResponse).getTransports() as AuthenticatorTransport[],
     };
   }
@@ -279,7 +280,7 @@ export default class PasskeyDecorator {
     const decryptedBytes = await crypto.subtle.decrypt(
       {
         name: ENCRYPTION_KEY_ALGORITHM,
-        iv: hexToBytes(this._passkey.initializationVector),
+        iv: decodeHex(this._passkey.initializationVector),
       },
       encryptionKey,
       encryptedBytes
@@ -300,7 +301,7 @@ export default class PasskeyDecorator {
     const encryptedBytes = await crypto.subtle.encrypt(
       {
         name: ENCRYPTION_KEY_ALGORITHM,
-        iv: hexToBytes(this._passkey.initializationVector),
+        iv: decodeHex(this._passkey.initializationVector),
       },
       encryptionKey,
       bytes
