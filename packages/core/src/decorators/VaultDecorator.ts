@@ -1,5 +1,3 @@
-import { decode as decodeHex, encode as encodeHex } from '@stablelib/hex';
-import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
@@ -15,6 +13,9 @@ import type {
   VaultParameters,
   VaultSchemas,
 } from '@/types';
+
+// utilities
+import { bytesToHex, hexToBytes, utf8ToBytes } from '@/utilities';
 
 export default class VaultDecorator {
   // public static variables
@@ -42,7 +43,7 @@ export default class VaultDecorator {
    */
   public static async create({ logger, user }: CreateVaultParameters): Promise<VaultDecorator> {
     const __logPrefix = `${VaultDecorator.displayName}#create`;
-    const vaultName = `${IDB_DB_NAME_PREFIX}_${encodeHex(encodeUTF8(user.username))}`;
+    const vaultName = `${IDB_DB_NAME_PREFIX}_${bytesToHex(utf8ToBytes(user.username))}`;
     const db = await openDB<VaultSchemas>(vaultName, undefined, {
       upgrade: (_db, oldVersion, newVersion) => {
         // we are creating a new database
@@ -114,7 +115,7 @@ export default class VaultDecorator {
     for (const key of keys) {
       item = await transaction.store.get(key);
       result.set(key as string, {
-        keyData: decodeHex(item.keyData),
+        keyData: hexToBytes(item.keyData),
         name: item.name,
       });
     }
@@ -226,7 +227,7 @@ export default class VaultDecorator {
     for (const [address, item] of itemsToAdd) {
       await transaction.store.add(
         {
-          keyData: encodeHex(item.keyData),
+          keyData: bytesToHex(item.keyData),
           name: item.name,
         },
         address
@@ -236,7 +237,7 @@ export default class VaultDecorator {
     for (const [address, item] of itemsToUpdate) {
       await transaction.store.put(
         {
-          keyData: encodeHex(item.keyData),
+          keyData: bytesToHex(item.keyData),
           name: item.name,
         },
         address
