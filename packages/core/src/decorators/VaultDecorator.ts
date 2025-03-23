@@ -217,12 +217,12 @@ export default class VaultDecorator {
     const addresses = await transaction.store.getAllKeys();
     const itemsToAdd = items
       .entries()
-      .filter(([key]) => !addresses.some((value) => value === key))
-      .toArray();
+      .toArray()
+      .filter(([key]) => !addresses.some((value) => value === key));
     const itemsToUpdate = items
       .entries()
-      .filter(([key]) => addresses.some((value) => value === key))
-      .toArray();
+      .toArray()
+      .filter(([key]) => addresses.some((value) => value === key));
 
     for (const [address, item] of itemsToAdd) {
       await transaction.store.add(
