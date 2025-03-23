@@ -1,0 +1,97 @@
+---
+sidebar_label: signMessage
+slug: /core/data/sign-message
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# signMessage
+
+> Signs a message or some arbitrary bytes.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createWallet, utf8ToBytes } from '@kibisis/embedded-wallet-sdk';
+    import { verifyBytes } from 'algosdk';
+
+    const wallet = await createWallet({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    const address = 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU';
+    const message = 'hello humie!';
+    const signature = await wallet.signMessage({
+      address,
+      message,
+    });
+
+    console.log('verified:', verifyBytes(utf8ToBytes(message), signature, address)));
+    /*
+    verified: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### parameters
+
+* Type: [`SignMessageParameters`](03-glossary/02-types.mdx#signparameters)
+
+The signer, the message and optional output encoding.
+
+<SectionBreak />
+
+## Returns
+
+`Promise<string | Uint8Array>`
+
+A promise that resolves to the signature of the signed message.
+
+If the encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in raw bytes.
+
+:::note
+
+The signed message is prepended with "MX" for domain separation.
+
+:::
+
+## Throws
+
+### [AccountDoesNotExistError](03-glossary/03-errors.mdx#accountdoesnotexisterror)
+
+If the specified address does not exist in the wallet.
+
+### [FailedToAuthenticatePasskeyError](03-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+
+If the passkey did not return the encryption key credentials.
+
+### [FailedToRegisterPasskeyError](03-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+
+If, when attempting to register a passkey, the public key credentials failed to be created on the passkey.
+
+### [PasskeyNotSupportedError](03-glossary/03-errors.mdx#passkeynotsupportederror)
+
+If the browser does not support WebAuthn or the passkey does not support storing encryption key material.
+
+### [UserCanceledPasskeyRequestError](03-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
+
+If the user canceled the passkey register/authenticate request or the request timed out.

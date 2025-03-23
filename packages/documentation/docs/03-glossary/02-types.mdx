@@ -30,6 +30,16 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 <SectionBreak />
 
+## SignParameters
+
+| Name     | Type                     | Required | Default     | Description                                                                                                           |
+|----------|--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
+| address  | `string`                 | yes      | -           | The address of the account to be used to sign the message.                                                            |
+| encoding | `base64` \| `hex`        | no       | `undefined` | The output encoding of the signature. If no encoding is specified, the signature will be in raw bytes (`Uint8Array`). |
+| message  | `string` \| `Uint8Array` | yes      | -           | A UTF-8 encoded message or raw bytes to sign.                                                                         |
+
+<SectionBreak />
+
 <!-- links -->
 [keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses
 [rfc4648_6]: https://datatracker.ietf.org/doc/html/rfc4648#section-6
