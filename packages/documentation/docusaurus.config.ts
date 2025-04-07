@@ -8,13 +8,13 @@ const config: () => Promise<Config> = async () => {
   const srcDir = resolve(__dirname, 'src');
   // links
   const organizationName = 'kibis-is';
-  const projectName = 'embedded-wallet-sdk';
+  const projectName = 'katavault';
   const githubLink = `https://github.com/${organizationName}/${projectName}`;
   const npmLink = `https://npmjs.com/package/@kibisis/${projectName}`;
   const url = 'https://kibis-is.github.io';
   // header
   const tagline = 'A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.';
-  const title = 'Embedded Wallet SDK';
+  const title = 'Katavault';
 
   return {
     baseUrl: '/',

@@ -1,6 +1,6 @@
 {
   "name": "documentation",
-  "description": "The documentation for the embedded wallet SDK.",
+  "description": "The documentation for the Katavault.",
   "private": true,
   "scripts": {
     "build": "docusaurus build --out-dir dist",

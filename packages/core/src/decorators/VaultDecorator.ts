@@ -36,7 +36,7 @@ export default class VaultDecorator {
   /**
    * Opens a connection to a vault. The vault to connect to is defined by the provided username and is named by:
    *
-   * "kibisis_embedded_[hex(username)]"
+   * "katavault_[hex(username)]"
    * @param {CreateVaultParameters} parameters - The user details.
    * @public
    * @static
