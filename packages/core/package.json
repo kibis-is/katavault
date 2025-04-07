@@ -59,6 +59,9 @@
     "@agoralabs-sh/uuid": "^1.1.0",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
+    "@stablelib/base64": "^2.0.1",
+    "@stablelib/hex": "^2.0.1",
+    "@stablelib/utf8": "^2.0.1",
     "idb": "^8.0.2"
   }
 }

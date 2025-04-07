@@ -1,0 +1,85 @@
+---
+sidebar_label: generateAccount
+slug: /core/accounts/generate-account
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# generateAccount
+
+> Generates a new account in the wallet.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createWallet } from '@kibisis/embedded-wallet-sdk';
+
+    const wallet = await createWallet({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    const account = await wallet.generateAccount('Personal');
+
+    console.log(account);
+    /*
+    {
+      address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
+      name: 'Personal',
+    }
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### name (optional)
+
+* Type: `string`
+* Default: `undefined`
+
+A name for the account.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<Account>`](03-glossary/02-types.mdx#account)
+
+A promise that resolves to the created account.
+
+<SectionBreak />
+
+## Throws
+
+### [FailedToAuthenticatePasskeyError](03-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+
+If the passkey did not return the encryption key credentials.
+
+### [FailedToRegisterPasskeyError](03-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+
+If, when attempting to register a passkey, the public key credentials failed to be created on the passkey.
+
+### [PasskeyNotSupportedError](03-glossary/03-errors.mdx#passkeynotsupportederror)
+
+If the browser does not support WebAuthn or the passkey does not support storing encryption key material.
+
+### [UserCanceledPasskeyRequestError](03-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
+
+If the user canceled the passkey register/authenticate request or the request timed out.

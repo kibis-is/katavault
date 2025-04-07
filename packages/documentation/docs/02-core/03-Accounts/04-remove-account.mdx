@@ -1,0 +1,49 @@
+---
+sidebar_label: removeAccount
+slug: /core/accounts/remove-account
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# removeAccount
+
+> Removes the account from the wallet for the specified address, if it exists.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createWallet } from '@kibisis/embedded-wallet-sdk';
+
+    const wallet = await createWallet({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+
+    await wallet.removeAccount('SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU');
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### address
+
+* Type: `string`
+
+The address of the account to remove from the wallet.

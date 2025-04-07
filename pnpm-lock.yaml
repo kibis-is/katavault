@@ -116,6 +116,15 @@ importers:
       '@noble/hashes':
         specifier: ^1.7.1
         version: 1.7.1
+      '@stablelib/base64':
+        specifier: ^2.0.1
+        version: 2.0.1
+      '@stablelib/hex':
+        specifier: ^2.0.1
+        version: 2.0.1
+      '@stablelib/utf8':
+        specifier: ^2.0.1
+        version: 2.0.1
       idb:
         specifier: ^8.0.2
         version: 8.0.2
@@ -2081,6 +2090,9 @@ packages:
   '@slorber/remark-comment@1.0.0':
     resolution: {integrity: sha512-RCE24n7jsOj1M0UPvIQCHTe7fI0sFL4S2nwKVWwHyVr/wI/H8GosgsJGyhnsZoGFnD/P2hLf1mSbrrgSLN93NA==}
 
+  '@stablelib/base64@2.0.1':
+    resolution: {integrity: sha512-P2z89A7N1ETt6RxgpVdDT2xlg8cnm3n6td0lY9gyK7EiWK3wdq388yFX/hLknkCC0we05OZAD1rfxlQJUbl5VQ==}
+
   '@stablelib/binary@2.0.1':
     resolution: {integrity: sha512-U9iAO8lXgEDONsA0zPPSgcf3HUBNAqHiJmSHgZz62OvC3Hi2Bhc5kTnQ3S1/L+sthDTHtCMhcEiklmIly6uQ3w==}
 
@@ -2095,6 +2107,9 @@ packages:
 
   '@stablelib/random@2.0.1':
     resolution: {integrity: sha512-W6GAtXEEs7r+dSbuBsvoFmlyL3gLxle41tQkjKu17dDWtDdjhVUbtRfRCQcCUeczwkgjQxMPopgwYEvxXtHXGw==}
+
+  '@stablelib/utf8@2.0.1':
+    resolution: {integrity: sha512-7+C2Iap42fbLyoKMaEIIDSb1TrcQVo+lGDItYAwb2JoAJr7QffyuDnbtvV/qzTyokOIMBrJgT+Rpsp1bPR8SjA==}
 
   '@stablelib/uuid@2.0.1':
     resolution: {integrity: sha512-6tPZoUOhrqcXP8n3BvooLa1QFcY//F37/TIMEOt/nwODEfrLr50JcXNz2L9YA+GF+scwy8yIxGi022aXoyCTyw==}
@@ -10102,6 +10117,8 @@ snapshots:
       micromark-util-character: 1.2.0
       micromark-util-symbol: 1.1.0
 
+  '@stablelib/base64@2.0.1': {}
+
   '@stablelib/binary@2.0.1':
     dependencies:
       '@stablelib/int': 2.0.1
@@ -10116,6 +10133,8 @@ snapshots:
     dependencies:
       '@stablelib/binary': 2.0.1
       '@stablelib/wipe': 2.0.1
+
+  '@stablelib/utf8@2.0.1': {}
 
   '@stablelib/uuid@2.0.1':
     dependencies:

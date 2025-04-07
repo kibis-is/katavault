@@ -1,4 +1,3 @@
-import { bytesToHex, hexToBytes, utf8ToBytes } from '@noble/hashes/utils';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
@@ -14,6 +13,9 @@ import type {
   VaultParameters,
   VaultSchemas,
 } from '@/types';
+
+// utilities
+import { bytesToHex, hexToBytes, utf8ToBytes } from '@/utilities';
 
 export default class VaultDecorator {
   // public static variables
@@ -89,7 +91,17 @@ export default class VaultDecorator {
   }
 
   /**
-   * Gets the vault items.
+   * Gets a vault private key by address. If no item exists, null is returned.
+   * @param {string} address - THe address of the private key.
+   * @returns {Promise<PrivateKey | null>} A promise that resolves to the private key or null if it doesn't exist.
+   * @public
+   */
+  public async itemByAddress(address: string): Promise<PrivateKey | null> {
+    return (await this._db.get(IDB_ITEMS_STORE_NAME, address)) || null;
+  }
+
+  /**
+   * Gets the vault private key.
    * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the vault private keys. The result will be a map
    * containing the keys referenced by the account's address.
    * @public
@@ -169,23 +181,42 @@ export default class VaultDecorator {
   }
 
   /**
+   * Removes a list of private keys from the vault.
+   * @param {[string, ...string[]]} addresses - A list of addresses to remove.
+   * @returns {Promise<string[]>} A promise that resolves to the list of removed private keys.
+   * @public
+   */
+  public async removeItems(addresses: [string, ...string[]]): Promise<string[]> {
+    const removedKeys: string[] = [];
+    const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
+    let _key: IDBValidKey | null;
+
+    for (const address of addresses) {
+      _key = (await transaction.store.getKey(address)) || null;
+
+      if (_key) {
+        await transaction.store.delete(address);
+
+        removedKeys.push(address);
+      }
+    }
+
+    return removedKeys;
+  }
+
+  /**
    * Upserts private keys into the database. If and of the item addresses already exist, they will be overwritten with the
    * new account. If any private keys don't exist, they will be added.
    * @param {Map<string, PrivateKey>} items - The private keys to insert and/or update.
    * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the inserted and/or updated private keys.
+   * @public
    */
   public async upsertItems(items: Map<string, PrivateKey>): Promise<Map<string, PrivateKey>> {
     const __logPrefix = `${VaultDecorator.displayName}#upsertItems`;
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
-    const keys = await transaction.store.getAllKeys();
-    const itemsToAdd = items
-      .entries()
-      .filter(([key]) => !keys.some((value) => value === key))
-      .toArray();
-    const itemsToUpdate = items
-      .entries()
-      .filter(([key]) => keys.some((value) => value === key))
-      .toArray();
+    const addresses = await transaction.store.getAllKeys();
+    const itemsToAdd = Array.from(items.entries()).filter(([key]) => !addresses.some((value) => value === key));
+    const itemsToUpdate = Array.from(items.entries()).filter(([key]) => addresses.some((value) => value === key));
 
     for (const [address, item] of itemsToAdd) {
       await transaction.store.add(
