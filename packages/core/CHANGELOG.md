@@ -1,3 +1,10 @@
+# [@kibisis/embedded-wallet-sdk-v1.0.0-beta.2](https://github.com/kibis-is/embedded-wallet-sdk/compare/@kibisis/embedded-wallet-sdk-v1.0.0-beta.1...@kibisis/embedded-wallet-sdk-v1.0.0-beta.2) (2025-04-07)
+
+
+### Features
+
+* **core:** send message ([#2](https://github.com/kibis-is/embedded-wallet-sdk/issues/2)) ([d482f60](https://github.com/kibis-is/embedded-wallet-sdk/commit/d482f60df949d14a3dac330ab912d6dcacf8223f))
+
 # @kibisis/embedded-wallet-sdk-v1.0.0-beta.1 (2025-03-21)
 
 

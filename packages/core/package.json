@@ -1,6 +1,6 @@
 {
   "name": "@kibisis/embedded-wallet-sdk",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "The core implementation for the embedded wallet SDK that allows dApps to create/import embedded wallets.",
   "repository": {
     "type": "git",
