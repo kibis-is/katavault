@@ -36,6 +36,7 @@
     "@kibisis/katavault-core": "workspace:",
     "@types/node": "catalog:",
     "@types/react": "^18.x",
+    "@types/react-dom": "18.x",
     "@vitejs/plugin-react": "^4.3.4",
     "algosdk": "^3.x",
     "chalk": "catalog:",
