@@ -48,9 +48,9 @@ jobs:
   ##
 
   lint_build_test_core:
-    name: "Lint, Build & Test - @kibisis/embedded-wallet-sdk"
+    name: "Lint, Build & Test - @kibisis/katavault-core"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.core == 'true' }}
     uses: ./.github/workflows/lint_build_test.yml
     with:
-      package_name: "@kibisis/embedded-wallet-sdk"
+      package_name: "@kibisis/katavault-core"

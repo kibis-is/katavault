@@ -1,4 +1,4 @@
-import { type Account, EmbeddedWallet, type Logger } from '@kibisis/embedded-wallet-sdk';
+import { type Account, EmbeddedWallet, type Logger } from '@kibisis/Katavault-core';
 
 // handlers
 import { onRemoveButtonClick } from '../handlers';

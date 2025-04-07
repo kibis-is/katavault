@@ -1,10 +1,10 @@
 {
-  "name": "@kibisis/embedded-wallet-sdk",
+  "name": "@kibisis/katavault-core",
   "version": "1.0.0-beta.2",
-  "description": "The core implementation for the embedded wallet SDK that allows dApps to create/import embedded wallets.",
+  "description": "The core implementation for Katavault that allows dApps to create/import embedded wallets.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kibis-is/embedded-wallet-sdk"
+    "url": "https://github.com/kibis-is/katavault"
   },
   "author": {
     "name": "Kieran O'Neill",

@@ -1,5 +1,5 @@
 <h1 align="center">
-  Embedded Wallet SDK
+  Katavault
 </h1>
 
 <p align="center">
@@ -31,13 +31,13 @@ Blockchain technology has revolutionized the way we think about digital ownershi
 
 ### Approach
 
-The embedded wallet SDK attempts to enable dApps to embed a wallet directly within their website which addresses some of the aforementioned challenges by abstracting away blockchain complexities and providing a seamless user experience.
+Katavault attempts to enable dApps to embed a wallet directly within their website which addresses some of the aforementioned challenges by abstracting away blockchain complexities and providing a seamless user experience.
 
 A glaring problem with embedded wallets is that a website is not really a safe place for sensitive data. However, the embedded wallet takes advantage of some of the latest emerging technologies available on the web.
 
 One of these exciting technologies is [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (also known as WebAuthn). This technology leverages the native browser's internal UI to interact with a user's passkey, which can take any number of forms: from Windows Hello on PCs, to biometrics (fingerprint/FaceID) on Android/iOS devices, to physical USB security keys such as Yubikey.
 
-The embedded wallet uses the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to extract deterministic encryption key material that can be used to derive an encryption key. This derived encryption key can then apply [AES-GCM](https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf) encryption to the wallet's private keys.
+Katavault uses the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to extract deterministic encryption key material that can be used to derive an encryption key. This derived encryption key can then apply [AES-GCM](https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf) encryption to the wallet's private keys.
 
 These encrypted private keys are then stored using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), as opposed to `localStorage`, due to the latter being less secure than IndexedDB.
 
@@ -54,7 +54,7 @@ In essence, this SDK empowers developers to build dApps that feel like tradition
 
 ## 📚 2. Documentation
 
-For full documentation on usage, see [here](https://kibis-is.github.io/embedded-wallet-sdk).
+For full documentation on usage, see [here](https://kibis-is.github.io/katavault).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -62,15 +62,15 @@ For full documentation on usage, see [here](https://kibis-is.github.io/embedded-
 
 ### 3.1. Packages
 
-| Name                                                        | Description                                          | Package                                                                                                                                       |
-|-------------------------------------------------------------|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| [`@kibisis/embedded-wallet-sdk`](./packages/core/README.md) | The core implementation for the embedded wallet SDK. | [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fembedded-wallet-sdk)](https://www.npmjs.com/package/%40kibisis/embedded-wallet-sdk) |
+| Name                                                   | Description                                | Package                                                                                                                             |
+|--------------------------------------------------------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| [`@kibisis/katavault-core`](./packages/core/README.md) | The core implementation for the Katavault. | [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-core)](https://www.npmjs.com/package/%40kibisis/katavault-core) |
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
 ## 👏 4. How to contribute
 
-Please read the [**contributing guide**](https://github.com/kibis-is/embedded-wallet-sdk/blob/main/CONTRIBUTING.md) to learn about the development process.
+Please read the [**contributing guide**](https://github.com/kibis-is/katavault/blob/main/CONTRIBUTING.md) to learn about the development process.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

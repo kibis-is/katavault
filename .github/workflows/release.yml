@@ -18,10 +18,10 @@ permissions:
 
 jobs:
   release_core:
-    name: "Release - @kibisis/embedded-wallet-sdk"
+    name: "Release - @kibisis/katavault-core"
     uses: ./.github/workflows/publish_release.yml
     with:
       package_dir: "core"
-      package_name: "@kibisis/embedded-wallet-sdk"
+      package_name: "@kibisis/katavault-core"
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_PUBLISH_PACKAGES_ACCESS_TOKEN }}
