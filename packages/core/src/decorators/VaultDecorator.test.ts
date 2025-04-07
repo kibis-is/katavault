@@ -79,7 +79,7 @@ describe(VaultDecorator.displayName, () => {
     });
   });
 
-  describe('removeAccounts()', () => {
+  describe('removeItems()', () => {
     test('it should remove an account', async () => {
       const privateKey = generatePrivateKey();
       const address = addressFromPrivateKey(privateKey);
