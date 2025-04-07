@@ -1,4 +1,4 @@
-import { createLogger, createWallet } from '@kibisis/embedded-wallet-sdk';
+import { createLogger, createWallet } from '@kibisis/katavault-core';
 
 // handlers
 import { onCreateAccountButtonClick, onResetButtonClick } from './handlers';

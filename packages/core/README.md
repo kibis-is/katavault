@@ -1,23 +1,23 @@
 <div align="center">
 
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-brightgreen.svg)](LICENSE)
-[![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fembedded-wallet-sdk)](https://www.npmjs.com/package/%40kibisis/embedded-wallet-sdk)
+[![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault)](https://www.npmjs.com/package/%40kibisis/katavault)
 
 </div>
 
 <div align="center">
 
-![GitHub Release](https://img.shields.io/github/v/release/kibis-is/embedded-wallet-sdk?filter=%40kibis-is%2Fembedded-wallet-sdk*)
-![GitHub Release](https://img.shields.io/github/v/release/kibis-is/embedded-wallet-sdk?include_prereleases&filter=%40kibis-is%2Fembedded-wallet-sdk*&label=pre-release)
+![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?filter=%40kibis-is%2Fkatavault-core*)
+![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?include_prereleases&filter=%40kibis-is%2Fkatavault-core*&label=pre-release)
 
 </div>
 
 <h1 align="center">
-  @kibisis/embedded-wallet-sdk
+  @kibisis/katavault-core
 </h1>
 
 <p align="center">
-  The core implementation for the embedded wallet SDK.
+  The core implementation for Katavault.
 </p>
 
 ---
@@ -42,14 +42,14 @@
 
 You can install using:
 ```shell
-npm install @kibisis/embedded-wallet-sdk
+npm install @kibisis/katavault-core
 ```
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
 ## 📚 2. Documentation
 
-For full documentation on usage, see [here](https://kibis-is.github.io/embedded-wallet-sdk/usage/core).
+For full documentation on usage, see [here](https://kibis-is.github.io/katavault/usage/core).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -74,7 +74,7 @@ $ pnpm install
 The example can be run by using:
 
 ```shell
-pnpm -F @kibisis/embedded-wallet-sdk start
+pnpm -F @kibisis/katavault-core start
 ```
 
 This will build a local copy of the SDK and start a development server running the example code in [`example/`](./example).
@@ -100,7 +100,7 @@ The example site will be running on [http://localhost:8080](http://localhost:808
 
 ## 👏 5. How to contribute
 
-Please read the [**contributing guide**](https://github.com/kibis-is/embedded-wallet-sdk/blob/main/CONTRIBUTING.md) to learn about the development process.
+Please read the [**contributing guide**](https://github.com/kibis-is/katavault/blob/main/CONTRIBUTING.md) to learn about the development process.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

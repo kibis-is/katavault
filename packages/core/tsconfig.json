@@ -17,7 +17,7 @@
     "noImplicitThis": true,
     "paths": {
       "@/*": ["src/*"],
-      "@kibisis/embedded-wallet-sdk": ["dist"]
+      "@kibisis/katavault-core": ["dist"]
     },
     "removeComments": false,
     "resolveJsonModule": true,

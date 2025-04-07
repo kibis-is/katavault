@@ -8,7 +8,7 @@ export default (() => {
     root: __dirname,
     resolve: {
       alias: {
-        '@kibisis/embedded-wallet-sdk': sdkDir,
+        '@kibisis/katavault-core': sdkDir,
       },
     },
     server: {
