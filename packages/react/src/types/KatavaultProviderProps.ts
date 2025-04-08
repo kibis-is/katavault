@@ -1,8 +1,8 @@
-import type { WalletParameters } from '@kibisis/katavault-core';
+import type { CreateWalletParameters } from '@kibisis/katavault-core';
 import type { PropsWithChildren } from 'react';
 
 interface Props {
-  config: WalletParameters;
+  config: CreateWalletParameters;
 }
 
 type KatavaultProviderProps = PropsWithChildren<Props>;
