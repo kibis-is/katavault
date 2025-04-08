@@ -60,7 +60,7 @@ A name for the account.
 
 ## Returns
 
-[`Promise<Account>`](03-glossary/02-types.mdx#account)
+[`Promise<Account>`](04-glossary/02-types.mdx#account)
 
 A promise that resolves to the created account.
 
@@ -68,18 +68,18 @@ A promise that resolves to the created account.
 
 ## Throws
 
-### [FailedToAuthenticatePasskeyError](03-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+### [FailedToAuthenticatePasskeyError](04-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
 
 If the passkey did not return the encryption key credentials.
 
-### [FailedToRegisterPasskeyError](03-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+### [FailedToRegisterPasskeyError](04-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
 
 If, when attempting to register a passkey, the public key credentials failed to be created on the passkey.
 
-### [PasskeyNotSupportedError](03-glossary/03-errors.mdx#passkeynotsupportederror)
+### [PasskeyNotSupportedError](04-glossary/03-errors.mdx#passkeynotsupportederror)
 
 If the browser does not support WebAuthn or the passkey does not support storing encryption key material.
 
-### [UserCanceledPasskeyRequestError](03-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
+### [UserCanceledPasskeyRequestError](04-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
 
 If the user canceled the passkey register/authenticate request or the request timed out.

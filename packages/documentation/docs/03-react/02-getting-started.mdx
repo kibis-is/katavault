@@ -1,0 +1,138 @@
+---
+sidebar_label: Getting started
+slug: /react/getting-started
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Getting started
+
+> Katavault can be easily initailized withing a React app.
+
+<SectionBreak />
+
+## Overview
+
+Katavault is a TypeScript implementation that allows dApps to create/import embedded wallets within the browser.
+
+The React implementation leverages React's Context API and hooks to allow Katavault's functionality to be easily available across a React app.
+
+<SectionBreak />
+
+## Quick start
+
+### 1. Wrap the app in the provider
+
+Wrap the app in the `KatavaultProvider` React Context Provider and pass the params tp the value property.
+
+<Tabs
+  defaultValue="app"
+  values={[
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          {/** ... */}
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+See [`CreateKatavaultParameters`](04-glossary/02-types.mdx#createkatavaultparameters) for information on the available parameters for the config.
+
+:::
+
+### 2. Using Katavault
+
+Now that everything is set up, every component inside the `KatavaultProvider` can use the React Hooks.
+
+<Tabs
+  defaultValue="accounts"
+  values={[
+    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="accounts">
+
+    ```typescript
+    import { useAccounts } from '@kibisis/katavault-react';
+    import config from './config';
+
+    export function Accounts() {
+      const accounts = useAccounts();
+
+      return accounts.map(({ address, name }) => (
+        <div>
+          <p>Address: {address}</p>
+          <p>Name: {name ?? '-'}</p>
+        </div>
+      ));
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          {/** ... */}
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
