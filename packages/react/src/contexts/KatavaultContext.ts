@@ -1,6 +1,12 @@
-import { Wallet } from '@kibisis/katavault-core';
 import { createContext } from 'react';
 
-const KatavaultContext = createContext<Wallet | null>(null);
+// types
+import type { ContextState } from '@/types';
+
+const KatavaultContext = createContext<ContextState>({
+  timestamp: 0,
+  onUpdate: null,
+  wallet: null,
+});
 
 export default KatavaultContext;

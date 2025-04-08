@@ -1,4 +1,4 @@
-import { type Account, BaseError } from '@kibisis/katavault-core';
+import { BaseError } from '@kibisis/katavault-core';
 import { useContext } from 'react';
 
 // contexts
@@ -8,13 +8,13 @@ import { KatavaultContext } from '@/contexts';
 import { WalletNotInitializedError } from '@/errors';
 
 // types
-import type { HookFunctionWithOptionalParams } from '@/types';
+import type { HookFunction } from '@/types';
 
 /**
- * Hook to generate an account.
- * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to generate a new account.
+ * Hook to remove an account.
+ * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove an account.
  */
-export default function useGenerateAccount(): HookFunctionWithOptionalParams<string | undefined, Account, BaseError> {
+export default function useRemoveAccount(): HookFunction<string, undefined, BaseError> {
   // contexts
   const { onUpdate, wallet } = useContext(KatavaultContext);
 
@@ -25,13 +25,13 @@ export default function useGenerateAccount(): HookFunctionWithOptionalParams<str
 
     (async () => {
       try {
-        const result = await wallet.generateAccount(params);
+        await wallet.removeAccount(params);
 
         if (onUpdate) {
           onUpdate();
         }
 
-        options?.onSuccess?.(result, params);
+        return options?.onSuccess?.(undefined, params);
       } catch (error) {
         return options?.onError?.(error, params);
       }

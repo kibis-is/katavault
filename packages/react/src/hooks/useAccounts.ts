@@ -4,8 +4,12 @@ import { useContext, useEffect, useState } from 'react';
 // contexts
 import { KatavaultContext } from '@/contexts';
 
+/**
+ * Hook for getting the accounts.
+ * @returns {Account[]} The accounts in the wallet.
+ */
 export default function useAccounts(): Account[] {
-  const wallet = useContext(KatavaultContext);
+  const { wallet, timestamp } = useContext(KatavaultContext);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
@@ -16,7 +20,7 @@ export default function useAccounts(): Account[] {
     (async () => {
       setAccounts(await wallet.accounts());
     })();
-  }, [wallet]);
+  }, [timestamp]);
 
   return accounts;
 }
