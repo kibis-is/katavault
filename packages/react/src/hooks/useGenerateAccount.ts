@@ -19,11 +19,11 @@ export default function useGenerateAccount(): HookFunctionWithOptionalParams<str
   const { onUpdate, wallet } = useContext(KatavaultContext);
 
   return (params, options?) => {
-    if (!wallet) {
-      return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
-    }
-
     (async () => {
+      if (!wallet) {
+        return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
+      }
+
       try {
         const result = await wallet.generateAccount(params);
 

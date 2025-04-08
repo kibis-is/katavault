@@ -19,11 +19,11 @@ export default function useRemoveAccount(): HookFunction<string, undefined, Base
   const { onUpdate, wallet } = useContext(KatavaultContext);
 
   return (params, options?) => {
-    if (!wallet) {
-      return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
-    }
-
     (async () => {
+      if (!wallet) {
+        return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
+      }
+
       try {
         await wallet.removeAccount(params);
 

@@ -1,10 +1,11 @@
 import { type Account } from '@kibisis/katavault-core';
-import { useAccounts, useGenerateAccount, useRemoveAccount } from '@kibisis/katavault-react';
+import { useAccounts, useClear, useGenerateAccount, useRemoveAccount } from '@kibisis/katavault-react';
 import { type FC } from 'react';
 
 const AccountsTable: FC = () => {
   // hooks
   const accounts = useAccounts();
+  const clear = useClear();
   const generateAccount = useGenerateAccount();
   const removeAccount = useRemoveAccount();
   // handlers
@@ -15,7 +16,7 @@ const AccountsTable: FC = () => {
     removeAccount(address);
   };
   const handleResetClick = () => {
-
+    clear();
   };
 
   return (
