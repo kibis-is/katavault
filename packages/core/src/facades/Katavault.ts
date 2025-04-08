@@ -14,7 +14,7 @@ import { AccountDoesNotExistError } from '@/errors';
 import type {
   Account,
   ClientInformation,
-  WalletParameters,
+  KatavaultParameters,
   Logger,
   Passkey,
   PrivateKey,
@@ -26,16 +26,16 @@ import type {
 // utilities
 import { addressFromPrivateKey, bytesToBase64, bytesToHex, generatePrivateKey, utf8ToBytes } from '@/utilities';
 
-export default class Wallet {
+export default class Katavault {
   // public static variables
-  public static readonly displayName = 'Wallet';
+  public static readonly displayName = 'Katavault';
   // private variables
   private readonly _client: ClientInformation;
   private readonly _logger: Logger;
   private readonly _user: UserInformation;
   private readonly _vault: VaultDecorator;
 
-  public constructor({ client, logger, user, vault }: WalletParameters) {
+  public constructor({ client, logger, user, vault }: KatavaultParameters) {
     this._client = client;
     this._logger = logger;
     this._user = user;
@@ -76,7 +76,7 @@ export default class Wallet {
    * @private
    */
   private async _passkey(): Promise<Passkey> {
-    const __logPrefix = `${Wallet.displayName}#_passkey`;
+    const __logPrefix = `${Katavault.displayName}#_passkey`;
     let passkey = await this._vault.passkey();
 
     // if there is no passkey, register a new one
@@ -185,7 +185,7 @@ export default class Wallet {
    * @public
    */
   public async removeAccount(address: string): Promise<void> {
-    const __logPrefix = `${Wallet.displayName}#removeAccount`;
+    const __logPrefix = `${Katavault.displayName}#removeAccount`;
     const items = await this._vault.items();
     let result: string[];
 
@@ -215,7 +215,7 @@ export default class Wallet {
    * @public
    */
   public async signMessage({ address, encoding, message }: SignMessageParameters): Promise<string | Uint8Array> {
-    const __logPrefix = `${Wallet.displayName}#signMessage`;
+    const __logPrefix = `${Katavault.displayName}#signMessage`;
     const item = await this._vault.itemByAddress(address);
     let _error: string;
     let privateKey: Uint8Array;

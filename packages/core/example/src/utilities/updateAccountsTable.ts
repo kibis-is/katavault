@@ -1,9 +1,9 @@
-import { type Account, Wallet, type Logger } from '@kibisis/katavault-core';
+import { type Account, Katavault, type Logger } from '@kibisis/katavault-core';
 
 // handlers
 import { onRemoveButtonClick } from '../handlers';
 
-export default async function updateAccountsTable(wallet: Wallet, logger: Logger) {
+export default async function updateAccountsTable(katavault: Katavault, logger: Logger) {
   const __logPrefix = 'updateAccountsTable';
   const containerElement = document.getElementById('accountsTable');
   let accounts: Account[];
@@ -14,7 +14,7 @@ export default async function updateAccountsTable(wallet: Wallet, logger: Logger
     return;
   }
 
-  accounts = await wallet.accounts();
+  accounts = await katavault.accounts();
 
   containerElement.innerHTML = `
 <table>
@@ -42,6 +42,6 @@ export default async function updateAccountsTable(wallet: Wallet, logger: Logger
 
   // add click listeners to the buttons
   Array.from(document.getElementsByClassName('remove-button')).forEach((element, index) =>
-    element.addEventListener('click', onRemoveButtonClick(accounts[index].address, wallet, logger))
+    element.addEventListener('click', onRemoveButtonClick(accounts[index].address, katavault, logger))
   );
 }

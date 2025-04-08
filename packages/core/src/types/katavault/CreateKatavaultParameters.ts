@@ -6,10 +6,10 @@ import type { ClientInformation, UserInformation } from '@/types';
  * @property {Omit<ClientInformation, 'host'>} client - [optional] The client's name and icon URL.
  * @property {UserInformation} user - User details.
  */
-interface CreateWalletParameters {
+interface CreateKatavaultParameters {
   debug?: boolean;
   client?: Omit<ClientInformation, 'host'>;
   user: UserInformation;
 }
 
-export default CreateWalletParameters;
+export default CreateKatavaultParameters;

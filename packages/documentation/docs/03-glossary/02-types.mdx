@@ -22,11 +22,21 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 ## BaseError
 
-| Name                  | Type     | Required | Default | Description                               |
-|-----------------------|----------|----------|---------|-------------------------------------------|
-| message               | `string` | yes      | -       | A message assoiciated with the error.     |
-| isEmbeddedWalletError | `true`   | yes      | -       | Used to determine if this a wallet error. |
-| type                  | `string` | yes      | -       | A reference for this error.               |
+| Name             | Type     | Required | Default | Description                                  |
+|------------------|----------|----------|---------|----------------------------------------------|
+| message          | `string` | yes      | -       | A message associated with the error.         |
+| isKatavaultError | `true`   | yes      | -       | Used to determine if this a Katavault error. |
+| type             | `string` | yes      | -       | A reference for this error.                  |
+
+<SectionBreak />
+
+## CreateKatavaultParameters
+
+| Name   | Type                                  | Required | Default | Description                     |
+|--------|---------------------------------------|----------|---------|---------------------------------|
+| debug  | `boolean`                             | no       | `false` | Whether to log debug messages.  |
+| client | `{ icon?: string; name: string; }`    | no       | -       | The client's name and icon URL. |
+| user   | [`UserInformation`](#userinformation) | yes      | -       | User details.                   |
 
 <SectionBreak />
 
@@ -39,6 +49,13 @@ import SectionBreak from '@site/src/components/SectionBreak';
 | message  | `string` \| `Uint8Array` | yes      | -           | A UTF-8 encoded message or raw bytes to sign.                                                                         |
 
 <SectionBreak />
+
+## UserInformation
+
+| Name        | Type     | Required | Default | Description                                                                                                   |
+|-------------|----------|----------|---------|---------------------------------------------------------------------------------------------------------------|
+| displayName | `string` | no       | -       | A human-readable display name for the user. This does not have to be unique and is used to display in the UI. |
+| username    | `string` | yes      | -       | A globally unique identifier for the user. This could be, for example, an email address.                      |
 
 <!-- links -->
 [keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses

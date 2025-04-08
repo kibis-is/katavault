@@ -16,7 +16,7 @@ import SectionBreak from '@site/src/components/SectionBreak';
 Install the required packages.
 
 ```bash npm2yarn
-npm install @kibisis/katavault-core
+npm install algosdk@3.x @kibisis/katavault-core
 ```
 
 <SectionBreak />
@@ -27,6 +27,7 @@ If you're not using a package manager, you can install via an ESM-compatible CDN
 
 ```html
 <script type="module">
-  import { createWallet } from 'https://esm.sh/@kibisis/katavault-core';
+  import 'https://esm.sh/algosdk';
+  import { createKatavault } from 'https://esm.sh/@kibisis/katavault-core';
 </script>
 ```

@@ -1,22 +1,17 @@
-import {
-  BaseError,
-  EmbeddedWallet,
-  type Logger,
-  USER_CANCELED_PASSKEY_REQUEST_ERROR,
-} from '@kibisis/embedded-wallet-sdk';
+import { BaseError, Katavault, type Logger, USER_CANCELED_PASSKEY_REQUEST_ERROR } from '@kibisis/katavault-core';
 
 // utilities
 import { updateAccountsTable } from '../utilities';
 
-export default function onCreateAccountButtonClick(wallet: EmbeddedWallet, logger: Logger) {
+export default function onCreateAccountButtonClick(katavault: Katavault, logger: Logger) {
   return async () => {
     const __logPrefix = 'onCreateAccountButtonClick';
     try {
-      const account = await wallet.generateAccount();
+      const account = await katavault.generateAccount();
 
       logger.debug(`${__logPrefix}: created new account "${account.address}"`);
 
-      await updateAccountsTable(wallet, logger);
+      await updateAccountsTable(katavault, logger);
     } catch (error) {
       if ((error as BaseError).isEmbeddedWalletError) {
         switch ((error as BaseError).type) {

@@ -3,4 +3,79 @@ sidebar_label: Getting started
 slug: /core/getting-started
 ---
 
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Getting started
+
+> Katavault can be started simply with a few lines of code.
+
+<SectionBreak />
+
+## Overview
+
+Katavault is a TypeScript implementation that allows dApps to create/import embedded wallets within the browser.
+
+The core implementation contains the main functionality that handles all the authentication, encryption and storage of wallet keys.
+
+<SectionBreak />
+
+## Quick start
+
+### 1. Set up Katavault
+
+First, set up the Katavault client:
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+See [`CreateKatavaultParameters`](03-glossary/02-types.mdx#createkatavaultparameters) for information on the available parameters.
+
+:::
+
+### 2. Using Katavault
+
+Once the client is set up, you can start interacting with the embedded wallet.
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    const account = await katavault.generateAccount('Personal');
+
+    console.log(account);
+    /*
+    {
+      address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
+      name: 'Personal',
+    }
+    */
+    ```
+
+  </TabItem>
+</Tabs>

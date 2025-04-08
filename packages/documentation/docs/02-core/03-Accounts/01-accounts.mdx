@@ -23,15 +23,15 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
-    import { createWallet } from '@kibisis/katavault-core';
+    import { createKatavault } from '@kibisis/katavault-core';
 
-    const wallet = await createWallet({
+    const katavault = await createKatavault({
       user: {
         name: 'Kibi',
         username: 'kibi@kibis.is',
       },
     });
-    const accounts = await wallet.accounts();
+    const accounts = await katavault.accounts();
 
     console.log(accounts);
     /*

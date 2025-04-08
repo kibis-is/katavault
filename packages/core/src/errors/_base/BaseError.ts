@@ -1,5 +1,5 @@
 export default abstract class BaseError extends Error {
-  public readonly isEmbeddedWalletError = true;
+  public readonly isKatavaultError = true;
   public message: string;
   public readonly type: string;
 

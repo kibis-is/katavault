@@ -1,1 +1,1 @@
-export { default as Wallet } from './Wallet';
+export { default as Katavault } from './Katavault';
