@@ -1,4 +1,4 @@
-import { createWallet, Wallet } from '@kibisis/katavault-core';
+import { createKatavault, Katavault } from '@kibisis/katavault-core';
 import { createElement, type FC, useCallback, useEffect, useState } from 'react';
 
 // contexts
@@ -10,13 +10,13 @@ import type { KatavaultProviderProps } from '@/types';
 const KatavaultProvider: FC<KatavaultProviderProps> = ({ config, children }) => {
   // states
   const [timestamp, setTimestamp] = useState<number>(0);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [katavault, setKatavault] = useState<Katavault | null>(null);
   // callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
 
   useEffect(() => {
     (async () => {
-      setWallet(await createWallet(config));
+      setKatavault(await createKatavault(config));
       setTimestamp(Date.now());
     })();
   }, [config]);
@@ -25,7 +25,7 @@ const KatavaultProvider: FC<KatavaultProviderProps> = ({ config, children }) => 
     value: {
       timestamp,
       onUpdate,
-      wallet,
+      katavault,
     },
   }, children);
 };

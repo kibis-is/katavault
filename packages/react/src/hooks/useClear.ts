@@ -18,16 +18,16 @@ import type { HookFunctionWithoutParams } from '@/types';
  */
 export default function useClear(): HookFunctionWithoutParams<undefined, BaseError> {
   // contexts
-  const { onUpdate, wallet } = useContext(KatavaultContext);
+  const { onUpdate, katavault } = useContext(KatavaultContext);
 
   return (options?) => {
     (async () => {
-      if (!wallet) {
+      if (!katavault) {
         return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), undefined);
       }
 
       try {
-        await wallet.clear();
+        await katavault.clear();
 
         if (onUpdate) {
           onUpdate();

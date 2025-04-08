@@ -16,16 +16,16 @@ import type { HookFunctionWithOptionalParams } from '@/types';
  */
 export default function useGenerateAccount(): HookFunctionWithOptionalParams<string | undefined, Account, BaseError> {
   // contexts
-  const { onUpdate, wallet } = useContext(KatavaultContext);
+  const { onUpdate, katavault } = useContext(KatavaultContext);
 
   return (params, options?) => {
     (async () => {
-      if (!wallet) {
+      if (!katavault) {
         return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
       }
 
       try {
-        const result = await wallet.generateAccount(params);
+        const result = await katavault.generateAccount(params);
 
         if (onUpdate) {
           onUpdate();

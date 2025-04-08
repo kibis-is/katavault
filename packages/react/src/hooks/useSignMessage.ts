@@ -16,16 +16,16 @@ import type { HookFunction } from '@/types';
  */
 export default function useSignMessage(): HookFunction<SignMessageParameters, string | Uint8Array, BaseError> {
   // contexts
-  const { wallet } = useContext(KatavaultContext);
+  const { katavault } = useContext(KatavaultContext);
 
   return (params, options?) => {
     (async () => {
-      if (!wallet) {
+      if (!katavault) {
         return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
       }
 
       try {
-        const result = await wallet.signMessage(params);
+        const result = await katavault.signMessage(params);
 
         return options?.onSuccess?.(result, params);
       } catch (error) {

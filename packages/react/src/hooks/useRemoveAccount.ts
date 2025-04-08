@@ -16,16 +16,16 @@ import type { HookFunction } from '@/types';
  */
 export default function useRemoveAccount(): HookFunction<string, undefined, BaseError> {
   // contexts
-  const { onUpdate, wallet } = useContext(KatavaultContext);
+  const { onUpdate, katavault } = useContext(KatavaultContext);
 
   return (params, options?) => {
     (async () => {
-      if (!wallet) {
+      if (!katavault) {
         return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
       }
 
       try {
-        await wallet.removeAccount(params);
+        await katavault.removeAccount(params);
 
         if (onUpdate) {
           onUpdate();
