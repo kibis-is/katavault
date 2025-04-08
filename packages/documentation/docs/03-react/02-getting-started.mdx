@@ -107,12 +107,13 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Accounts } from './Accounts';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
-          {/** ... */}
+          <Accounts />
         </KatavaultProvider>
       );
     }
