@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // containers
-import App from './containers/App';
+import { App } from './containers';
 
 async function onDOMContentLoaded() {
   const rootElement = document.getElementById('root');

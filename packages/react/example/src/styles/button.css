@@ -24,6 +24,10 @@ button:hover {
   background: var(--primary-400-color);
 }
 
+button.button--full {
+  width: 100%;
+}
+
 button.button--sm {
   min-width: 5rem;
 }
