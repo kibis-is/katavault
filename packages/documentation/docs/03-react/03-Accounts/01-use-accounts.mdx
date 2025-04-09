@@ -1,0 +1,84 @@
+---
+sidebar_label: useAccounts
+slug: /react/accounts/use-accounts
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# useAccounts
+
+> Hook for getting the list of accounts stored in the wallet.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="accounts"
+  values={[
+    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="accounts">
+
+    ```typescript
+    import { useAccounts } from '@kibisis/katavault-react';
+
+    function Accounts() {
+      const accounts = useAccounts();
+
+      return accounts.map(({ address, name }) => (
+        <div>
+          <p>Address: {address}</p>
+          <p>Name: {name ?? '-'}</p>
+        </div>
+      ));
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Accounts } from './Accounts';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <Accounts />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+[`Account[]`](04-glossary/02-types.mdx#account)
+
+The list of accounts stored in the wallet.

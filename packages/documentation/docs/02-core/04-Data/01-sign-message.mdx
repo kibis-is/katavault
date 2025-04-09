@@ -23,10 +23,10 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
-    import { createWallet, utf8ToBytes } from '@kibisis/katavault-core';
+    import { createKatavault, utf8ToBytes } from '@kibisis/katavault-core';
     import { verifyBytes } from 'algosdk';
 
-    const wallet = await createWallet({
+    const katavault = await createKatavault({
       user: {
         name: 'Kibi',
         username: 'kibi@kibis.is',
@@ -34,7 +34,7 @@ import TabItem from '@theme/TabItem';
     });
     const address = 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU';
     const message = 'hello humie!';
-    const signature = await wallet.signMessage({
+    const signature = await katavault.signMessage({
       address,
       message,
     });
@@ -54,7 +54,7 @@ import TabItem from '@theme/TabItem';
 
 ### parameters
 
-* Type: [`SignMessageParameters`](03-glossary/02-types.mdx#signparameters)
+* Type: [`SignMessageParameters`](04-glossary/02-types.mdx#signparameters)
 
 The signer, the message and optional output encoding.
 
@@ -76,22 +76,22 @@ The signed message is prepended with "MX" for domain separation.
 
 ## Throws
 
-### [AccountDoesNotExistError](03-glossary/03-errors.mdx#accountdoesnotexisterror)
+### [AccountDoesNotExistError](04-glossary/03-errors.mdx#accountdoesnotexisterror)
 
 If the specified address does not exist in the wallet.
 
-### [FailedToAuthenticatePasskeyError](03-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+### [FailedToAuthenticatePasskeyError](04-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
 
 If the passkey did not return the encryption key credentials.
 
-### [FailedToRegisterPasskeyError](03-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+### [FailedToRegisterPasskeyError](04-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
 
 If, when attempting to register a passkey, the public key credentials failed to be created on the passkey.
 
-### [PasskeyNotSupportedError](03-glossary/03-errors.mdx#passkeynotsupportederror)
+### [PasskeyNotSupportedError](04-glossary/03-errors.mdx#passkeynotsupportederror)
 
 If the browser does not support WebAuthn or the passkey does not support storing encryption key material.
 
-### [UserCanceledPasskeyRequestError](03-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
+### [UserCanceledPasskeyRequestError](04-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
 
 If the user canceled the passkey register/authenticate request or the request timed out.

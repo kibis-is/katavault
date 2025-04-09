@@ -1,7 +1,7 @@
 <div align="center">
 
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-brightgreen.svg)](LICENSE)
-[![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault)](https://www.npmjs.com/package/%40kibisis/katavault)
+[![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-core)](https://www.npmjs.com/package/%40kibisis/katavault-core)
 
 </div>
 
@@ -40,7 +40,13 @@
 
 ### 1.1. Installation
 
-You can install using:
+First, install the dependencies:
+
+```shell
+npm install algosdk@3.x
+```
+
+Then install the SDK using:
 ```shell
 npm install @kibisis/katavault-core
 ```

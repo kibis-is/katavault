@@ -62,9 +62,10 @@ For full documentation on usage, see [here](https://kibis-is.github.io/katavault
 
 ### 3.1. Packages
 
-| Name                                                   | Description                                | Package                                                                                                                             |
-|--------------------------------------------------------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| [`@kibisis/katavault-core`](./packages/core/README.md) | The core implementation for the Katavault. | [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-core)](https://www.npmjs.com/package/%40kibisis/katavault-core) |
+| Name                                                     | Description                             | Package                                                                                                                               |
+|----------------------------------------------------------|-----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| [`@kibisis/katavault-core`](./packages/core/README.md)   | The core implementation for Katavault.  | [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-core)](https://www.npmjs.com/package/%40kibisis/katavault-core)   |
+| [`@kibisis/katavault-react`](./packages/react/README.md) | The React implementation for Katavault. | [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-react)](https://www.npmjs.com/package/%40kibisis/katavault-react) |
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

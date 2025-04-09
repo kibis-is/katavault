@@ -1,0 +1,28 @@
+.sign-message-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sign-message-modal__input {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+.sign-message-modal__select {
+  height: 2.5rem;
+  width: 100%;
+}
+
+.sign-message-modal__signature {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.sign-message-modal__signature > code {
+  word-break: break-all;
+}

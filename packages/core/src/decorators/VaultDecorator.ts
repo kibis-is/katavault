@@ -97,7 +97,16 @@ export default class VaultDecorator {
    * @public
    */
   public async itemByAddress(address: string): Promise<PrivateKey | null> {
-    return (await this._db.get(IDB_ITEMS_STORE_NAME, address)) || null;
+    const item: SerializedPrivateKey | null = (await this._db.get(IDB_ITEMS_STORE_NAME, address)) || null;
+
+    if (!item) {
+      return null;
+    }
+
+    return {
+      ...item,
+      keyData: hexToBytes(item.keyData),
+    };
   }
 
   /**

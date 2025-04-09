@@ -1,0 +1,62 @@
+---
+sidebar_label: Types
+slug: /glossary/types
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# Types
+
+> A glossary of types.
+
+<SectionBreak />
+
+## Account
+
+| Name    | Type     | Required | Default     | Description                                                                                                                      |
+|---------|----------|----------|-------------|----------------------------------------------------------------------------------------------------------------------------------|
+| address | `string` | yes      | -           | A [base32][rfc4648_6] encoded public key with a 4-byte checksum appended as defined in [keys and addresses][keys-and-addresses]. |
+| name    | `string` | no       | `undefined` | A human-readable name for this account.                                                                                          |
+
+<SectionBreak />
+
+## BaseError
+
+| Name             | Type     | Required | Default | Description                                  |
+|------------------|----------|----------|---------|----------------------------------------------|
+| message          | `string` | yes      | -       | A message associated with the error.         |
+| isKatavaultError | `true`   | yes      | -       | Used to determine if this a Katavault error. |
+| type             | `string` | yes      | -       | A reference for this error.                  |
+
+<SectionBreak />
+
+## CreateKatavaultParameters
+
+| Name   | Type                                  | Required | Default | Description                     |
+|--------|---------------------------------------|----------|---------|---------------------------------|
+| debug  | `boolean`                             | no       | `false` | Whether to log debug messages.  |
+| client | `{ icon?: string; name: string; }`    | no       | -       | The client's name and icon URL. |
+| user   | [`UserInformation`](#userinformation) | yes      | -       | User details.                   |
+
+<SectionBreak />
+
+## SignParameters
+
+| Name     | Type                     | Required | Default     | Description                                                                                                           |
+|----------|--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
+| address  | `string`                 | yes      | -           | The address of the account to be used to sign the message.                                                            |
+| encoding | `base64` \| `hex`        | no       | `undefined` | The output encoding of the signature. If no encoding is specified, the signature will be in raw bytes (`Uint8Array`). |
+| message  | `string` \| `Uint8Array` | yes      | -           | A UTF-8 encoded message or raw bytes to sign.                                                                         |
+
+<SectionBreak />
+
+## UserInformation
+
+| Name        | Type     | Required | Default | Description                                                                                                   |
+|-------------|----------|----------|---------|---------------------------------------------------------------------------------------------------------------|
+| displayName | `string` | no       | -       | A human-readable display name for the user. This does not have to be unique and is used to display in the UI. |
+| username    | `string` | yes      | -       | A globally unique identifier for the user. This could be, for example, an email address.                      |
+
+<!-- links -->
+[keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses
+[rfc4648_6]: https://datatracker.ietf.org/doc/html/rfc4648#section-6

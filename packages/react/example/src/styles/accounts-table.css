@@ -1,0 +1,25 @@
+.accounts-table__container > table,
+.accounts-table__container > table td,
+.accounts-table__container > table th {
+  border: 1px solid var(--gray-300-color);
+}
+
+.accounts-table__container > table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.accounts-table__container > table td,
+.accounts-table__container > table th {
+  padding: 0.5rem;
+}
+
+.accounts-table__container > table th {
+  background: var(--gray-400-color);
+  color: white;
+  text-align: left;
+}
+
+.accounts-table__container > table td {
+  text-align: left;
+}
