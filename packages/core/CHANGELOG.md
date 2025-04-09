@@ -1,3 +1,10 @@
+# [@kibisis/katavault-core-v1.0.0-beta.2](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.0.0-beta.1...@kibisis/katavault-core-v1.0.0-beta.2) (2025-04-09)
+
+
+### Features
+
+* **react:** add react package ([#4](https://github.com/kibis-is/katavault/issues/4)) ([2f48dc2](https://github.com/kibis-is/katavault/commit/2f48dc2694de3b33cb9d77a9365420e223130530))
+
 # @kibisis/katavault-core-v1.0.0-beta.1 (2025-04-07)
 
 
