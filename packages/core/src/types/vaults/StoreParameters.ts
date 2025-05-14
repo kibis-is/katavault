@@ -3,9 +3,8 @@ import type { IDBPDatabase } from 'idb';
 // types
 import type { CommonParameters, VaultSchema } from '@/types';
 
-interface PasswordVaultDecoratorParameters extends CommonParameters {
-  password: string;
+interface StoreParameters extends CommonParameters {
   vault: IDBPDatabase<VaultSchema>;
 }
 
-export default PasswordVaultDecoratorParameters;
+export default StoreParameters;

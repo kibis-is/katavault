@@ -13,7 +13,7 @@ export default function onCreateAccountButtonClick(katavault: Katavault, logger:
 
       await updateAccountsTable(katavault, logger);
     } catch (error) {
-      if ((error as BaseError).isEmbeddedWalletError) {
+      if ((error as BaseError).isKatavaultError) {
         switch ((error as BaseError).type) {
           case USER_CANCELED_PASSKEY_REQUEST_ERROR:
             logger.debug(`${__logPrefix}: user canceled passkey request`);

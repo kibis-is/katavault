@@ -1,3 +1,3 @@
 export type { default as CreateDerivedKeyParameters } from './CreateDerivedKeyParameters';
-export type { default as InitializePasswordVaultDecoratorParameters } from './InitializePasswordVaultDecoratorParameters';
-export type { default as PasswordVaultDecoratorParameters } from './PasswordVaultDecoratorParameters';
+export type { default as InitializePasswordStoreParameters } from './InitializePasswordStoreParameters';
+export type { default as PasswordStoreParameters } from './PasswordStoreParameters';

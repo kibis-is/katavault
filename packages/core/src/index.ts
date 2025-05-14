@@ -1,5 +1,3 @@
-// exports will be generated automatically generated using: pnpm generate:index
-export * from './@types';
 export * from './constants';
 export * from './decorators';
 export * from './enums';

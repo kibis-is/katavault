@@ -1,12 +1,17 @@
 import { ed25519 } from '@noble/curves/ed25519';
 import { concatBytes } from '@noble/hashes/utils';
-import { deleteDB } from 'idb';
+import type { IDBPDatabase } from 'idb';
 
 // constants
-import { SIGN_MESSAGE_PREFIX } from '@/constants';
+import {
+  IDB_ACCOUNTS_STORE_NAME,
+  IDB_PASSKEY_STORE_NAME,
+  IDB_PASSWORD_STORE_NAME,
+  SIGN_MESSAGE_PREFIX,
+} from '@/constants';
 
 // decorators
-import { AccountsVaultDecorator } from '@/decorators';
+import { AccountStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -19,12 +24,13 @@ import type {
   Account,
   AccountStoreItemWithPasskey,
   AccountStoreItemWithPassword,
-  AuthenticationClient,
+  AuthenticationStore,
   InitializeKatavaultParameters,
   KatavaultParameters,
   Logger,
   SignMessageParameters,
   UserInformation,
+  VaultSchema,
   WithEncoding,
 } from '@/types';
 
@@ -33,7 +39,6 @@ import {
   addressFromPrivateKey,
   bytesToBase64,
   bytesToHex,
-  createVaultName,
   generatePrivateKey,
   hexToBytes,
   utf8ToBytes,
@@ -43,16 +48,18 @@ export default class Katavault {
   // public static variables
   public static readonly displayName = 'Katavault';
   // private variables
-  private readonly _accountsVaultClient: AccountsVaultDecorator;
-  private readonly _authenticationClient: AuthenticationClient;
+  private readonly _accountStore: AccountStore;
+  private readonly _authenticationStore: AuthenticationStore;
   private readonly _logger: Logger;
   private readonly _user: UserInformation;
+  private readonly _vault: IDBPDatabase<VaultSchema>;
 
-  public constructor({ accountsVaultClient, authenticationClient, logger, user }: KatavaultParameters) {
-    this._accountsVaultClient = accountsVaultClient;
-    this._authenticationClient = authenticationClient;
+  public constructor({ accountStore, authenticationStore, logger, user, vault }: KatavaultParameters) {
+    this._accountStore = accountStore;
+    this._authenticationStore = authenticationStore;
     this._logger = logger;
     this._user = user;
+    this._vault = vault;
   }
 
   /**
@@ -60,15 +67,17 @@ export default class Katavault {
    */
 
   public static async initialize({
-    authenticationClient,
+    authenticationStore,
     logger,
     user,
+    vault,
   }: InitializeKatavaultParameters): Promise<Katavault> {
     return new Katavault({
-      accountsVaultClient: await AccountsVaultDecorator.initialize({ logger, user }),
-      authenticationClient,
+      accountStore: await AccountStore.initialize({ logger, vault }),
+      authenticationStore: authenticationStore,
       logger,
       user,
+      vault,
     });
   }
 
@@ -87,7 +96,7 @@ export default class Katavault {
    */
   private async _decryptedAccountKeyByAddress(address: string): Promise<Uint8Array | null> {
     const __logPrefix = `${Katavault.displayName}#_decryptedAccountKeyByAddress`;
-    const account = await this._accountsVaultClient.accountByAddress(address);
+    const account = await this._accountStore.accountByAddress(address);
     let credentialID: string | null;
     let passwordHash: string | null;
 
@@ -97,30 +106,30 @@ export default class Katavault {
       return null;
     }
 
-    if (this._authenticationClient.__type === AuthenticationMethod.Passkey) {
+    if (this._authenticationStore.__type === AuthenticationMethod.Passkey) {
       credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
 
       // check that the account is encrypted using the correct credential
-      if (!credentialID || credentialID !== (await this._authenticationClient.vault.credentialID())) {
+      if (!credentialID || credentialID !== (await this._authenticationStore.store.credentialID())) {
         this._logger.debug(`${__logPrefix}: account "${address}" found, but not encrypted using the supplied passkey`);
 
         return null;
       }
 
-      return await this._authenticationClient.vault.decryptBytes(hexToBytes(account.keyData));
+      return await this._authenticationStore.store.decryptBytes(hexToBytes(account.keyData));
     }
 
-    if (this._authenticationClient.__type === AuthenticationMethod.Password) {
+    if (this._authenticationStore.__type === AuthenticationMethod.Password) {
       passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
 
       // check if the account was encrypted using the correct password
-      if (!passwordHash || passwordHash !== bytesToHex(this._authenticationClient.vault.hash())) {
+      if (!passwordHash || passwordHash !== bytesToHex(this._authenticationStore.store.hash())) {
         this._logger.debug(`${__logPrefix}: account "${address}" found, but not encrypted using the supplied password`);
 
         return null;
       }
 
-      return await this._authenticationClient.vault.decryptBytes(hexToBytes(account.keyData));
+      return await this._authenticationStore.store.decryptBytes(hexToBytes(account.keyData));
     }
 
     throw new UnknownAuthenticationMethodError(`unknown authentication method`);
@@ -136,7 +145,7 @@ export default class Katavault {
    * @public
    */
   public async accounts(): Promise<Account[]> {
-    const items = await this._accountsVaultClient.accounts();
+    const items = await this._accountStore.accounts();
 
     return items.map(({ address, name }) => ({
       address,
@@ -149,7 +158,9 @@ export default class Katavault {
    * @public
    */
   public async clear(): Promise<void> {
-    return await deleteDB(createVaultName(this._user.username));
+    await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
+    await this._vault.clear(IDB_PASSKEY_STORE_NAME);
+    await this._vault.clear(IDB_PASSWORD_STORE_NAME);
   }
 
   /**
@@ -164,26 +175,26 @@ export default class Katavault {
     const address = addressFromPrivateKey(privateKey);
     let encryptedKeyData: Uint8Array;
 
-    if (this._authenticationClient.__type === AuthenticationMethod.Passkey) {
-      encryptedKeyData = await this._authenticationClient.vault.encryptBytes(privateKey);
+    if (this._authenticationStore.__type === AuthenticationMethod.Passkey) {
+      encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
 
-      await this._accountsVaultClient.upsert([
+      await this._accountStore.upsert([
         {
           address,
-          credentialID: await this._authenticationClient.vault.credentialID(),
+          credentialID: await this._authenticationStore.store.credentialID(),
           keyData: bytesToHex(encryptedKeyData),
           name,
         },
       ]);
     }
 
-    if (this._authenticationClient.__type === AuthenticationMethod.Password) {
-      encryptedKeyData = await this._authenticationClient.vault.encryptBytes(privateKey);
+    if (this._authenticationStore.__type === AuthenticationMethod.Password) {
+      encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
 
-      await this._accountsVaultClient.upsert([
+      await this._accountStore.upsert([
         {
           address,
-          passwordHash: bytesToHex(this._authenticationClient.vault.hash()),
+          passwordHash: bytesToHex(this._authenticationStore.store.hash()),
           keyData: bytesToHex(encryptedKeyData),
           name,
         },
@@ -203,7 +214,7 @@ export default class Katavault {
    */
   public async removeAccount(address: string): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#removeAccount`;
-    const results = await this._accountsVaultClient.remove([address]);
+    const results = await this._accountStore.remove([address]);
 
     this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
   }

@@ -1,12 +1,12 @@
 import { generate } from '@agoralabs-sh/uuid';
 import { randomBytes } from '@noble/hashes/utils';
-import { type IDBPDatabase, openDB } from 'idb';
+import type { IDBPDatabase } from 'idb';
 
 // constants
 import { IDB_PASSKEY_STORE_NAME } from '@/constants';
 
 // decorators
-import { BaseVaultDecorator } from '@/decorators';
+import BaseStore from './BaseStore';
 
 // errors
 import {
@@ -22,19 +22,19 @@ import {
 // types
 import type {
   AuthenticatePasskeyParameters,
-  BaseAuthenticationDecorator,
+  BaseAuthenticationStore,
   GenerateEncryptionKeyFromKeyMaterialParameters,
-  InitializePasskeyVaultDecoratorParameters,
-  PasskeyVaultDecoratorParameters,
+  InitializePasskeyStoreParameters,
+  PasskeyStoreParameters,
   PasskeyStoreSchema,
   RegisterPasskeyParameters,
   VaultSchema,
 } from '@/types';
 
 // utilities
-import { bytesToHex, bufferSourceToUint8Array, hexToBytes, updateVault, createVaultName } from '@/utilities';
+import { bytesToHex, bufferSourceToUint8Array, hexToBytes } from '@/utilities';
 
-export default class PasskeyVaultDecorator extends BaseVaultDecorator implements BaseAuthenticationDecorator {
+export default class PasskeyStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
   private static readonly _challengeByteSize = 32; // 32-bytes
   private static readonly _derivationKeyAlgorithm = 'HKDF';
@@ -48,7 +48,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
   // private variables
   private readonly _keyMaterial: Uint8Array;
 
-  private constructor({ keyMaterial, ...defaultParameters }: PasskeyVaultDecoratorParameters) {
+  private constructor({ keyMaterial, ...defaultParameters }: PasskeyStoreParameters) {
     super(defaultParameters);
 
     this._keyMaterial = keyMaterial;
@@ -70,7 +70,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    * @static
    */
   private static async _authenticate({ logger, ...passkey }: AuthenticatePasskeyParameters): Promise<Uint8Array> {
-    const __logPrefix = `${PasskeyVaultDecorator.displayName}#authenticate`;
+    const __logPrefix = `${PasskeyStore.displayName}#authenticate`;
     let _error: string;
     let _credential: PublicKeyCredential | null;
     let extensionResults: AuthenticationExtensionsClientOutputs;
@@ -85,7 +85,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
               type: 'public-key',
             },
           ],
-          challenge: randomBytes(PasskeyVaultDecorator._challengeByteSize),
+          challenge: randomBytes(PasskeyStore._challengeByteSize),
           extensions: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -146,22 +146,22 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
     const derivationKey = await crypto.subtle.importKey(
       'raw',
       keyMaterial,
-      PasskeyVaultDecorator._derivationKeyAlgorithm,
+      PasskeyStore._derivationKeyAlgorithm,
       false,
       ['deriveKey']
     );
 
     return await crypto.subtle.deriveKey(
       {
-        name: PasskeyVaultDecorator._derivationKeyAlgorithm,
+        name: PasskeyStore._derivationKeyAlgorithm,
         info: hexToBytes(credentialID),
         salt: new Uint8Array(), // use an empty salt
-        hash: PasskeyVaultDecorator._derivationKeyHashAlgorithm,
+        hash: PasskeyStore._derivationKeyHashAlgorithm,
       },
       derivationKey,
       {
-        name: PasskeyVaultDecorator._encryptionKeyAlgorithm,
-        length: PasskeyVaultDecorator._encryptionKeyBitSize,
+        name: PasskeyStore._encryptionKeyAlgorithm,
+        length: PasskeyStore._encryptionKeyBitSize,
       },
       false,
       ['decrypt', 'encrypt']
@@ -174,7 +174,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    *
    * NOTE: this requires PRF extension support and will throw an error if the authenticator does not support it.
    * @param {RegisterPasskeyParameters} options - The client and user details.
-   * @returns {Promise<PasskeyVaultDecorator>} A promise that resolves to a registered passkey.
+   * @returns {Promise<PasskeyStore>} A promise that resolves to a registered passkey.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
@@ -183,13 +183,13 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    * @static
    */
   private static async _register({ client, logger, user }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
-    const __logPrefix = `${PasskeyVaultDecorator.displayName}#register`;
-    const salt = randomBytes(PasskeyVaultDecorator._saltByteSize);
+    const __logPrefix = `${PasskeyStore.displayName}#register`;
+    const salt = randomBytes(PasskeyStore._saltByteSize);
     let _error: string;
     let credential: PublicKeyCredential | null;
     let extensionResults: AuthenticationExtensionsClientOutputs;
 
-    if (!PasskeyVaultDecorator.isSupported()) {
+    if (!PasskeyStore.isSupported()) {
       throw new PasskeyNotSupportedError('webauthn not supported');
     }
 
@@ -200,7 +200,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
             residentKey: 'required', // make passkey discoverable on the device
             userVerification: 'discouraged',
           },
-          challenge: randomBytes(PasskeyVaultDecorator._challengeByteSize),
+          challenge: randomBytes(PasskeyStore._challengeByteSize),
           extensions: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -257,7 +257,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
 
     return {
       credentialID: bytesToHex(new Uint8Array(credential.rawId)),
-      initializationVector: bytesToHex(randomBytes(PasskeyVaultDecorator._initializationVectorByteSize)),
+      initializationVector: bytesToHex(randomBytes(PasskeyStore._initializationVectorByteSize)),
       salt: bytesToHex(salt),
       transports: (credential.response as AuthenticatorAttestationResponse).getTransports() as AuthenticatorTransport[],
     };
@@ -296,9 +296,9 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
 
   /**
    * Initializes an instance of the passkey vault decorator.
-   * @param {InitializePasskeyVaultDecoratorParameters} params - The user credentials, the client information, the user
+   * @param {InitializePasskeyStoreParameters} params - The user credentials, the client information, the user
    * information and logger.
-   * @returns {Promise<PasskeyVaultDecorator>} A promise that resolves to the passkey vault decorator.
+   * @returns {Promise<PasskeyStore>} A promise that resolves to the passkey vault decorator.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
@@ -310,38 +310,28 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
     client,
     logger,
     user,
-  }: InitializePasskeyVaultDecoratorParameters): Promise<PasskeyVaultDecorator> {
-    const __logPrefix = `${PasskeyVaultDecorator.displayName}#initialize`;
-    const vaultName = createVaultName(user.username);
-    const vault = await openDB<VaultSchema>(vaultName, undefined, {
-      upgrade: (_db, oldVersion, newVersion) => {
-        updateVault({
-          database: _db,
-          logger,
-          newVersion,
-          oldVersion,
-        });
-      },
-    });
+    vault,
+  }: InitializePasskeyStoreParameters): Promise<PasskeyStore> {
+    const __logPrefix = `${PasskeyStore.displayName}#initialize`;
     let keyMaterial: Uint8Array;
-    let passkeyVault: PasskeyVaultDecorator;
-    let passkey = await PasskeyVaultDecorator._store(vault);
+    let passkeyVault: PasskeyStore;
+    let passkey = await PasskeyStore._store(vault);
 
     if (!passkey) {
       logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
 
       // register the new passkey
-      passkey = await PasskeyVaultDecorator._register({
+      passkey = await PasskeyStore._register({
         client,
         logger,
         user,
       });
       // get the key material
-      keyMaterial = await PasskeyVaultDecorator._authenticate({
+      keyMaterial = await PasskeyStore._authenticate({
         logger,
         ...passkey,
       });
-      passkeyVault = new PasskeyVaultDecorator({
+      passkeyVault = new PasskeyStore({
         keyMaterial,
         logger,
         vault,
@@ -353,12 +343,12 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
       return passkeyVault;
     }
 
-    keyMaterial = await PasskeyVaultDecorator._authenticate({
+    keyMaterial = await PasskeyStore._authenticate({
       logger,
       ...passkey,
     });
 
-    return new PasskeyVaultDecorator({
+    return new PasskeyStore({
       keyMaterial,
       logger,
       vault,
@@ -385,7 +375,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    * @private
    */
   private async _store(): Promise<PasskeyStoreSchema | null> {
-    return await PasskeyVaultDecorator._store(this._vault);
+    return await PasskeyStore._store(this._vault);
   }
 
   /**
@@ -397,7 +387,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    * @public
    */
   public async clearStore(): Promise<void> {
-    const __logPrefix = `${PasskeyVaultDecorator.displayName}#clear`;
+    const __logPrefix = `${PasskeyStore.displayName}#clear`;
 
     await this._vault.clear(IDB_PASSKEY_STORE_NAME);
 
@@ -411,7 +401,7 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
    * @public
    */
   public async credentialID(): Promise<string> {
-    const __logPrefix = `${PasskeyVaultDecorator.displayName}#credentialID`;
+    const __logPrefix = `${PasskeyStore.displayName}#credentialID`;
     const store = await this._store();
 
     if (!store) {
@@ -437,13 +427,13 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
       throw new DecryptionError('no passkey credentials stored');
     }
 
-    encryptionKey = await PasskeyVaultDecorator._generateEncryptionKeyFromInputKeyMaterial({
+    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
       credentialID: store.credentialID,
       keyMaterial: this._keyMaterial,
     });
     decryptedBytes = await crypto.subtle.decrypt(
       {
-        name: PasskeyVaultDecorator._encryptionKeyAlgorithm,
+        name: PasskeyStore._encryptionKeyAlgorithm,
         iv: hexToBytes(store.initializationVector),
       },
       encryptionKey,
@@ -470,13 +460,13 @@ export default class PasskeyVaultDecorator extends BaseVaultDecorator implements
       throw new EncryptionError('no passkey credentials stored');
     }
 
-    encryptionKey = await PasskeyVaultDecorator._generateEncryptionKeyFromInputKeyMaterial({
+    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
       credentialID: store.credentialID,
       keyMaterial: this._keyMaterial,
     });
     encryptedBytes = await crypto.subtle.encrypt(
       {
-        name: PasskeyVaultDecorator._encryptionKeyAlgorithm,
+        name: PasskeyStore._encryptionKeyAlgorithm,
         iv: hexToBytes(store.initializationVector),
       },
       encryptionKey,

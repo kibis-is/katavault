@@ -1,14 +1,14 @@
 import type { IDBPDatabase } from 'idb';
 
 // types
-import type { Logger, VaultDecoratorParameters, VaultSchema } from '@/types';
+import type { Logger, StoreParameters, VaultSchema } from '@/types';
 
-export default abstract class BaseVaultDecorator {
+export default abstract class BaseStore {
   // protected variables
   protected readonly _logger: Logger;
   protected readonly _vault: IDBPDatabase<VaultSchema>;
 
-  protected constructor({ logger, vault }: VaultDecoratorParameters) {
+  protected constructor({ logger, vault }: StoreParameters) {
     this._logger = logger;
     this._vault = vault;
   }

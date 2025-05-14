@@ -2,32 +2,32 @@ import { decode as decodeUtf8, encode as encodeUtf8 } from '@stablelib/utf8';
 import scrypt from 'scrypt-async';
 import { sha512 } from '@noble/hashes/sha512';
 import { randomBytes } from '@noble/hashes/utils';
-import { type IDBPDatabase, openDB } from 'idb';
+import type { IDBPDatabase } from 'idb';
 import { secretbox } from 'tweetnacl';
 
 // constants
 import { IDB_PASSWORD_STORE_NAME } from '@/constants';
 
 // decorators
-import { BaseVaultDecorator } from '@/decorators';
+import BaseStore from './BaseStore';
 
 // errors
 import { EncryptionError, DecryptionError, InvalidPasswordError } from '@/errors';
 
 // types
 import type {
-  BaseAuthenticationDecorator,
+  BaseAuthenticationStore,
   CreateDerivedKeyParameters,
-  InitializePasswordVaultDecoratorParameters,
-  PasswordVaultDecoratorParameters,
+  InitializePasswordStoreParameters,
+  PasswordStoreParameters,
   PasswordStoreSchema,
   VaultSchema,
 } from '@/types';
 
 // utilities
-import { bytesToHex, createVaultName, hexToBytes, updateVault } from '@/utilities';
+import { bytesToHex, hexToBytes } from '@/utilities';
 
-export default class PasswordVaultDecorator extends BaseVaultDecorator implements BaseAuthenticationDecorator {
+export default class PasswordStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
   private static readonly _challenge = 'Katavault rules!';
   private static readonly _saltByteSize = 64; // 64-bytes
@@ -36,7 +36,7 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
   // private variables
   private readonly _password: string;
 
-  private constructor({ password, ...defaultParameters }: PasswordVaultDecoratorParameters) {
+  private constructor({ password, ...defaultParameters }: PasswordStoreParameters) {
     super(defaultParameters);
 
     this._password = password;
@@ -92,8 +92,8 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
 
   /**
    * Initializes an instance of the password vault decorator.
-   * @param {InitializePasswordVaultDecoratorParameters} params - The user credentials, password and logger.
-   * @returns {Promise<PasswordVaultDecorator>} A promise that resolves to the password vault decorator.
+   * @param {InitializePasswordStoreParameters} params - The user credentials, password and logger.
+   * @returns {Promise<PasswordStore>} A promise that resolves to the password vault decorator.
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
    * @public
@@ -102,21 +102,10 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
   public static async initialize({
     logger,
     password,
-    user,
-  }: InitializePasswordVaultDecoratorParameters): Promise<PasswordVaultDecorator> {
-    const __logPrefix = `${PasswordVaultDecorator.displayName}#initialize`;
-    const vaultName = createVaultName(user.username);
-    const vault = await openDB<VaultSchema>(vaultName, undefined, {
-      upgrade: (_db, oldVersion, newVersion) => {
-        updateVault({
-          database: _db,
-          logger,
-          newVersion,
-          oldVersion,
-        });
-      },
-    });
-    const passwordVault = new PasswordVaultDecorator({
+    vault,
+  }: InitializePasswordStoreParameters): Promise<PasswordStore> {
+    const __logPrefix = `${PasswordStore.displayName}#initialize`;
+    const passwordVault = new PasswordStore({
       logger,
       password,
       vault,
@@ -140,7 +129,7 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
     if (!store) {
       logger.debug(`${__logPrefix}: password store does not exist, creating a new one`);
 
-      challenge = bytesToHex(await passwordVault.encryptBytes(encodeUtf8(PasswordVaultDecorator._challenge)));
+      challenge = bytesToHex(await passwordVault.encryptBytes(encodeUtf8(PasswordStore._challenge)));
 
       await passwordVault.setChallenge(challenge);
       await passwordVault.setLastUsedAt();
@@ -159,7 +148,7 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
    * @private
    */
   private async _store(): Promise<PasswordStoreSchema | null> {
-    return await PasswordVaultDecorator._store(this._vault);
+    return await PasswordStore._store(this._vault);
   }
 
   /**
@@ -171,7 +160,7 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
    * @public
    */
   public async clearStore(): Promise<void> {
-    const __logPrefix = `${PasswordVaultDecorator.displayName}#clear`;
+    const __logPrefix = `${PasswordStore.displayName}#clear`;
 
     await this._vault.clear(IDB_PASSWORD_STORE_NAME);
 
@@ -187,11 +176,11 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
    * @public
    */
   public async decryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
-    const __logPrefix = `${PasswordVaultDecorator.displayName}#decryptBytes`;
+    const __logPrefix = `${PasswordStore.displayName}#decryptBytes`;
     const [nonce, salt, encryptedBytes] = [
       bytes.slice(0, secretbox.nonceLength),
-      bytes.slice(secretbox.nonceLength, secretbox.nonceLength + PasswordVaultDecorator._saltByteSize),
-      bytes.slice(secretbox.nonceLength + PasswordVaultDecorator._saltByteSize),
+      bytes.slice(secretbox.nonceLength, secretbox.nonceLength + PasswordStore._saltByteSize),
+      bytes.slice(secretbox.nonceLength + PasswordStore._saltByteSize),
     ];
     let _error: string;
     let encryptionKey: Uint8Array;
@@ -201,11 +190,11 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
       throw new DecryptionError('invalid nonce');
     }
 
-    if (!salt || salt.byteLength !== PasswordVaultDecorator._saltByteSize) {
+    if (!salt || salt.byteLength !== PasswordStore._saltByteSize) {
       throw new DecryptionError('invalid salt');
     }
 
-    encryptionKey = await PasswordVaultDecorator._createDerivedKeyFromPassword({
+    encryptionKey = await PasswordStore._createDerivedKeyFromPassword({
       password: encodeUtf8(this._password),
       salt,
     });
@@ -230,9 +219,9 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
    * @public
    */
   public async encryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
-    const __logPrefix = `${PasswordVaultDecorator.displayName}#encryptBytes`;
-    const salt = randomBytes(PasswordVaultDecorator._saltByteSize);
-    const encryptionKey = await PasswordVaultDecorator._createDerivedKeyFromPassword({
+    const __logPrefix = `${PasswordStore.displayName}#encryptBytes`;
+    const salt = randomBytes(PasswordStore._saltByteSize);
+    const encryptionKey = await PasswordStore._createDerivedKeyFromPassword({
       password: encodeUtf8(this._password),
       salt,
     });
@@ -315,7 +304,7 @@ export default class PasswordVaultDecorator extends BaseVaultDecorator implement
     try {
       decryptedChallenge = await this.decryptBytes(hexToBytes(store.challenge));
 
-      return decodeUtf8(decryptedChallenge) === PasswordVaultDecorator._challenge;
+      return decodeUtf8(decryptedChallenge) === PasswordStore._challenge;
     } catch (_) {
       return false;
     }

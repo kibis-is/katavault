@@ -1,13 +1,16 @@
+import type { IDBPDatabase } from 'idb';
+
 // decorators
-import { AccountsVaultDecorator } from '@/decorators';
+import { AccountStore } from '@/decorators';
 
 // types
-import type { AuthenticationClient, CommonParameters, UserInformation } from '@/types';
+import type { AuthenticationStore, CommonParameters, UserInformation, VaultSchema } from '@/types';
 
 interface KatavaultParameters extends CommonParameters {
-  accountsVaultClient: AccountsVaultDecorator;
-  authenticationClient: AuthenticationClient;
+  accountStore: AccountStore;
+  authenticationStore: AuthenticationStore;
   user: UserInformation;
+  vault: IDBPDatabase<VaultSchema>;
 }
 
 export default KatavaultParameters;

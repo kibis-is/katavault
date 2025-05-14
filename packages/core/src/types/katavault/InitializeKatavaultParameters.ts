@@ -1,9 +1,12 @@
+import type { IDBPDatabase } from 'idb';
+
 // types
-import type { AuthenticationClient, CommonParameters, UserInformation } from '@/types';
+import type { AuthenticationStore, CommonParameters, UserInformation, VaultSchema } from '@/types';
 
 interface InitializeKatavaultParameters extends CommonParameters {
-  authenticationClient: AuthenticationClient;
+  authenticationStore: AuthenticationStore;
   user: UserInformation;
+  vault: IDBPDatabase<VaultSchema>;
 }
 
 export default InitializeKatavaultParameters;

@@ -1,23 +1,17 @@
-import { openDB } from 'idb';
-
 // constants
 import { IDB_ACCOUNTS_STORE_NAME } from '@/constants';
 
 // decorators
-import { BaseVaultDecorator } from '@/decorators';
+import BaseStore from './BaseStore';
 
 // types
 import type {
   AccountStoreItemWithPasskey,
   AccountStoreItemWithPassword,
-  InitializeAccountsVaultDecoratorParameters,
-  VaultSchema,
+  InitializeAccountStoreParameters,
 } from '@/types';
 
-// utilities
-import { createVaultName, updateVault } from '@/utilities';
-
-export default class AccountsVaultDecorator extends BaseVaultDecorator {
+export default class AccountStore extends BaseStore {
   // public static variables
   public static readonly displayName = 'AccountsVaultDecorator';
 
@@ -25,23 +19,8 @@ export default class AccountsVaultDecorator extends BaseVaultDecorator {
    * public static methods
    */
 
-  public static async initialize({
-    logger,
-    user,
-  }: InitializeAccountsVaultDecoratorParameters): Promise<AccountsVaultDecorator> {
-    const vaultName = createVaultName(user.username);
-    const vault = await openDB<VaultSchema>(vaultName, undefined, {
-      upgrade: (_db, oldVersion, newVersion) => {
-        updateVault({
-          database: _db,
-          logger,
-          newVersion,
-          oldVersion,
-        });
-      },
-    });
-
-    return new AccountsVaultDecorator({
+  public static async initialize({ logger, vault }: InitializeAccountStoreParameters): Promise<AccountStore> {
+    return new AccountStore({
       logger,
       vault,
     });
@@ -56,7 +35,7 @@ export default class AccountsVaultDecorator extends BaseVaultDecorator {
    * @public
    */
   public async clearStore(): Promise<void> {
-    const __logPrefix = `${AccountsVaultDecorator.displayName}#clear`;
+    const __logPrefix = `${AccountStore.displayName}#clear`;
 
     await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
 
@@ -138,18 +117,18 @@ export default class AccountsVaultDecorator extends BaseVaultDecorator {
   public async upsert(
     items: (AccountStoreItemWithPasskey | AccountStoreItemWithPassword)[]
   ): Promise<(AccountStoreItemWithPasskey | AccountStoreItemWithPassword)[]> {
-    const __logPrefix = `${AccountsVaultDecorator.displayName}#upsert`;
+    const __logPrefix = `${AccountStore.displayName}#upsert`;
     const transaction = this._vault.transaction(IDB_ACCOUNTS_STORE_NAME, 'readwrite');
     const addresses = await transaction.store.getAllKeys();
-    const itemsToAdd = Array.from(items.entries()).filter(([key]) => !addresses.some((value) => value === key));
-    const itemsToUpdate = Array.from(items.entries()).filter(([key]) => addresses.some((value) => value === key));
+    const itemsToAdd = items.filter(({ address }) => !addresses.some((value) => value === address));
+    const itemsToUpdate = items.filter(({ address }) => addresses.some((value) => value === address));
 
-    for (const [address, item] of itemsToAdd) {
-      await transaction.store.add(item, address);
+    for (const item of itemsToAdd) {
+      await transaction.store.add(item, item.address);
     }
 
-    for (const [address, item] of itemsToUpdate) {
-      await transaction.store.put(item, address);
+    for (const item of itemsToUpdate) {
+      await transaction.store.put(item, item.address);
     }
 
     this._logger.debug(`${__logPrefix}: added "${itemsToAdd.length}" and updated "${itemsToUpdate.length}" accounts`);
