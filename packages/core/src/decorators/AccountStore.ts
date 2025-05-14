@@ -5,42 +5,19 @@ import { IDB_ACCOUNTS_STORE_NAME } from '@/constants';
 import BaseStore from './BaseStore';
 
 // types
-import type {
-  AccountStoreItemWithPasskey,
-  AccountStoreItemWithPassword,
-  InitializeAccountStoreParameters,
-} from '@/types';
+import type { AccountStoreItemWithPasskey, AccountStoreItemWithPassword, StoreParameters } from '@/types';
 
 export default class AccountStore extends BaseStore {
   // public static variables
-  public static readonly displayName = 'AccountsVaultDecorator';
+  public static readonly displayName = 'AccountStore';
 
-  /**
-   * public static methods
-   */
-
-  public static async initialize({ logger, vault }: InitializeAccountStoreParameters): Promise<AccountStore> {
-    return new AccountStore({
-      logger,
-      vault,
-    });
+  public constructor(params: StoreParameters) {
+    super(params);
   }
 
   /**
    * public methods
    */
-
-  /**
-   * Clears the accounts store.
-   * @public
-   */
-  public async clearStore(): Promise<void> {
-    const __logPrefix = `${AccountStore.displayName}#clear`;
-
-    await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
-
-    this._logger.debug(`${__logPrefix}: cleared accounts store`);
-  }
 
   /**
    * Gets an account by address. If no item exists, null is returned.

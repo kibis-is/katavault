@@ -14,12 +14,6 @@ export default abstract class BaseStore {
   }
 
   /**
-   * public abstract methods
-   */
-
-  public abstract clearStore(): Promise<void>;
-
-  /**
    * public methods
    */
 
@@ -30,14 +24,6 @@ export default abstract class BaseStore {
    */
   public name(): string {
     return this._vault.name;
-  }
-
-  /**
-   * Closes the connection to the indexedDB.
-   * @public
-   */
-  public close(): void {
-    this._vault.close();
   }
 
   /**

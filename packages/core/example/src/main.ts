@@ -4,12 +4,10 @@ import { createKatavault, createLogger, Katavault } from '@kibisis/katavault-cor
 import config from './config';
 
 // handlers
-import { onCreateAccountButtonClick, onResetButtonClick } from './handlers';
-
-// utilities
-import { updateAccountsTable } from './utilities';
+import { onAuthenticateWithPasskeyButtonClick, onCreateAccountButtonClick, onResetButtonClick } from './handlers';
 
 async function onDOMContentLoaded() {
+  const authenticateWithPasskeyButtonElement = document.getElementById('authenticateWithPasskeyButton');
   const createAccountButtonElement = document.getElementById('createAccountButton');
   const resetButtonElement = document.getElementById('resetButton');
   const logger = createLogger('debug');
@@ -18,6 +16,12 @@ async function onDOMContentLoaded() {
   try {
     katavault = await createKatavault(config);
 
+    if (authenticateWithPasskeyButtonElement) {
+      authenticateWithPasskeyButtonElement.addEventListener(
+        'click',
+        onAuthenticateWithPasskeyButtonClick(katavault, logger)
+      );
+    }
     if (createAccountButtonElement) {
       createAccountButtonElement.addEventListener('click', onCreateAccountButtonClick(katavault, logger));
     }
@@ -25,9 +29,6 @@ async function onDOMContentLoaded() {
     if (resetButtonElement) {
       resetButtonElement.addEventListener('click', onResetButtonClick(katavault, logger));
     }
-
-    // fetch the accounts and update the table
-    await updateAccountsTable(katavault, logger);
   } catch (error) {
     logger.error(error);
   }

@@ -1,6 +1,5 @@
 import { generate } from '@agoralabs-sh/uuid';
 import { randomBytes } from '@noble/hashes/utils';
-import type { IDBPDatabase } from 'idb';
 
 // constants
 import { IDB_PASSKEY_STORE_NAME } from '@/constants';
@@ -10,11 +9,9 @@ import BaseStore from './BaseStore';
 
 // errors
 import {
-  DecryptionError,
-  EncryptionError,
   FailedToAuthenticatePasskeyError,
-  FailedToInitializeError,
   FailedToRegisterPasskeyError,
+  NotAuthenticatedError,
   PasskeyNotSupportedError,
   UserCanceledPasskeyRequestError,
 } from '@/errors';
@@ -24,11 +21,9 @@ import type {
   AuthenticatePasskeyParameters,
   BaseAuthenticationStore,
   GenerateEncryptionKeyFromKeyMaterialParameters,
-  InitializePasskeyStoreParameters,
-  PasskeyStoreParameters,
   PasskeyStoreSchema,
   RegisterPasskeyParameters,
-  VaultSchema,
+  StoreParameters,
 } from '@/types';
 
 // utilities
@@ -44,18 +39,58 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   private static readonly _initializationVectorByteSize = 12; // 12-bytes
   private static readonly _saltByteSize = 32; // 32-bytes
   // public static variables
-  public static readonly displayName = 'PasskeyDecorator';
+  public static readonly displayName = 'PasskeyStore';
   // private variables
-  private readonly _keyMaterial: Uint8Array;
+  private _keyMaterial: Uint8Array | null = null;
 
-  private constructor({ keyMaterial, ...defaultParameters }: PasskeyStoreParameters) {
-    super(defaultParameters);
-
-    this._keyMaterial = keyMaterial;
+  public constructor(params: StoreParameters) {
+    super(params);
   }
 
   /**
    * private static methods
+   */
+
+  /**
+   * Generates an encryption key that can be used to decrypt/encrypt bytes. This function imports the key using the
+   * input key material from the passkey.
+   * @param {GenerateEncryptionKeyFromKeyMaterialParameters} params - The key material and the credential ID.
+   * @returns {Promise<CryptoKey>} A promise that resolves to an encryption key that can be used to decrypt/encrypt
+   * some bytes.
+   * @public
+   * @static
+   */
+  public static async _generateEncryptionKeyFromInputKeyMaterial({
+    credentialID,
+    keyMaterial,
+  }: GenerateEncryptionKeyFromKeyMaterialParameters): Promise<CryptoKey> {
+    const derivationKey = await crypto.subtle.importKey(
+      'raw',
+      keyMaterial,
+      PasskeyStore._derivationKeyAlgorithm,
+      false,
+      ['deriveKey']
+    );
+
+    return await crypto.subtle.deriveKey(
+      {
+        name: PasskeyStore._derivationKeyAlgorithm,
+        info: hexToBytes(credentialID),
+        salt: new Uint8Array(), // use an empty salt
+        hash: PasskeyStore._derivationKeyHashAlgorithm,
+      },
+      derivationKey,
+      {
+        name: PasskeyStore._encryptionKeyAlgorithm,
+        length: PasskeyStore._encryptionKeyBitSize,
+      },
+      false,
+      ['decrypt', 'encrypt']
+    );
+  }
+
+  /**
+   * public static methods
    */
 
   /**
@@ -66,10 +101,10 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * the PRF extension.
-   * @private
+   * @public
    * @static
    */
-  private static async _authenticate({ logger, ...passkey }: AuthenticatePasskeyParameters): Promise<Uint8Array> {
+  public static async authenticate({ logger, ...passkey }: AuthenticatePasskeyParameters): Promise<Uint8Array> {
     const __logPrefix = `${PasskeyStore.displayName}#authenticate`;
     let _error: string;
     let _credential: PublicKeyCredential | null;
@@ -131,41 +166,13 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   }
 
   /**
-   * Generates an encryption key that can be used to decrypt/encrypt bytes. This function imports the key using the
-   * input key material from the passkey.
-   * @param {GenerateEncryptionKeyFromKeyMaterialParameters} params - The key material and the credential ID.
-   * @returns {Promise<CryptoKey>} A promise that resolves to an encryption key that can be used to decrypt/encrypt
-   * some bytes.
-   * @private
+   * Convenience function that simply checks if the browser supports public key WebAuthn.
+   * @returns {boolean} true of the browser supports public key WebAuthn, false otherwise.
+   * @public
    * @static
    */
-  private static async _generateEncryptionKeyFromInputKeyMaterial({
-    credentialID,
-    keyMaterial,
-  }: GenerateEncryptionKeyFromKeyMaterialParameters): Promise<CryptoKey> {
-    const derivationKey = await crypto.subtle.importKey(
-      'raw',
-      keyMaterial,
-      PasskeyStore._derivationKeyAlgorithm,
-      false,
-      ['deriveKey']
-    );
-
-    return await crypto.subtle.deriveKey(
-      {
-        name: PasskeyStore._derivationKeyAlgorithm,
-        info: hexToBytes(credentialID),
-        salt: new Uint8Array(), // use an empty salt
-        hash: PasskeyStore._derivationKeyHashAlgorithm,
-      },
-      derivationKey,
-      {
-        name: PasskeyStore._encryptionKeyAlgorithm,
-        length: PasskeyStore._encryptionKeyBitSize,
-      },
-      false,
-      ['decrypt', 'encrypt']
-    );
+  public static isSupported(): boolean {
+    return !!window?.PublicKeyCredential;
   }
 
   /**
@@ -179,10 +186,10 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * the PRF extension.
-   * @private
+   * @public
    * @static
    */
-  private static async _register({ client, logger, user }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
+  public static async register({ client, logger, user }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
     const __logPrefix = `${PasskeyStore.displayName}#register`;
     const salt = randomBytes(PasskeyStore._saltByteSize);
     let _error: string;
@@ -264,13 +271,81 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   }
 
   /**
-   * Gets the store.
-   * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the store or null if no store exists.
-   * @private
-   * @static
+   * public methods
    */
-  private static async _store(vault: IDBPDatabase<VaultSchema>): Promise<PasskeyStoreSchema | null> {
-    const transaction = vault.transaction(IDB_PASSKEY_STORE_NAME, 'readonly');
+
+  /**
+   * Decrypts some previously encrypted bytes using the input key material fetched from a passkey.
+   * @param {Uint8Array} encryptedBytes - The encrypted bytes.
+   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
+   * @throws {NotAuthenticatedError} If no passkey credentials are stored.
+   * @public
+   */
+  public async decryptBytes(encryptedBytes: Uint8Array): Promise<Uint8Array> {
+    const passkey = await this.passkey();
+    let encryptionKey: CryptoKey;
+    let decryptedBytes: ArrayBuffer;
+
+    if (!this._keyMaterial || !passkey) {
+      throw new NotAuthenticatedError('no passkey credentials stored');
+    }
+
+    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
+      credentialID: passkey.credentialID,
+      keyMaterial: this._keyMaterial,
+    });
+    decryptedBytes = await crypto.subtle.decrypt(
+      {
+        name: PasskeyStore._encryptionKeyAlgorithm,
+        iv: hexToBytes(passkey.initializationVector),
+      },
+      encryptionKey,
+      encryptedBytes
+    );
+
+    return bufferSourceToUint8Array(decryptedBytes);
+  }
+
+  /**
+   * Encrypts some arbitrary bytes using the input key material fetched from a passkey. This function uses the AES-GCM
+   * algorithm to encrypt the bytes.
+   * @param {Uint8Array} bytes - The bytes to encrypt.
+   * @returns {Promise<Uint8Array>} A promise that resolves to the encrypted bytes.
+   * @throws {NotAuthenticatedError} If no passkey credentials are stored.
+   * @public
+   */
+  public async encryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
+    const passkey = await this.passkey();
+    let encryptionKey: CryptoKey;
+    let encryptedBytes: ArrayBuffer;
+
+    if (!this._keyMaterial || !passkey) {
+      throw new NotAuthenticatedError('no passkey credentials stored');
+    }
+
+    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
+      credentialID: passkey.credentialID,
+      keyMaterial: this._keyMaterial,
+    });
+    encryptedBytes = await crypto.subtle.encrypt(
+      {
+        name: PasskeyStore._encryptionKeyAlgorithm,
+        iv: hexToBytes(passkey.initializationVector),
+      },
+      encryptionKey,
+      bytes
+    );
+
+    return bufferSourceToUint8Array(encryptedBytes);
+  }
+
+  /**
+   * Gets the passkey.
+   * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the passkey or null if no passkey exists.
+   * @public
+   */
+  public async passkey(): Promise<PasskeyStoreSchema | null> {
+    const transaction = this._vault.transaction(IDB_PASSKEY_STORE_NAME, 'readonly');
     const store: PasskeyStoreSchema = {
       credentialID: await transaction.store.get('credentialID'),
       initializationVector: await transaction.store.get('initializationVector'),
@@ -291,189 +366,14 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   }
 
   /**
-   * public static methods
-   */
-
-  /**
-   * Initializes an instance of the passkey vault decorator.
-   * @param {InitializePasskeyStoreParameters} params - The user credentials, the client information, the user
-   * information and logger.
-   * @returns {Promise<PasskeyStore>} A promise that resolves to the passkey vault decorator.
-   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
-   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
-   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
-   * @public
-   * @static
-   */
-  public static async initialize({
-    client,
-    logger,
-    user,
-    vault,
-  }: InitializePasskeyStoreParameters): Promise<PasskeyStore> {
-    const __logPrefix = `${PasskeyStore.displayName}#initialize`;
-    let keyMaterial: Uint8Array;
-    let passkeyVault: PasskeyStore;
-    let passkey = await PasskeyStore._store(vault);
-
-    if (!passkey) {
-      logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
-
-      // register the new passkey
-      passkey = await PasskeyStore._register({
-        client,
-        logger,
-        user,
-      });
-      // get the key material
-      keyMaterial = await PasskeyStore._authenticate({
-        logger,
-        ...passkey,
-      });
-      passkeyVault = new PasskeyStore({
-        keyMaterial,
-        logger,
-        vault,
-      });
-
-      // set the passkey details
-      await passkeyVault.setPasskey(passkey);
-
-      return passkeyVault;
-    }
-
-    keyMaterial = await PasskeyStore._authenticate({
-      logger,
-      ...passkey,
-    });
-
-    return new PasskeyStore({
-      keyMaterial,
-      logger,
-      vault,
-    });
-  }
-
-  /**
-   * Convenience function that simply checks if the browser supports public key WebAuthn.
-   * @returns {boolean} true of the browser supports public key WebAuthn, false otherwise.
-   * @public
-   * @static
-   */
-  public static isSupported(): boolean {
-    return !!window?.PublicKeyCredential;
-  }
-
-  /**
-   * private methods
-   */
-
-  /**
-   * Gets the store.
-   * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the store or null if no store exists.
-   * @private
-   */
-  private async _store(): Promise<PasskeyStoreSchema | null> {
-    return await PasskeyStore._store(this._vault);
-  }
-
-  /**
-   * public methods
-   */
-
-  /**
-   * Clears the passkey store.
+   * Sets the key material from the authenticator used to derive an encryption key.
+   *
+   * **NOTE:** This does not set the key material to storage, only to runtime memory.
+   * @param {string} keyMaterial - The password to set.
    * @public
    */
-  public async clearStore(): Promise<void> {
-    const __logPrefix = `${PasskeyStore.displayName}#clear`;
-
-    await this._vault.clear(IDB_PASSKEY_STORE_NAME);
-
-    this._logger.debug(`${__logPrefix}: cleared passkey store`);
-  }
-
-  /**
-   * Gets the passkey credential ID.
-   * @returns {Promise<string>} A promise that resolves to the hexadecimal encoded ID of the passkey credential.
-   * @throws {FailedToInitializeError} If no credentials found.
-   * @public
-   */
-  public async credentialID(): Promise<string> {
-    const __logPrefix = `${PasskeyStore.displayName}#credentialID`;
-    const store = await this._store();
-
-    if (!store) {
-      throw new FailedToInitializeError(`${__logPrefix}: no passkey credentials found`);
-    }
-
-    return store.credentialID;
-  }
-
-  /**
-   * Decrypts some previously encrypted bytes using the input key material fetched from a passkey.
-   * @param {Uint8Array} encryptedBytes - The encrypted bytes.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
-   * @throws {DecryptionError} If no credentials are stored.
-   * @public
-   */
-  public async decryptBytes(encryptedBytes: Uint8Array): Promise<Uint8Array> {
-    const store = await this._store();
-    let encryptionKey: CryptoKey;
-    let decryptedBytes: ArrayBuffer;
-
-    if (!store) {
-      throw new DecryptionError('no passkey credentials stored');
-    }
-
-    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
-      credentialID: store.credentialID,
-      keyMaterial: this._keyMaterial,
-    });
-    decryptedBytes = await crypto.subtle.decrypt(
-      {
-        name: PasskeyStore._encryptionKeyAlgorithm,
-        iv: hexToBytes(store.initializationVector),
-      },
-      encryptionKey,
-      encryptedBytes
-    );
-
-    return bufferSourceToUint8Array(decryptedBytes);
-  }
-
-  /**
-   * Encrypts some arbitrary bytes using the input key material fetched from a passkey. This function uses the AES-GCM
-   * algorithm to encrypt the bytes.
-   * @param {Uint8Array} bytes - The bytes to encrypt.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the encrypted bytes.
-   * @throws {EncryptionError} If no credentials are stored.
-   * @public
-   */
-  public async encryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
-    const store = await this._store();
-    let encryptionKey: CryptoKey;
-    let encryptedBytes: ArrayBuffer;
-
-    if (!store) {
-      throw new EncryptionError('no passkey credentials stored');
-    }
-
-    encryptionKey = await PasskeyStore._generateEncryptionKeyFromInputKeyMaterial({
-      credentialID: store.credentialID,
-      keyMaterial: this._keyMaterial,
-    });
-    encryptedBytes = await crypto.subtle.encrypt(
-      {
-        name: PasskeyStore._encryptionKeyAlgorithm,
-        iv: hexToBytes(store.initializationVector),
-      },
-      encryptionKey,
-      bytes
-    );
-
-    return bufferSourceToUint8Array(encryptedBytes);
+  public setKeyMaterial(keyMaterial: Uint8Array): void {
+    this._keyMaterial = keyMaterial;
   }
 
   /**
