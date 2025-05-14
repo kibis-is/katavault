@@ -1,12 +1,13 @@
 // decorators
-import { VaultDecorator } from '@/decorators';
+import { AccountsVaultDecorator } from '@/decorators';
 
 // types
-import type { ClientInformation, CommonParameters } from '@/types';
+import type { AuthenticationClient, CommonParameters, UserInformation } from '@/types';
 
 interface KatavaultParameters extends CommonParameters {
-  client: ClientInformation;
-  vault: VaultDecorator;
+  accountsVaultClient: AccountsVaultDecorator;
+  authenticationClient: AuthenticationClient;
+  user: UserInformation;
 }
 
 export default KatavaultParameters;

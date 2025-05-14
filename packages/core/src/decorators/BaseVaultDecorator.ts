@@ -1,16 +1,51 @@
-// types
-import type { CommonParameters, Logger } from '@/types';
+import type { IDBPDatabase } from 'idb';
 
-export default abstract class BaseVaultDecorator<Schema> {
+// types
+import type { Logger, VaultDecoratorParameters, VaultSchema } from '@/types';
+
+export default abstract class BaseVaultDecorator {
   // protected variables
   protected readonly _logger: Logger;
+  protected readonly _vault: IDBPDatabase<VaultSchema>;
 
-  protected constructor({ logger }: CommonParameters) {
+  protected constructor({ logger, vault }: VaultDecoratorParameters) {
     this._logger = logger;
+    this._vault = vault;
   }
 
-  public abstract clear(): Promise<void>;
-  public abstract close(): void;
-  public abstract setStore(value: Schema): Promise<Schema>;
-  public abstract store(): Promise<Schema | null>;
+  /**
+   * public abstract methods
+   */
+
+  public abstract clearStore(): Promise<void>;
+
+  /**
+   * public methods
+   */
+
+  /**
+   * Gets the vault name.
+   * @returns {string} The name of the vault.
+   * @public
+   */
+  public name(): string {
+    return this._vault.name;
+  }
+
+  /**
+   * Closes the connection to the indexedDB.
+   * @public
+   */
+  public close(): void {
+    this._vault.close();
+  }
+
+  /**
+   * Gets the vault version.
+   * @returns {number} The vault version.
+   * @public
+   */
+  public version(): number {
+    return this._vault.version;
+  }
 }

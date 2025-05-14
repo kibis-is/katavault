@@ -34,7 +34,6 @@
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@types/node": "catalog:",
-    "@types/scrypt-async": "^1.3.5",
     "algosdk": "^3.x",
     "chalk": "catalog:",
     "concurrently": "catalog:",

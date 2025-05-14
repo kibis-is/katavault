@@ -1,42 +1,75 @@
 import { ed25519 } from '@noble/curves/ed25519';
 import { concatBytes } from '@noble/hashes/utils';
+import { deleteDB } from 'idb';
 
 // constants
 import { SIGN_MESSAGE_PREFIX } from '@/constants';
 
 // decorators
-import { PasskeyDecorator, VaultDecorator } from '@/decorators';
+import { AccountsVaultDecorator } from '@/decorators';
+
+// enums
+import { AuthenticationMethod } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError } from '@/errors';
+import { AccountDoesNotExistError, UnknownAuthenticationMethodError } from '@/errors';
 
 // types
 import type {
   Account,
-  ClientInformation,
+  AccountStoreItemWithPasskey,
+  AccountStoreItemWithPassword,
+  AuthenticationClient,
+  InitializeKatavaultParameters,
   KatavaultParameters,
   Logger,
-  Passkey,
-  AccountWithKeyData,
   SignMessageParameters,
+  UserInformation,
   WithEncoding,
 } from '@/types';
 
 // utilities
-import { addressFromPrivateKey, bytesToBase64, bytesToHex, generatePrivateKey, utf8ToBytes } from '@/utilities';
+import {
+  addressFromPrivateKey,
+  bytesToBase64,
+  bytesToHex,
+  createVaultName,
+  generatePrivateKey,
+  hexToBytes,
+  utf8ToBytes,
+} from '@/utilities';
 
 export default class Katavault {
   // public static variables
   public static readonly displayName = 'Katavault';
   // private variables
-  private readonly _client: ClientInformation;
+  private readonly _accountsVaultClient: AccountsVaultDecorator;
+  private readonly _authenticationClient: AuthenticationClient;
   private readonly _logger: Logger;
-  private readonly _vault: VaultDecorator;
+  private readonly _user: UserInformation;
 
-  public constructor({ client, logger, vault }: KatavaultParameters) {
-    this._client = client;
+  public constructor({ accountsVaultClient, authenticationClient, logger, user }: KatavaultParameters) {
+    this._accountsVaultClient = accountsVaultClient;
+    this._authenticationClient = authenticationClient;
     this._logger = logger;
-    this._vault = vault;
+    this._user = user;
+  }
+
+  /**
+   * public static methods
+   */
+
+  public static async initialize({
+    authenticationClient,
+    logger,
+    user,
+  }: InitializeKatavaultParameters): Promise<Katavault> {
+    return new Katavault({
+      accountsVaultClient: await AccountsVaultDecorator.initialize({ logger, user }),
+      authenticationClient,
+      logger,
+      user,
+    });
   }
 
   /**
@@ -44,68 +77,53 @@ export default class Katavault {
    */
 
   /**
-   * Convenience method to authenticate with the passkey and decrypt an encrypted private key.
-   * @param {AccountWithKeyData} item - A vault item containing the encrypted private key.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted private key.
-   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
-   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
-   * @throws {UserCanceledPasskeyRequestError} If the user canceled the passkey request.
+   * Gets the decrypted account private key by address.
+   * @param {string} address - The address of the account to get the private key from.
+   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted private key or null if the private key
+   * could.
+   * @throws {UnknownAuthenticationMethodError} If the authentication method is unknown or there are no credentials stored.
+   * @throws {DecryptionError} If there was an issue with decryption or the credentials were not found.
    * @private
    */
-  private async _decryptPrivateKey(item: AccountWithKeyData): Promise<Uint8Array> {
-    const passkey = await this._passkey();
-    const passkeyClient = await PasskeyDecorator.authenticate({
-      passkey,
-      logger: this._logger,
-    });
+  private async _decryptedAccountKeyByAddress(address: string): Promise<Uint8Array | null> {
+    const __logPrefix = `${Katavault.displayName}#_decryptedAccountKeyByAddress`;
+    const account = await this._accountsVaultClient.accountByAddress(address);
+    let credentialID: string | null;
+    let passwordHash: string | null;
 
-    return await passkeyClient.decryptBytes(item.keyData);
-  }
+    if (!account) {
+      this._logger.debug(`${__logPrefix}: account "${address}" not found`);
 
-  /**
-   * Extracts the passkey from the vault. If no passkey exists in the vault, a new one is registered via Web
-   * Authentication and added to the vault.
-   * @returns {Promise<PasskeyStoreSchema>} A promise that resolves to a retried or created passkey.
-   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
-   * @throws {UserCanceledPasskeyRequestError} If the user canceled the passkey request.
-   * @private
-   */
-  private async _passkey(): Promise<Passkey> {
-    const __logPrefix = `${Katavault.displayName}#_passkey`;
-    let passkey = await this._vault.passkey();
-
-    // if there is no passkey, register a new one
-    if (!passkey) {
-      passkey = await PasskeyDecorator.register({
-        client: this._client,
-        logger: this._logger,
-      });
-
-      this._logger.debug(`${__logPrefix}: registered new passkey "${passkey.credentialID}"`);
-
-      await this._vault.setPasskey(passkey);
-
-      this._logger.debug(`${__logPrefix}: saved new passkey "${passkey.credentialID}" to vault`);
+      return null;
     }
 
-    return passkey;
-  }
+    if (this._authenticationClient.__type === AuthenticationMethod.Passkey) {
+      credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
 
-  /**
-   * The secret key is the concatenation of a private key (32 byte) + the (uncompressed) public key.
-   * @returns {Uint8Array} The secret key.
-   * @private
-   */
-  private _secretKey(privateKey: Uint8Array): Uint8Array {
-    const publicKey = ed25519.getPublicKey(privateKey);
-    const secretKey = new Uint8Array(privateKey.length + publicKey.length);
+      // check that the account is encrypted using the correct credential
+      if (!credentialID || credentialID !== (await this._authenticationClient.vault.credentialID())) {
+        this._logger.debug(`${__logPrefix}: account "${address}" found, but not encrypted using the supplied passkey`);
 
-    secretKey.set(privateKey);
-    secretKey.set(publicKey, privateKey.length);
+        return null;
+      }
 
-    return secretKey;
+      return await this._authenticationClient.vault.decryptBytes(hexToBytes(account.keyData));
+    }
+
+    if (this._authenticationClient.__type === AuthenticationMethod.Password) {
+      passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
+
+      // check if the account was encrypted using the correct password
+      if (!passwordHash || passwordHash !== bytesToHex(this._authenticationClient.vault.hash())) {
+        this._logger.debug(`${__logPrefix}: account "${address}" found, but not encrypted using the supplied password`);
+
+        return null;
+      }
+
+      return await this._authenticationClient.vault.decryptBytes(hexToBytes(account.keyData));
+    }
+
+    throw new UnknownAuthenticationMethodError(`unknown authentication method`);
   }
 
   /**
@@ -118,15 +136,12 @@ export default class Katavault {
    * @public
    */
   public async accounts(): Promise<Account[]> {
-    const items = await this._vault.items();
+    const items = await this._accountsVaultClient.accounts();
 
-    return items
-      .entries()
-      .toArray()
-      .map(([address, { name }]) => ({
-        address,
-        name,
-      }));
+    return items.map(({ address, name }) => ({
+      address,
+      name,
+    }));
   }
 
   /**
@@ -134,40 +149,46 @@ export default class Katavault {
    * @public
    */
   public async clear(): Promise<void> {
-    return await this._vault.clear();
+    return await deleteDB(createVaultName(this._user.username));
   }
 
   /**
    * Generates a new account in the wallet.
    * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
    * @returns {Promise<Account>} A promise that resolves to the created account.
-   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
-   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
-   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
+   * @throws {EncryptionError} If the
    * @public
    */
   public async generateAccount(name?: string): Promise<Account> {
-    const passkey = await this._passkey();
-    const passkeyClient = await PasskeyDecorator.authenticate({
-      passkey,
-      logger: this._logger,
-    });
     const privateKey: Uint8Array = generatePrivateKey();
     const address = addressFromPrivateKey(privateKey);
+    let encryptedKeyData: Uint8Array;
 
-    // encrypt the private key add it to the vault
-    await this._vault.upsertItems(
-      new Map<string, AccountWithKeyData>([
-        [
+    if (this._authenticationClient.__type === AuthenticationMethod.Passkey) {
+      encryptedKeyData = await this._authenticationClient.vault.encryptBytes(privateKey);
+
+      await this._accountsVaultClient.upsert([
+        {
           address,
-          {
-            keyData: await passkeyClient.encryptBytes(privateKey),
-            name,
-          },
-        ],
-      ])
-    );
+          credentialID: await this._authenticationClient.vault.credentialID(),
+          keyData: bytesToHex(encryptedKeyData),
+          name,
+        },
+      ]);
+    }
+
+    if (this._authenticationClient.__type === AuthenticationMethod.Password) {
+      encryptedKeyData = await this._authenticationClient.vault.encryptBytes(privateKey);
+
+      await this._accountsVaultClient.upsert([
+        {
+          address,
+          passwordHash: bytesToHex(this._authenticationClient.vault.hash()),
+          keyData: bytesToHex(encryptedKeyData),
+          name,
+        },
+      ]);
+    }
 
     return {
       address,
@@ -182,14 +203,9 @@ export default class Katavault {
    */
   public async removeAccount(address: string): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#removeAccount`;
-    const items = await this._vault.items();
-    let result: string[];
+    const results = await this._accountsVaultClient.remove([address]);
 
-    if (items.has(address)) {
-      result = await this._vault.removeItems([address]);
-
-      this._logger.debug(`${__logPrefix}: removed accounts [${result.map((value) => `"${value}"`).join(',')}]`);
-    }
+    this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
   }
 
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
@@ -203,30 +219,18 @@ export default class Katavault {
    * encoding parameter was specified, the signature will be encoded in that format, otherwise signature will be in raw
    * bytes.
    * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
-   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
-   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
-   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
-   * @throws {UserCanceledPasskeyRequestError} If the user canceled the passkey request.
    * @see {@link https://algorand.github.io/js-algorand-sdk/functions/signBytes.html}
    * @public
    */
   public async signMessage({ address, encoding, message }: SignMessageParameters): Promise<string | Uint8Array> {
-    const __logPrefix = `${Katavault.displayName}#signMessage`;
-    const item = await this._vault.itemByAddress(address);
-    let _error: string;
-    let privateKey: Uint8Array;
+    const privateKey = await this._decryptedAccountKeyByAddress(address);
     let signature: Uint8Array;
     let toSign: Uint8Array;
 
-    if (!item) {
-      _error = `account "${address}" does not exist`;
-
-      this._logger.debug(`${__logPrefix}: ${_error}`);
-
-      throw new AccountDoesNotExistError(_error);
+    if (!privateKey) {
+      throw new AccountDoesNotExistError(`account "${address}" does not exist`);
     }
 
-    privateKey = await this._decryptPrivateKey(item);
     toSign = concatBytes(
       utf8ToBytes(SIGN_MESSAGE_PREFIX), // "MX" prefix
       typeof message === 'string' ? utf8ToBytes(message) : message

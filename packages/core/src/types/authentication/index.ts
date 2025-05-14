@@ -1,4 +1,4 @@
-export type { default as AuthenticationParameters } from './AuthenticationParameters';
+export type { default as AuthenticationClient } from './AuthenticationClient';
+export type { default as AuthenticationClientWithPasskey } from './AuthenticationClientWithPasskey';
+export type { default as AuthenticationClientWithPassword } from './AuthenticationClientWithPassword';
 export type { default as BaseAuthenticationDecorator } from './BaseAuthenticationDecorator';
-export type { default as PasskeyAuthenticationParameters } from './PasskeyAuthenticationParameters';
-export type { default as PasswordAuthenticationParameters } from './PasswordAuthenticationParameters';

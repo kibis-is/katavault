@@ -3,9 +3,9 @@
  * unique and is used to display in the UI.
  * @property {string} username - A globally unique identifier for the user. This could be, for example, an email address.
  */
-interface PasskeyUserInformation {
+interface UserInformation {
   displayName?: string;
   username: string;
 }
 
-export default PasskeyUserInformation;
+export default UserInformation;

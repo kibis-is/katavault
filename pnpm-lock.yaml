@@ -141,9 +141,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.13.10
-      '@types/scrypt-async':
-        specifier: ^1.3.5
-        version: 1.3.5
       algosdk:
         specifier: ^3.x
         version: 3.2.0
@@ -2450,9 +2447,6 @@ packages:
 
   '@types/sax@1.2.7':
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
-
-  '@types/scrypt-async@1.3.5':
-    resolution: {integrity: sha512-WprBpDhqq8DemGI0QepdcLdfTfOuAgD85A0hz8PljDFlalRbnZ1Puy1qC8x8CoAzr5Ugnyerbu+mNQ4jk9dg/w==}
 
   '@types/send@0.17.4':
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}
@@ -10560,8 +10554,6 @@ snapshots:
   '@types/sax@1.2.7':
     dependencies:
       '@types/node': 22.13.10
-
-  '@types/scrypt-async@1.3.5': {}
 
   '@types/send@0.17.4':
     dependencies:

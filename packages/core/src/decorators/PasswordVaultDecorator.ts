@@ -6,31 +6,28 @@ import { type IDBPDatabase, openDB } from 'idb';
 import { secretbox } from 'tweetnacl';
 
 // constants
-import { IDB_DB_NAME, IDB_PASSWORD_STORE_NAME } from '@/constants';
+import { IDB_PASSWORD_STORE_NAME } from '@/constants';
 
 // decorators
 import { BaseVaultDecorator } from '@/decorators';
 
 // errors
-import { EncryptionError, DecryptionError, FailedToInitializeError } from '@/errors';
+import { EncryptionError, DecryptionError, InvalidPasswordError } from '@/errors';
 
 // types
 import type {
   BaseAuthenticationDecorator,
   CreateDerivedKeyParameters,
-  InitializePasswordDecoratorParameters,
-  PasswordDecoratorParameters,
+  InitializePasswordVaultDecoratorParameters,
+  PasswordVaultDecoratorParameters,
   PasswordStoreSchema,
   VaultSchema,
 } from '@/types';
 
 // utilities
-import { bytesToHex, hexToBytes, updateVault } from '@/utilities';
+import { bytesToHex, createVaultName, hexToBytes, updateVault } from '@/utilities';
 
-export default class PasswordVaultDecorator
-  extends BaseVaultDecorator<PasswordStoreSchema>
-  implements BaseAuthenticationDecorator
-{
+export default class PasswordVaultDecorator extends BaseVaultDecorator implements BaseAuthenticationDecorator {
   // private static variables
   private static readonly _challenge = 'Katavault rules!';
   private static readonly _saltByteSize = 64; // 64-bytes
@@ -38,13 +35,11 @@ export default class PasswordVaultDecorator
   public static readonly displayName = 'PasswordDecorator';
   // private variables
   private readonly _password: string;
-  private readonly _vault: IDBPDatabase<VaultSchema>;
 
-  private constructor({ password, vault, ...commonParameters }: PasswordDecoratorParameters) {
-    super(commonParameters);
+  private constructor({ password, ...defaultParameters }: PasswordVaultDecoratorParameters) {
+    super(defaultParameters);
 
     this._password = password;
-    this._vault = vault;
   }
 
   /**
@@ -77,16 +72,41 @@ export default class PasswordVaultDecorator
     });
   }
 
+  private static async _store(vault: IDBPDatabase<VaultSchema>): Promise<PasswordStoreSchema | null> {
+    const transaction = vault.transaction(IDB_PASSWORD_STORE_NAME, 'readonly');
+    const store: PasswordStoreSchema = {
+      challenge: await transaction.store.get('challenge'),
+      lastUsedAt: await transaction.store.get('lastUsedAt'),
+    };
+
+    if (typeof store.challenge === 'undefined' || typeof store.lastUsedAt === 'undefined') {
+      return null;
+    }
+
+    return store;
+  }
+
   /**
    * public static methods
    */
 
+  /**
+   * Initializes an instance of the password vault decorator.
+   * @param {InitializePasswordVaultDecoratorParameters} params - The user credentials, password and logger.
+   * @returns {Promise<PasswordVaultDecorator>} A promise that resolves to the password vault decorator.
+   * @throws {DecryptionError} If the stored challenge failed to be decrypted.
+   * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+   * @public
+   * @static
+   */
   public static async initialize({
     logger,
     password,
-  }: InitializePasswordDecoratorParameters): Promise<PasswordVaultDecorator> {
+    user,
+  }: InitializePasswordVaultDecoratorParameters): Promise<PasswordVaultDecorator> {
     const __logPrefix = `${PasswordVaultDecorator.displayName}#initialize`;
-    const vault = await openDB<VaultSchema>(IDB_DB_NAME, undefined, {
+    const vaultName = createVaultName(user.username);
+    const vault = await openDB<VaultSchema>(vaultName, undefined, {
       upgrade: (_db, oldVersion, newVersion) => {
         updateVault({
           database: _db,
@@ -96,12 +116,12 @@ export default class PasswordVaultDecorator
         });
       },
     });
-    const passwordDecorator = new PasswordVaultDecorator({
+    const passwordVault = new PasswordVaultDecorator({
       logger,
       password,
       vault,
     });
-    const store = await passwordDecorator.store();
+    const store = await passwordVault._store();
     let challenge: string;
     let isVerified: boolean;
 
@@ -109,10 +129,10 @@ export default class PasswordVaultDecorator
     if (store) {
       logger.debug(`${__logPrefix}: password store exists`);
 
-      isVerified = await passwordDecorator.verify();
+      isVerified = await passwordVault.verify();
 
       if (!isVerified) {
-        throw new FailedToInitializeError('incorrect password');
+        throw new InvalidPasswordError('incorrect password');
       }
     }
 
@@ -120,15 +140,26 @@ export default class PasswordVaultDecorator
     if (!store) {
       logger.debug(`${__logPrefix}: password store does not exist, creating a new one`);
 
-      challenge = bytesToHex(await passwordDecorator.encryptBytes(encodeUtf8(PasswordVaultDecorator._challenge)));
+      challenge = bytesToHex(await passwordVault.encryptBytes(encodeUtf8(PasswordVaultDecorator._challenge)));
 
-      await passwordDecorator.setStore({
-        challenge,
-        lastUsedAt: Date.now().toString(),
-      });
+      await passwordVault.setChallenge(challenge);
+      await passwordVault.setLastUsedAt();
     }
 
-    return passwordDecorator;
+    return passwordVault;
+  }
+
+  /**
+   * private methods
+   */
+
+  /**
+   * Gets the store.
+   * @returns {Promise<PasswordStoreSchema | null>} A promise that resolves to the store or null if no store exists.
+   * @private
+   */
+  private async _store(): Promise<PasswordStoreSchema | null> {
+    return await PasswordVaultDecorator._store(this._vault);
   }
 
   /**
@@ -139,7 +170,7 @@ export default class PasswordVaultDecorator
    * Clears the password store.
    * @public
    */
-  public async clear(): Promise<void> {
+  public async clearStore(): Promise<void> {
     const __logPrefix = `${PasswordVaultDecorator.displayName}#clear`;
 
     await this._vault.clear(IDB_PASSWORD_STORE_NAME);
@@ -148,17 +179,11 @@ export default class PasswordVaultDecorator
   }
 
   /**
-   * Closes the connection to the indexedDB.
-   * @public
-   */
-  public close(): void {
-    this._vault.close();
-  }
-
-  /**
    * Decrypts some previously encrypted bytes using the password.
    * @param {Uint8Array} bytes - The encrypted bytes.
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
+   * @throws {DecryptionError} If the supplied bytes are malformed or there was a problem deriving a key from the
+   * password.
    * @public
    */
   public async decryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
@@ -241,48 +266,46 @@ export default class PasswordVaultDecorator
     return sha512(encodeUtf8(this._password));
   }
 
-  public async setStore(value: PasswordStoreSchema): Promise<PasswordStoreSchema> {
+  /**
+   * Sets a hexadecimal encoded encrypted challenge.
+   * @param {string} value - A hexadecimal encoded encrypted challenge.
+   * @returns {string} The hexadecimal encoded encrypted challenge.
+   * @public
+   */
+  public async setChallenge(value: string): Promise<string> {
     const transaction = this._vault.transaction(IDB_PASSWORD_STORE_NAME, 'readwrite');
     const challenge = (await transaction.store.get('challenge')) || null;
-    const lastUsedAt = (await transaction.store.get('lastUsedAt')) || null;
 
-    challenge
-      ? await transaction.store.put(value.challenge, 'challenge')
-      : await transaction.store.add(value.challenge, 'challenge');
-    lastUsedAt
-      ? await transaction.store.put(value.lastUsedAt, 'lastUsedAt')
-      : await transaction.store.add(value.lastUsedAt, 'lastUsedAt');
+    challenge ? await transaction.store.put(value, 'challenge') : await transaction.store.add(value, 'challenge');
 
     return value;
   }
 
   /**
-   * Gets the store.
-   * @returns {Promise<PasswordStoreSchema | null>} A promise that resolves to the store or null if no store exists.
+   * Sets the last used at timestamp. If the parameter is omitted, the current Unix timestamp, in milliseconds, is used.
+   * @param {string} value - [optional] A Unix timestamp, in milliseconds. Defaults to the current Unix timestamp.
+   * @returns {string} The last used at timestamp in milliseconds.
    * @public
    */
-  public async store(): Promise<PasswordStoreSchema | null> {
-    const transaction = this._vault.transaction(IDB_PASSWORD_STORE_NAME, 'readonly');
-    const store: PasswordStoreSchema = {
-      challenge: await transaction.store.get('challenge'),
-      lastUsedAt: await transaction.store.get('lastUsedAt'),
-    };
+  public async setLastUsedAt(value?: string): Promise<string> {
+    const transaction = this._vault.transaction(IDB_PASSWORD_STORE_NAME, 'readwrite');
+    const lastUsedAt = (await transaction.store.get('lastUsedAt')) || null;
+    const _value = value ?? Date.now().toString();
 
-    if (typeof store.challenge === 'undefined' || typeof store.lastUsedAt === 'undefined') {
-      return null;
-    }
+    lastUsedAt ? await transaction.store.put(_value, 'lastUsedAt') : await transaction.store.add(_value, 'lastUsedAt');
 
-    return store;
+    return _value;
   }
 
   /**
    * Verifies that the password is valid.
    * @returns {Promise<boolean>} A promise that resolves to true if the password successfully decrypts the challenge,
    * or false otherwise.
+   * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @public
    */
   public async verify(): Promise<boolean> {
-    const store = await this.store();
+    const store = await this._store();
     let decryptedChallenge: Uint8Array;
 
     if (!store) {
