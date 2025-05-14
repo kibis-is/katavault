@@ -5,13 +5,14 @@ import { IDB_DB_NAME_PREFIX, IDB_ITEMS_STORE_NAME, IDB_PASSKEY_STORE_NAME } from
 
 // types
 import type {
+  AuthenticationParameters,
   CreateVaultParameters,
   Logger,
   Passkey,
-  PrivateKey,
+  AccountWithKeyData,
   SerializedPrivateKey,
   VaultParameters,
-  VaultSchemas,
+  VaultSchema,
 } from '@/types';
 
 // utilities
@@ -21,7 +22,8 @@ export default class VaultDecorator {
   // public static variables
   public static readonly displayName = 'VaultDecorator';
   // private variables
-  private readonly _db: IDBPDatabase<VaultSchemas>;
+  private readonly _auth: AuthenticationParameters;
+  private readonly _db: IDBPDatabase<VaultSchema>;
   private readonly _logger: Logger;
 
   private constructor({ db, logger }: VaultParameters) {
@@ -41,10 +43,10 @@ export default class VaultDecorator {
    * @public
    * @static
    */
-  public static async create({ logger, user }: CreateVaultParameters): Promise<VaultDecorator> {
+  public static async create({ auth, logger }: CreateVaultParameters): Promise<VaultDecorator> {
     const __logPrefix = `${VaultDecorator.displayName}#create`;
     const vaultName = `${IDB_DB_NAME_PREFIX}_${bytesToHex(utf8ToBytes(user.username))}`;
-    const db = await openDB<VaultSchemas>(vaultName, undefined, {
+    const db = await openDB<VaultSchema>(vaultName, undefined, {
       upgrade: (_db, oldVersion, newVersion) => {
         // we are creating a new database
         if (oldVersion <= 0 && newVersion && newVersion > 0) {
@@ -93,10 +95,10 @@ export default class VaultDecorator {
   /**
    * Gets a vault private key by address. If no item exists, null is returned.
    * @param {string} address - THe address of the private key.
-   * @returns {Promise<PrivateKey | null>} A promise that resolves to the private key or null if it doesn't exist.
+   * @returns {Promise<AccountWithKeyData | null>} A promise that resolves to the private key or null if it doesn't exist.
    * @public
    */
-  public async itemByAddress(address: string): Promise<PrivateKey | null> {
+  public async itemByAddress(address: string): Promise<AccountWithKeyData | null> {
     const item: SerializedPrivateKey | null = (await this._db.get(IDB_ITEMS_STORE_NAME, address)) || null;
 
     if (!item) {
@@ -111,12 +113,12 @@ export default class VaultDecorator {
 
   /**
    * Gets the vault private key.
-   * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the vault private keys. The result will be a map
+   * @returns {Promise<Map<string, AccountWithKeyData>>} A promise that resolves to the vault private keys. The result will be a map
    * containing the keys referenced by the account's address.
    * @public
    */
-  public async items(): Promise<Map<string, PrivateKey>> {
-    const result = new Map<string, PrivateKey>();
+  public async items(): Promise<Map<string, AccountWithKeyData>> {
+    const result = new Map<string, AccountWithKeyData>();
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readonly');
     const keys = await transaction.store.getAllKeys();
     let item: SerializedPrivateKey;
@@ -143,7 +145,7 @@ export default class VaultDecorator {
 
   /**
    * Gets the vault passkey.
-   * @returns {Promise<Passkey | null>} A promise that resolves to the vault passkey or null if the vault has not
+   * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the vault passkey or null if the vault has not
    * been initialized.
    * @public
    */
@@ -216,11 +218,11 @@ export default class VaultDecorator {
   /**
    * Upserts private keys into the database. If and of the item addresses already exist, they will be overwritten with the
    * new account. If any private keys don't exist, they will be added.
-   * @param {Map<string, PrivateKey>} items - The private keys to insert and/or update.
-   * @returns {Promise<Map<string, PrivateKey>>} A promise that resolves to the inserted and/or updated private keys.
+   * @param {Map<string, AccountWithKeyData>} items - The private keys to insert and/or update.
+   * @returns {Promise<Map<string, AccountWithKeyData>>} A promise that resolves to the inserted and/or updated private keys.
    * @public
    */
-  public async upsertItems(items: Map<string, PrivateKey>): Promise<Map<string, PrivateKey>> {
+  public async upsertItems(items: Map<string, AccountWithKeyData>): Promise<Map<string, AccountWithKeyData>> {
     const __logPrefix = `${VaultDecorator.displayName}#upsertItems`;
     const transaction = this._db.transaction(IDB_ITEMS_STORE_NAME, 'readwrite');
     const addresses = await transaction.store.getAllKeys();

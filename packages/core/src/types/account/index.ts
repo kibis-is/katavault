@@ -1,2 +1,2 @@
 export type { default as Account } from './Account';
-export type { default as PrivateKey } from './PrivateKey';
+export type { default as AccountWithKeyData } from './AccountWithKeyData';

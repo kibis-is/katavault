@@ -12,7 +12,7 @@ import { INITIALIZATION_VECTOR_BYTE_SIZE, SALT_BYTE_SIZE } from '@/constants';
 import VaultDecorator from './VaultDecorator';
 
 // types
-import { PrivateKey, Passkey, UserInformation } from '@/types';
+import { AccountWithKeyData, Passkey, UserInformation } from '@/types';
 
 // utilities
 import { addressFromPrivateKey, createLogger, generatePrivateKey } from '@/utilities';
@@ -83,10 +83,10 @@ describe(VaultDecorator.displayName, () => {
     test('it should remove an account', async () => {
       const privateKey = generatePrivateKey();
       const address = addressFromPrivateKey(privateKey);
-      let items: Map<string, PrivateKey>;
+      let items: Map<string, AccountWithKeyData>;
       let result: string[];
 
-      await vault.upsertItems(new Map<string, PrivateKey>([[address, { keyData: privateKey }]]));
+      await vault.upsertItems(new Map<string, AccountWithKeyData>([[address, { keyData: privateKey }]]));
 
       items = await vault.items();
 
@@ -104,11 +104,11 @@ describe(VaultDecorator.displayName, () => {
       const privateKey2 = generatePrivateKey();
       const address1 = addressFromPrivateKey(privateKey1);
       const address2 = addressFromPrivateKey(privateKey2);
-      let items: Map<string, PrivateKey>;
+      let items: Map<string, AccountWithKeyData>;
       let result: string[];
 
       await vault.upsertItems(
-        new Map<string, PrivateKey>([
+        new Map<string, AccountWithKeyData>([
           [address1, { keyData: privateKey1 }],
           [address2, { keyData: privateKey2 }],
         ])
@@ -125,11 +125,11 @@ describe(VaultDecorator.displayName, () => {
       const privateKey = generatePrivateKey();
       const removedPrivateKey = generatePrivateKey();
       const address = addressFromPrivateKey(removedPrivateKey);
-      let items: Map<string, PrivateKey>;
+      let items: Map<string, AccountWithKeyData>;
       let result: string[];
 
       await vault.upsertItems(
-        new Map<string, PrivateKey>([
+        new Map<string, AccountWithKeyData>([
           [addressFromPrivateKey(privateKey), { keyData: privateKey }],
           [address, { keyData: removedPrivateKey }],
         ])
@@ -149,11 +149,11 @@ describe(VaultDecorator.displayName, () => {
     test('it should not remove any accounts account does not exist', async () => {
       const privateKey = generatePrivateKey();
       const address = addressFromPrivateKey(generatePrivateKey());
-      let items: Map<string, PrivateKey>;
+      let items: Map<string, AccountWithKeyData>;
       let result: string[];
 
       await vault.upsertItems(
-        new Map<string, PrivateKey>([[addressFromPrivateKey(privateKey), { keyData: privateKey }]])
+        new Map<string, AccountWithKeyData>([[addressFromPrivateKey(privateKey), { keyData: privateKey }]])
       );
 
       result = await vault.removeItems([address]);
@@ -166,16 +166,16 @@ describe(VaultDecorator.displayName, () => {
 
   describe('upsertItem()', () => {
     test('it should add the new item', async () => {
-      const item: PrivateKey = {
+      const item: AccountWithKeyData = {
         keyData: generatePrivateKey(),
         name: 'Personal',
       };
-      let _item: PrivateKey | null;
+      let _item: AccountWithKeyData | null;
       let items = await vault.items();
 
       expect(items.size).toBe(0);
 
-      await vault.upsertItems(new Map<string, PrivateKey>([[addressFromPrivateKey(item.keyData), item]]));
+      await vault.upsertItems(new Map<string, AccountWithKeyData>([[addressFromPrivateKey(item.keyData), item]]));
 
       items = await vault.items();
       _item = items.get(addressFromPrivateKey(item.keyData)) || null;
@@ -186,15 +186,15 @@ describe(VaultDecorator.displayName, () => {
     });
 
     test('it should update an existing item', async () => {
-      const item: PrivateKey = {
+      const item: AccountWithKeyData = {
         keyData: generatePrivateKey(),
         name: 'Personal',
       };
-      let _item: PrivateKey | null;
-      let items: Map<string, PrivateKey>;
+      let _item: AccountWithKeyData | null;
+      let items: Map<string, AccountWithKeyData>;
 
       await vault.upsertItems(
-        new Map<string, PrivateKey>([
+        new Map<string, AccountWithKeyData>([
           [
             addressFromPrivateKey(item.keyData),
             {
@@ -209,7 +209,7 @@ describe(VaultDecorator.displayName, () => {
 
       expect(items.size).toBe(1);
 
-      await vault.upsertItems(new Map<string, PrivateKey>([[addressFromPrivateKey(item.keyData), item]]));
+      await vault.upsertItems(new Map<string, AccountWithKeyData>([[addressFromPrivateKey(item.keyData), item]]));
 
       items = await vault.items();
       _item = items.get(addressFromPrivateKey(item.keyData)) || null;

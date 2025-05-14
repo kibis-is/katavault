@@ -17,9 +17,8 @@ import type {
   KatavaultParameters,
   Logger,
   Passkey,
-  PrivateKey,
+  AccountWithKeyData,
   SignMessageParameters,
-  UserInformation,
   WithEncoding,
 } from '@/types';
 
@@ -32,13 +31,11 @@ export default class Katavault {
   // private variables
   private readonly _client: ClientInformation;
   private readonly _logger: Logger;
-  private readonly _user: UserInformation;
   private readonly _vault: VaultDecorator;
 
-  public constructor({ client, logger, user, vault }: KatavaultParameters) {
+  public constructor({ client, logger, vault }: KatavaultParameters) {
     this._client = client;
     this._logger = logger;
-    this._user = user;
     this._vault = vault;
   }
 
@@ -48,7 +45,7 @@ export default class Katavault {
 
   /**
    * Convenience method to authenticate with the passkey and decrypt an encrypted private key.
-   * @param {PrivateKey} item - A vault item containing the encrypted private key.
+   * @param {AccountWithKeyData} item - A vault item containing the encrypted private key.
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted private key.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
@@ -56,7 +53,7 @@ export default class Katavault {
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the passkey request.
    * @private
    */
-  private async _decryptPrivateKey(item: PrivateKey): Promise<Uint8Array> {
+  private async _decryptPrivateKey(item: AccountWithKeyData): Promise<Uint8Array> {
     const passkey = await this._passkey();
     const passkeyClient = await PasskeyDecorator.authenticate({
       passkey,
@@ -69,7 +66,7 @@ export default class Katavault {
   /**
    * Extracts the passkey from the vault. If no passkey exists in the vault, a new one is registered via Web
    * Authentication and added to the vault.
-   * @returns {Promise<Passkey>} A promise that resolves to a retried or created passkey.
+   * @returns {Promise<PasskeyStoreSchema>} A promise that resolves to a retried or created passkey.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the passkey request.
@@ -84,7 +81,6 @@ export default class Katavault {
       passkey = await PasskeyDecorator.register({
         client: this._client,
         logger: this._logger,
-        user: this._user,
       });
 
       this._logger.debug(`${__logPrefix}: registered new passkey "${passkey.credentialID}"`);
@@ -162,7 +158,7 @@ export default class Katavault {
 
     // encrypt the private key add it to the vault
     await this._vault.upsertItems(
-      new Map<string, PrivateKey>([
+      new Map<string, AccountWithKeyData>([
         [
           address,
           {
