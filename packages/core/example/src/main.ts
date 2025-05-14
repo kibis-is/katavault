@@ -1,5 +1,8 @@
 import { createKatavault, createLogger, Katavault } from '@kibisis/katavault-core';
 
+// config
+import config from './config';
+
 // handlers
 import { onCreateAccountButtonClick, onResetButtonClick } from './handlers';
 
@@ -13,13 +16,7 @@ async function onDOMContentLoaded() {
   let katavault: Katavault;
 
   try {
-    katavault = await createKatavault({
-      debug: true,
-      user: {
-        displayName: `Kieran O'Neill`,
-        username: `magnetartare`,
-      },
-    });
+    katavault = await createKatavault(config);
 
     if (createAccountButtonElement) {
       createAccountButtonElement.addEventListener('click', onCreateAccountButtonClick(katavault, logger));

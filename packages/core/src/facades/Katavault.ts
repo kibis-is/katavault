@@ -146,11 +146,37 @@ export default class Katavault {
    */
   public async accounts(): Promise<Account[]> {
     const items = await this._accountStore.accounts();
+    let results: Account[] = [];
 
-    return items.map(({ address, name }) => ({
-      address,
-      name,
-    }));
+    for (const account of items) {
+      let credentialID: string | null;
+      let passwordHash: string | null;
+
+      if (this._authenticationStore.__type === AuthenticationMethod.Passkey) {
+        credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
+
+        if (credentialID && credentialID === (await this._authenticationStore.store.credentialID())) {
+          results.push({
+            address: account.address,
+            name: account.name,
+          });
+        }
+      }
+
+      if (this._authenticationStore.__type === AuthenticationMethod.Password) {
+        passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
+
+        // check if the account was encrypted using the correct password
+        if (passwordHash && passwordHash === bytesToHex(this._authenticationStore.store.hash())) {
+          results.push({
+            address: account.address,
+            name: account.name,
+          });
+        }
+      }
+    }
+
+    return results;
   }
 
   /**
