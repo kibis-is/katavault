@@ -1,7 +1,7 @@
 {
   "name": "katavault",
   "private": true,
-  "description": "A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.",
+  "description": "A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging modern encryption techniques, such as WebAuthn, to securely store private keys.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kibis-is/katavault"

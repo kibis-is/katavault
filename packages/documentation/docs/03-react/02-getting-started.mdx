@@ -55,9 +55,8 @@ Wrap the app in the `KatavaultProvider` React Context Provider and pass the para
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
+      client: {
+        name: 'Awesome App!!',
       },
     };
 
@@ -73,7 +72,174 @@ See [`CreateKatavaultParameters`](04-glossary/02-types.mdx#createkatavaultparame
 
 :::
 
-### 2. Using Katavault
+### 2. Authentication
+
+As explained in the [core](02-core/02-getting-started.mdx#2-authentication) documentation, before the app is able to start using the provider, the user **MUST** authenticate.
+
+#### 2.1. Passkey authentication
+
+<Tabs
+  defaultValue="auth"
+  values={[
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticateWithPasskey,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticateWithPasskey({
+          user: {
+            name: 'Kibi',
+            username: 'kibi@kibis.is',
+          },
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatewithpasskeyparameters) for information on the available parameters.
+
+:::
+
+#### 2.2. Password authentication
+
+<Tabs
+  defaultValue="auth"
+  values={[
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticateWithPassword,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticateWithPassword({
+          password: 'mtr*tpv!cbg@dhn9RFH',
+          user: {
+            name: 'Kibi',
+            username: 'kibi@kibis.is',
+          },
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+See [`AuthenticateWithPasswordParameters`](04-glossary/02-types.mdx#authenticatewithpasswordparameters) for information on the available parameters.
+
+:::
+
+### 3. Using Katavault
 
 Now that everything is set up, every component inside the `KatavaultProvider` can use the React Hooks.
 
@@ -82,6 +248,7 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
   values={[
     { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
   <TabItem value="accounts">
@@ -108,14 +275,48 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
     import { Accounts } from './Accounts';
+    import { AuthScript } from './AuthScript';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
+          <AuthScript />
           <Accounts />
         </KatavaultProvider>
       );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticateWithPasskey,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticateWithPasskey({
+          user: {
+            name: 'Kibi',
+            username: 'kibi@kibis.is',
+          },
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
     }
     ```
 
@@ -126,9 +327,8 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
+      client: {
+        name: 'Awesome App!!',
       },
     };
 

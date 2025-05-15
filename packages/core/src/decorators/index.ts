@@ -1,2 +1,4 @@
-export { default as PasskeyDecorator } from './PasskeyDecorator';
-export { default as VaultDecorator } from './VaultDecorator';
+export { default as AccountStore } from './AccountStore';
+export { default as BaseStore } from './BaseStore';
+export { default as PasskeyStore } from './PasskeyStore';
+export { default as PasswordStore } from './PasswordStore';

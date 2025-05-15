@@ -1,4 +1,4 @@
-import { BaseError, Katavault, type Logger, USER_CANCELED_PASSKEY_REQUEST_ERROR } from '@kibisis/katavault-core';
+import { Katavault, type Logger } from '@kibisis/katavault-core';
 
 // utilities
 import { updateAccountsTable } from '../utilities';
@@ -6,6 +6,7 @@ import { updateAccountsTable } from '../utilities';
 export default function onCreateAccountButtonClick(katavault: Katavault, logger: Logger) {
   return async () => {
     const __logPrefix = 'onCreateAccountButtonClick';
+
     try {
       const account = await katavault.generateAccount();
 
@@ -13,15 +14,7 @@ export default function onCreateAccountButtonClick(katavault: Katavault, logger:
 
       await updateAccountsTable(katavault, logger);
     } catch (error) {
-      if ((error as BaseError).isEmbeddedWalletError) {
-        switch ((error as BaseError).type) {
-          case USER_CANCELED_PASSKEY_REQUEST_ERROR:
-            logger.debug(`${__logPrefix}: user canceled passkey request`);
-            break;
-          default:
-            break;
-        }
-      }
+      logger.error(`${__logPrefix}:`, error);
     }
   };
 }

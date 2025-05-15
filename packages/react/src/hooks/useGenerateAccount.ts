@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { KatavaultContext } from '@/contexts';
 
 // errors
-import { WalletNotInitializedError } from '@/errors';
+import { NotInitializedError } from '@/errors';
 
 // types
 import type { HookFunctionWithOptionalParams } from '@/types';
@@ -21,7 +21,7 @@ export default function useGenerateAccount(): HookFunctionWithOptionalParams<str
   return (params, options?) => {
     (async () => {
       if (!katavault) {
-        return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), params);
+        return options?.onError?.(new NotInitializedError('katavault not initialized'), params);
       }
 
       try {

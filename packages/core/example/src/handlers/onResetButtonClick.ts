@@ -4,8 +4,14 @@ import { Katavault, type Logger } from '@kibisis/katavault-core';
 import { updateAccountsTable } from '../utilities';
 
 export default function onResetButtonClick(katavault: Katavault, logger: Logger) {
+  const __logPrefix = 'onResetButtonClick';
+
   return async () => {
-    await katavault.clear();
-    await updateAccountsTable(katavault, logger);
+    try {
+      await katavault.clear();
+      await updateAccountsTable(katavault, logger);
+    } catch (error) {
+      logger.error(`${__logPrefix}:`, error);
+    }
   };
 }

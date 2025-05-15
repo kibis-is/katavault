@@ -13,7 +13,7 @@ export default function useAccounts(): Account[] {
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
-    if (!katavault) {
+    if (!katavault || !katavault.isAuthenticated()) {
       return;
     }
 

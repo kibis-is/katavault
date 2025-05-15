@@ -23,15 +23,19 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
-    import { createKatavault } from '@kibisis/katavault-core';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
 
-    const katavault = await createKatavault({
+    const katavault = await createKatavault();
+    let accounts: Account[];
+
+    await katavault.authenticateWithPasskey({
       user: {
         name: 'Kibi',
         username: 'kibi@kibis.is',
       },
     });
-    const accounts = await katavault.accounts();
+
+    accounts = await katavault.accounts();
 
     console.log(accounts);
     /*
@@ -58,3 +62,11 @@ import TabItem from '@theme/TabItem';
 [`Promise<Account[]>`](04-glossary/02-types.mdx#Account)
 
 A promise that resolves to the list of accounts stored in the wallet.
+
+<SectionBreak />
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If the provider has not been authenticated.

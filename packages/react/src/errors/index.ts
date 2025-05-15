@@ -1,1 +1,1 @@
-export { default as WalletNotInitializedError } from './WalletNotInitializedError';
+export { default as NotInitializedError } from './NotInitializedError';

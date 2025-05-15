@@ -23,15 +23,19 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
-    import { createKatavault } from '@kibisis/katavault-core';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
 
-    const katavault = await createKatavault({
+    const katavault = await createKatavault();
+    let account: Account;
+
+    await katavault.authenticateWithPasskey({
       user: {
         name: 'Kibi',
         username: 'kibi@kibis.is',
       },
     });
-    const account = await katavault.generateAccount('Personal');
+
+    account = await katavault.generateAccount('Personal');
 
     console.log(account);
     /*
@@ -68,18 +72,10 @@ A promise that resolves to the created account.
 
 ## Throws
 
-### [FailedToAuthenticatePasskeyError](04-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+### [EncryptionError](04-glossary/03-errors.mdx#encryptionerror)
 
-If the passkey did not return the encryption key credentials.
+If the account's private key failed to be encrypted.
 
-### [FailedToRegisterPasskeyError](04-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
 
-If, when attempting to register a passkey, the public key credentials failed to be created on the passkey.
-
-### [PasskeyNotSupportedError](04-glossary/03-errors.mdx#passkeynotsupportederror)
-
-If the browser does not support WebAuthn or the passkey does not support storing encryption key material.
-
-### [UserCanceledPasskeyRequestError](04-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
-
-If the user canceled the passkey register/authenticate request or the request timed out.
+If the provider has not been authenticated.

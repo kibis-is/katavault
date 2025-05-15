@@ -1,6 +1,3 @@
-// decorators
-import { VaultDecorator } from '@/decorators';
-
 // facades
 import { Katavault } from '@/facades';
 
@@ -10,22 +7,20 @@ import type { CreateKatavaultParameters } from '@/types';
 // utilities
 import { createLogger, documentTitle, faviconURL } from '@/utilities';
 
-export default async function createKatavault({
-  client,
-  debug = false,
-  user,
-}: CreateKatavaultParameters): Promise<Katavault> {
+/**
+ * Creates an instance of Katavault.
+ * @param {CreateKatavaultParameters} params - The client information and optional debug mode.
+ * @returns {Katavault} An initialized instance of Katavault.
+ */
+export default function createKatavault({ debug = false, client }: CreateKatavaultParameters): Katavault {
   const logger = createLogger(debug ? 'debug' : 'error');
-  const vault = await VaultDecorator.create({ logger, user });
 
   return new Katavault({
-    client: {
+    clientInformation: {
       host: window.location.hostname,
       icon: client?.icon || faviconURL() || undefined,
       name: client?.name ?? documentTitle(),
     },
     logger,
-    user,
-    vault,
   });
 }

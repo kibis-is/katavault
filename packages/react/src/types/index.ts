@@ -6,3 +6,4 @@ export type { default as HookFunctionWithoutParams } from './HookFunctionWithout
 export type { default as KatavaultProviderProps } from './KatavaultProviderProps';
 export type { default as OnErrorHandler } from './OnErrorHandler';
 export type { default as OnSuccessHandler } from './OnSuccessHandler';
+export type { default as UseAuthenticateState } from './UseAuthenticateState';

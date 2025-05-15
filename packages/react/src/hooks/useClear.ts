@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { KatavaultContext } from '@/contexts';
 
 // errors
-import { WalletNotInitializedError } from '@/errors';
+import { NotInitializedError } from '@/errors';
 
 // types
 import type { HookFunctionWithoutParams } from '@/types';
@@ -23,7 +23,7 @@ export default function useClear(): HookFunctionWithoutParams<undefined, BaseErr
   return (options?) => {
     (async () => {
       if (!katavault) {
-        return options?.onError?.(new WalletNotInitializedError('wallet not initialized'), undefined);
+        return options?.onError?.(new NotInitializedError('katavault not initialized'), undefined);
       }
 
       try {
