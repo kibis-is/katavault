@@ -1,3 +1,10 @@
+# [@kibisis/katavault-core-v1.0.0-beta.3](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.0.0-beta.2...@kibisis/katavault-core-v1.0.0-beta.3) (2025-05-15)
+
+
+### Features
+
+* add password option ([#5](https://github.com/kibis-is/katavault/issues/5)) ([b8e6abe](https://github.com/kibis-is/katavault/commit/b8e6abe4afb3517bebd910c3dd713420e158e299))
+
 # [@kibisis/katavault-core-v1.0.0-beta.2](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.0.0-beta.1...@kibisis/katavault-core-v1.0.0-beta.2) (2025-04-09)
 
 
