@@ -341,6 +341,7 @@ export default class Katavault {
       throw new NotAuthenticatedError('not authenticated');
     }
 
+    this._authenticationStore = null;
     await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
     await this._vault.clear(IDB_PASSKEY_STORE_NAME);
     await this._vault.clear(IDB_PASSWORD_STORE_NAME);
@@ -352,7 +353,7 @@ export default class Katavault {
    * **NOTE:** Requires authentication.
    * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
    * @returns {Promise<Account>} A promise that resolves to the created account.
-   * @throws {EncryptionError} If the private failed to be encrypted.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
@@ -414,7 +415,7 @@ export default class Katavault {
   }
 
   /**
-   * Removes the account from the wallet for the specified address, if it exists.
+   * Removes the account from the provider for the specified address if it exists.
    *
    * **NOTE:** Requires authentication.
    * @param {string} address - The address of the account to remove from the wallet.

@@ -23,15 +23,19 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
-    import { createKatavault } from '@kibisis/katavault-core';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
 
-    const katavault = await createKatavault({
+    const katavault = await createKatavault();
+    let account: Account;
+
+    await katavault.authenticateWithPasskey({
       user: {
         name: 'Kibi',
         username: 'kibi@kibis.is',
       },
     });
-    const account = await katavault.generateAccount('Personal');
+
+    account = await katavault.generateAccount('Personal');
 
     console.log(account);
     /*
@@ -67,6 +71,15 @@ A promise that resolves to the created account.
 <SectionBreak />
 
 ## Throws
+
+### [EncryptionError](04-glossary/03-errors.mdx#encryptionerror)
+
+If the account's private key failed to be encrypted.
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If the provider has not been authenticated.
+
 
 ### [FailedToAuthenticatePasskeyError](04-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
 

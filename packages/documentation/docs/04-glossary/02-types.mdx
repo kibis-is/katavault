@@ -20,6 +20,23 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 <SectionBreak />
 
+## AuthenticateWithPasskeyParameters
+
+| Name     | Type                                  | Required | Default | Description                                            |
+|----------|---------------------------------------|----------|---------|--------------------------------------------------------|
+| user     | [`UserInformation`](#userinformation) | yes      | -       | User details.                                          |
+
+<SectionBreak />
+
+## AuthenticateWithPasswordParameters
+
+| Name     | Type                                  | Required | Default | Description                                            |
+|----------|---------------------------------------|----------|---------|--------------------------------------------------------|
+| password | `string`                              | yes      | -       | The password used to encrypt the account private keys. |
+| user     | [`UserInformation`](#userinformation) | yes      | -       | User details.                                          |
+
+<SectionBreak />
+
 ## BaseError
 
 | Name             | Type     | Required | Default | Description                                  |
@@ -36,7 +53,6 @@ import SectionBreak from '@site/src/components/SectionBreak';
 |--------|---------------------------------------|----------|---------|---------------------------------|
 | debug  | `boolean`                             | no       | `false` | Whether to log debug messages.  |
 | client | `{ icon?: string; name: string; }`    | no       | -       | The client's name and icon URL. |
-| user   | [`UserInformation`](#userinformation) | yes      | -       | User details.                   |
 
 <SectionBreak />
 

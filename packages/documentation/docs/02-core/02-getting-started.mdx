@@ -37,12 +37,7 @@ First, set up the Katavault client:
     ```typescript
     import { createKatavault } from '@kibisis/katavault-core';
 
-    const katavault = await createKatavault({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
+    const katavault = await createKatavault();
     ```
 
   </TabItem>
@@ -54,9 +49,105 @@ See [`CreateKatavaultParameters`](04-glossary/02-types.mdx#createkatavaultparame
 
 :::
 
-### 2. Using Katavault
+### 2. Authentication
 
-Once the client is set up, you can start interacting with the embedded wallet.
+Katavault currently supports two types of encryption:
+
+* [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (WebAuthn) — utilizing the [PRF extension][prf_extension] to extract encryption key material that can be used with strong AES-GCM data encryption.
+* Password — more traditional, but more widely supported.
+
+The choice of authentication method comes down to either support or to the prerogative of the integration.
+
+:::note
+
+Authentication using one of the below methods is **REQUIRED** for all interactions with sensitive (private keys) information — including write operations, such as signing.
+
+:::
+
+#### 2.1. Passkey authentication
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    await katavault.authenticateWithPasskey({
+    user: {
+    displayName: 'Kibi', // optional
+    username: 'kibi@kibis.is',
+  },
+  });
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatewithpasskeyparameters) for information on the available parameters.
+
+:::
+
+If this is the first time the user has used Katavault, they will be prompted to "register" a passkey. Under the hood, this is essentially calling [`navigator.credentials.create()`](https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create).
+
+Once the user has successfully registered the passkey, they will need to "authenticate" the passkey to extract the key material, which is used to derive an encryption key. Similar to above, under the hood this is essentially calling [`navigator.credentials.get()`](https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/get).
+
+:::warning
+
+If passkeys are not supported, or the supplied passkey does not support the [PRF extension][prf_extension], a [PasskeyNotSupportedError](04-glossary/03-errors.mdx#passkeynotsupportederror) error will be thrown.
+
+:::
+
+#### 2.2. Password authentication
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    await katavault.authenticateWithPassword({
+      password: 'mtr*tpv!cbg@dhn9RFH',
+      user: {
+        displayName: 'Kibi', // optional
+        username: 'kibi@kibis.is',
+      },
+    });
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+
+If Katavault was previously initilized with a password, and the supplied password does not match the saved one a [InvalidPasswordError](04-glossary/03-errors.mdx#invalidpassworderror) error will be thrown.
+
+:::
+
+:::note
+
+See [`AuthenticateWithPasswordParameters`](04-glossary/02-types.mdx#authenticatewithpasswordparameters) for information on the available parameters.
+
+:::
+
+### 3. Using Katavault
+
+Once the client is set up and authenticated, you can start interacting with the embedded wallet.
 
 <Tabs
   defaultValue="main"
@@ -79,3 +170,6 @@ Once the client is set up, you can start interacting with the embedded wallet.
 
   </TabItem>
 </Tabs>
+
+<!-- links -->
+[prf_extension]: https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension

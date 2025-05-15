@@ -30,15 +30,19 @@ Blockchain technology has revolutionized the way we think about digital ownershi
 
 ## Approach
 
-Katavault attempts to enable dApps to embed a wallet directly within their website which addresses some of the aforementioned challenges by abstracting away blockchain complexities and providing a seamless user experience.
+Katavault empowers dApps to embed a secure wallet directly within their website, streamlining blockchain interactions and delivering a seamless user experience by abstracting away underlying complexities.
 
-A glaring problem with embedded wallets is that a website is not really a safe place for sensitive data. However, the embedded wallet takes advantage of some of the latest emerging technologies available on the web.
+While embedding a wallet in a website introduces concerns about the safety of sensitive data, Katavault addresses these challenges by leveraging the latest advancements in web security technology.
 
-One of these exciting technologies is [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (also known as WebAuthn). This technology leverages the native browser's internal UI to interact with a user's passkey, which can take any number of forms: from Windows Hello on PCs, to biometrics (fingerprint/FaceID) on Android/iOS devices, to physical USB security keys such as Yubikey.
+A key innovation is the use of [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (WebAuthn). WebAuthn enables the wallet to interact with a user’s passkey through the browser’s native UI, supporting a wide range of authentication methods-from Windows Hello on PCs, to biometrics like fingerprint or FaceID on mobile devices, and even hardware security keys such as Yubikey.
 
-The embedded wallet uses the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to extract deterministic encryption key material that can be used to derive an encryption key. This derived encryption key can then apply [AES-GCM](https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf) encryption to the wallet's private keys.
+Katavault utilizes the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to deterministically derive encryption key material from the user’s passkey. This key is then used to encrypt the wallet’s private keys using AES-GCM, ensuring robust protection.
 
-These encrypted private keys are then stored using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), as opposed to `localStorage`, due to the latter being less secure than IndexedDB.
+For users who prefer or require a more traditional approach, Katavault also supports password-based encryption. In this mode, a user’s password is transformed into a strong cryptographic key using PBKDF2, and private keys are encrypted using the XSalsa20-Poly1305 algorithm-a modern, high-security cipher that provides both confidentiality and integrity.
+
+Regardless of the authentication method, all encrypted private keys are securely stored using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), which offers stronger isolation and security guarantees than alternatives like `localStorage`.
+
+By supporting both passkey-based and password-based encryption, Katavault ensures that users can choose the authentication method that best fits their needs, without compromising on security or usability.
 
 <SectionBreak />
 
