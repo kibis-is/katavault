@@ -76,7 +76,6 @@ const config: () => Promise<Config> = async () => {
         },
       ],
       navbar: {
-        title,
         items: [
           // right
           {
@@ -96,6 +95,12 @@ const config: () => Promise<Config> = async () => {
             'aria-label': 'npm registry',
           },
         ],
+        logo: {
+          alt: 'Katavault logo',
+          src: 'images/logo-light.svg',
+          srcDark: 'images/logo-dark.svg',
+        },
+        title,
       },
       footer: {
         copyright: `
