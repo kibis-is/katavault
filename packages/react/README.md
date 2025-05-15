@@ -12,6 +12,11 @@
 
 </div>
 
+
+<div align="center">
+  <img alt="Katavault and React logo" src="https://github.com/kibis-is/katavault/blob/main/images/katavault_react_logo@405x128.png" height="64" />
+</div>
+
 <h1 align="center">
   @kibisis/katavault-react
 </h1>
