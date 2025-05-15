@@ -11,7 +11,7 @@ const config: () => Promise<Config> = async () => {
   const projectName = 'katavault';
   const githubLink = `https://github.com/${organizationName}/${projectName}`;
   const npmLink = `https://www.npmjs.com/package/@kibisis/katavault-core`;
-  const url = 'https://kibis-is.github.io';
+  const url = 'https://katavault.kibis.is';
   // header
   const tagline = 'A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging modern encryption techniques, such as WebAuthn, to securely store private keys.';
   const title = 'Katavault';
