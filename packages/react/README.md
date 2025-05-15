@@ -7,8 +7,8 @@
 
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?filter=%40kibis-is%2Fkatavault-react*)](https://github.com/kibis-is/katavault/releases)
-[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?include_prereleases&filter=%40kibis-is%2Fkatavault-react*&label=pre-release)](https://github.com/kibis-is/katavault/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?filter=%40kibisis%2Fkatavault-react*)](https://github.com/kibis-is/katavault/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?include_prereleases&filter=%40kibisis%2Fkatavault-react*&label=pre-release)](https://github.com/kibis-is/katavault/releases/latest)
 
 </div>
 
