@@ -1,6 +1,6 @@
 {
   "name": "@kibisis/katavault-core",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0",
   "description": "The core implementation for Katavault that allows dApps to create/import embedded wallets.",
   "repository": {
     "type": "git",
