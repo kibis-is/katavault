@@ -1,14 +1,14 @@
 <div align="center">
 
-[![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-brightgreen.svg)](LICENSE)
+[![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-brightgreen.svg)][license]
 [![NPM Version](https://img.shields.io/npm/v/%40kibisis%2Fkatavault-react)](https://www.npmjs.com/package/%40kibisis/katavault-react)
 
 </div>
 
 <div align="center">
 
-![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?filter=%40kibis-is%2Fkatavault-react*)
-![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?include_prereleases&filter=%40kibis-is%2Fkatavault-react*&label=pre-release)
+[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?filter=%40kibis-is%2Fkatavault-react*)](https://github.com/kibis-is/katavault/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/kibis-is/katavault?include_prereleases&filter=%40kibis-is%2Fkatavault-react*&label=pre-release)](https://github.com/kibis-is/katavault/releases/latest)
 
 </div>
 
@@ -117,6 +117,6 @@ Please refer to the [LICENSE][license] file.
 <sup>[Back to top ^][table-of-contents]</sup>
 
 <!-- links -->
-[license]: LICENSE
+[license]: https://github.com/kibis-is/katavault/blob/main/packages/react/LICENSE
 [table-of-contents]: #table-of-contents
 

@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging WebAuthn for private key encryption.
+  A TypeScript/JavaScript SDK that allows dApps to securely embed wallets using IndexedDB and leveraging modern encryption techniques, such as WebAuthn, to securely store private keys.
 </p>
 
 ---
