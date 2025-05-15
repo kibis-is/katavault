@@ -22,11 +22,15 @@ jobs:
           path: ./packages/documentation/dist
 
   deploy:
+    name: "Deploy"
+    needs: [ build ]
+    permissions:
+      pages: write # to deploy to pages
+      id-token: write # to verify the deployment originates from an appropriate source
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
       - name: "🚀 Deploy"
         id: deployment
