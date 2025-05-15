@@ -11,6 +11,7 @@ jobs:
       pull-requests: read
     outputs:
       core: ${{ steps.filter.outputs.core }}
+      react: ${{ steps.filter.outputs.react }}
     steps:
       - name: "📥 Filter"
         uses: dorny/paths-filter@v3
@@ -19,6 +20,8 @@ jobs:
           filters: |
             core:
               - 'packages/core/**'
+            react:
+              - 'packages/react/**'
 
   validate_pr_title:
     name: "Validate PR Title"
@@ -41,7 +44,7 @@ jobs:
             });
             return data.title;
       - name: "✅ Validate"
-        run: echo "${{ steps.get_pr_title.outputs.result }}" | npx commitlint
+        run: echo "${{ steps.get_pr_title.outputs.result }}" | pnpm commitlint
 
   ##
   # package specific
@@ -54,3 +57,11 @@ jobs:
     uses: ./.github/workflows/lint_build_test.yml
     with:
       package_name: "@kibisis/katavault-core"
+
+  lint_build_test_react:
+    name: "Lint, Build & Test - @kibisis/katavault-react"
+    needs: [changed_files, validate_pr_title]
+    if: ${{ needs.changed_files.outputs.react == 'true' }}
+    uses: ./.github/workflows/lint_build_test.yml
+    with:
+      package_name: "@kibisis/katavault-react"
