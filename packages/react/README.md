@@ -60,7 +60,7 @@ npm install @kibisis/katavault-react
 
 ## 📚 2. Documentation
 
-For full documentation on usage, see [here](https://kibis-is.github.io/katavault/usage/core).
+For full documentation on usage, see [here](https://katavault.kibis.is/react/getting-started).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

@@ -62,7 +62,7 @@ In essence, this SDK empowers developers to build dApps that feel like tradition
 
 ## 📚 2. Documentation
 
-For full documentation on usage, see [here](https://kibis-is.github.io/katavault).
+For full documentation on usage, see [here](https://katavault.kibis.is).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
