@@ -13,7 +13,7 @@
 </div>
 
 <div align="center">
-  <img alt="Katavault and React logo" src="https://github.com/kibis-is/katavault/blob/main/images/katavault_typescript_logo@405x128.png" height="64" />
+  <img alt="Katavault and TypeScript logo" src="https://github.com/kibis-is/katavault/blob/main/images/katavault_typescript_logo@405x128.png" height="64" />
 </div>
 
 <h1 align="center">
