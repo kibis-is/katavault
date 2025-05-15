@@ -1,3 +1,7 @@
+<div align="center">
+  <img alt="Katavault logo" src="https://github.com/kibis-is/katavault/blob/main/images/repo_logo@128x128.png" height="64" />
+</div>
+
 <h1 align="center">
   Katavault
 </h1>
