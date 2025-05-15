@@ -20,6 +20,7 @@ import TabItem from '@theme/TabItem';
   values={[
     { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
   <TabItem value="accounts">
@@ -30,7 +31,7 @@ import TabItem from '@theme/TabItem';
     function Accounts() {
       const accounts = useAccounts();
       const removeAccount = useRemoveAccount();
-      const handleOnRemoveAccountClick = (address: string) => () => {
+      const handleOnRemoveAccountClick = useCallback((address: string) => () => {
         removeAccount(address, {
           onError: (error) => {
             console.error(error);
@@ -39,7 +40,7 @@ import TabItem from '@theme/TabItem';
             console.log(`removed account ${address}`);
           },
         });
-      };
+      }, [removeAccount]);
 
       return (
         <div>
@@ -61,14 +62,48 @@ import TabItem from '@theme/TabItem';
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
     import { Accounts } from './Accounts';
+    import { AuthScript } from './AuthScript';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
+          <AuthScript />
           <Accounts />
         </KatavaultProvider>
       );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticateWithPasskey,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticateWithPasskey({
+          user: {
+            name: 'Kibi',
+            username: 'kibi@kibis.is',
+          },
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
     }
     ```
 

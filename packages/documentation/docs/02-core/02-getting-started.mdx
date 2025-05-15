@@ -75,11 +75,11 @@ Authentication using one of the below methods is **REQUIRED** for all interactio
 
     ```typescript
     await katavault.authenticateWithPasskey({
-    user: {
-    displayName: 'Kibi', // optional
-    username: 'kibi@kibis.is',
-  },
-  });
+      user: {
+        displayName: 'Kibi', // optional
+        username: 'kibi@kibis.is',
+      },
+    });
 
     console.log(`is authenticated: ${katavault.isAuthenticated()}`);
     /*
