@@ -111,8 +111,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@kibisis/chains':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.1.1
+        version: 1.1.1
       '@noble/curves':
         specifier: ^1.8.1
         version: 1.8.1
@@ -1786,8 +1786,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kibisis/chains@1.1.0':
-    resolution: {integrity: sha512-f02kQAsS+qk7kXTTAud6r9Ir+qdDR5A2FK696BjBPITubwo42ycTO3KpzJpZ7W1ExK0upS1p7PFZfmC3OblhJw==}
+  '@kibisis/chains@1.1.1':
+    resolution: {integrity: sha512-MxRQ42Sbs7LUFQCnmlzKxQSFnC/LJYPu77qUXDj70TcOWw7fmGPZd5cTPjQueVsfUVxWbv3m6qOo5Z4uzgdT4A==}
 
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
@@ -9825,7 +9825,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kibisis/chains@1.1.0':
+  '@kibisis/chains@1.1.1':
     dependencies:
       '@stablelib/base64': 2.0.1
       axios: 1.9.0
