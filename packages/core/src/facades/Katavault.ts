@@ -229,7 +229,7 @@ export default class Katavault {
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
    * chain by the genesis hash.
    * @param {Chain} chain - The chain to be added.
-   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.'
+   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.
    * @public
    */
   public async addChain(chain: Chain): Promise<ChainWithNetworkParameters> {

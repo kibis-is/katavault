@@ -5,7 +5,7 @@ import {
 } from '@kibisis/katavault-core';
 
 // types
-import HookFunction from './HookFunction';
+import type HookFunction from './HookFunction';
 
 interface UseAuthenticateState {
   authenticateWithPasskey: HookFunction<AuthenticateWithPasskeyParameters, undefined, BaseError>;

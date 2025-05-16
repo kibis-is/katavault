@@ -23,11 +23,14 @@ import TabItem from '@theme/TabItem';
   <TabItem value="main">
 
     ```typescript
+    import { voi } from '@kibisis/chains';
     import { createKatavault, utf8ToBytes } from '@kibisis/katavault-core';
     import { verifyBytes } from 'algosdk';
 
     const address = 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU';
-    const katavault = await createKatavault();
+    const katavault = await createKatavault({
+      chains: [voi],
+    });
     const message = 'hello humie!';
     let signature: Uint8Array;
 
