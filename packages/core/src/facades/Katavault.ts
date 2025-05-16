@@ -18,7 +18,12 @@ import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
 import { AuthenticationMethod } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError, InvalidPasswordError, NotAuthenticatedError } from '@/errors';
+import {
+  AccountDoesNotExistError,
+  FailedToFetchNetworkError,
+  InvalidPasswordError,
+  NotAuthenticatedError,
+} from '@/errors';
 
 // types
 import type {
@@ -224,12 +229,14 @@ export default class Katavault {
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
    * chain by the genesis hash.
    * @param {Chain} chain - The chain to be added.
+   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.'
    * @public
    */
-  public async addChain(chain: Chain): Promise<void> {
+  public async addChain(chain: Chain): Promise<ChainWithNetworkParameters> {
     const __logPrefix = `${Katavault.displayName}#addChain`;
     let index: number;
     let _chain: ChainWithNetworkParameters;
+    let _error: string;
 
     try {
       _chain = await networkParametersFromChain(chain);
@@ -239,13 +246,19 @@ export default class Katavault {
       if (index >= 0) {
         this._chains[index] = _chain;
 
-        return;
+        return _chain;
       }
 
       // otherwise, add the chain
       this._chains.push(_chain);
+
+      return _chain;
     } catch (error) {
-      this._logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
+      _error = `failed to add chain "${chain.displayName}"`;
+
+      this._logger.error(`${__logPrefix}: ${_error} - `, error);
+
+      throw new FailedToFetchNetworkError(_error);
     }
   }
 
