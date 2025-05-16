@@ -3,7 +3,7 @@ import {
   type AuthenticateWithPasswordParameters,
   BaseError,
 } from '@kibisis/katavault-core';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 // contexts
 import { KatavaultContext } from '@/contexts';
@@ -20,7 +20,7 @@ import type { HookFunction, UseAuthenticateState } from '@/types';
  */
 export default function useAuthenticate(): UseAuthenticateState {
   // contexts
-  const { onUpdate, katavault } = useContext(KatavaultContext);
+  const { onUpdate, katavault, timestamp } = useContext(KatavaultContext);
   // states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
@@ -79,6 +79,15 @@ export default function useAuthenticate(): UseAuthenticateState {
     },
     [katavault, setIsAuthenticated, setIsAuthenticating]
   );
+
+  // on updates, check if authenticated
+  useEffect(() => {
+    if (!katavault) {
+      return;
+    }
+
+    setIsAuthenticated(katavault.isAuthenticated());
+  }, [katavault, timestamp]);
 
   return {
     authenticateWithPasskey,
