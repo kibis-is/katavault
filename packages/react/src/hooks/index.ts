@@ -1,7 +1,5 @@
-export { default as useAccounts } from './useAccounts';
-export { default as useAuthenticate } from './useAuthenticate';
-export { default as useChains } from './useChains';
-export { default as useClear } from './useClear';
-export { default as useGenerateAccount } from './useGenerateAccount';
-export { default as useRemoveAccount } from './useRemoveAccount';
-export { default as useSignMessage } from './useSignMessage';
+export * from './accounts';
+export * from './authentication';
+export * from './chains';
+export * from './data';
+export * from './general';
