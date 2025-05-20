@@ -1,3 +1,10 @@
+# [@kibisis/katavault-react-v1.1.0-beta.1](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.0.0...@kibisis/katavault-react-v1.1.0-beta.1) (2025-05-20)
+
+
+### Features
+
+* add chain configuration ([#7](https://github.com/kibis-is/katavault/issues/7)) ([71ae661](https://github.com/kibis-is/katavault/commit/71ae661050d717af3a7ed2393427c5af36ec4c80))
+
 # @kibisis/katavault-react-v1.0.0 (2025-05-15)
 
 
