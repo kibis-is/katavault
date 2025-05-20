@@ -21,6 +21,7 @@ import { AuthenticationMethod } from '@/enums';
 import {
   AccountDoesNotExistError,
   FailedToFetchNetworkError,
+  InvalidAccountError,
   InvalidPasswordError,
   NotAuthenticatedError,
 } from '@/errors';
@@ -30,10 +31,13 @@ import type {
   Account,
   AccountStoreItemWithPasskey,
   AccountStoreItemWithPassword,
+  AddAccountParameters,
   AuthenticateWithPasskeyParameters,
   AuthenticateWithPasswordParameters,
   AuthenticationStore,
   ClientInformation,
+  ImportAccountWithMnemonicParameters,
+  ImportAccountWithPrivateKeyParameters,
   InitializeVaultParameters,
   KatavaultParameters,
   Logger,
@@ -52,6 +56,8 @@ import {
   createVaultName,
   generatePrivateKey,
   hexToBytes,
+  isValidMnemonic,
+  privateKeyFromMnemonic,
   utf8ToBytes,
 } from '@/utilities';
 import { encode as encodeUtf8 } from '@stablelib/utf8';
@@ -164,6 +170,61 @@ export default class Katavault {
         }
       },
     });
+  }
+
+  /**
+   * Adds the account to the provider.
+   * @param {AddAccountParameters} params - The account to be added.
+   * @returns {Promise<Account>} A promise that resolves to the added account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @private
+   */
+  private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
+    const address = addressFromPrivateKey(privateKey);
+    let encryptedKeyData: Uint8Array;
+    let passkey: PasskeyStoreSchema | null;
+
+    switch (this._authenticationStore?.__type) {
+      case AuthenticationMethod.Passkey:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+        passkey = await this._authenticationStore.store.passkey();
+
+        if (!passkey) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        await this._accountStore.upsert([
+          {
+            address,
+            credentialID: passkey.credentialID,
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      case AuthenticationMethod.Password:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+
+        await this._accountStore.upsert([
+          {
+            address,
+            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      default:
+        throw new NotAuthenticatedError('not authenticated');
+    }
+
+    return {
+      address,
+      name,
+    };
   }
 
   /**
@@ -412,51 +473,59 @@ export default class Katavault {
    * @public
    */
   public async generateAccount(name?: string): Promise<Account> {
-    const privateKey: Uint8Array = generatePrivateKey();
-    const address = addressFromPrivateKey(privateKey);
-    let encryptedKeyData: Uint8Array;
-    let passkey: PasskeyStoreSchema | null;
+    return await this._addAccount({
+      name,
+      privateKey: generatePrivateKey(),
+    });
+  }
 
-    switch (this._authenticationStore?.__type) {
-      case AuthenticationMethod.Passkey:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-        passkey = await this._authenticationStore.store.passkey();
+  /**
+   * Imports an account from a 25-word mnemonic.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {ImportAccountWithPrivateKeyParameters} params - The 25-word mnemonic of the account to be imported and an
+   * optional name for the account.
+   * @returns {Promise<Account>} A promise that resolves to the imported account.
+   * @throws {InvalidAccountError} If the supplied mnemonic is not valid.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async importAccountFromMnemonic({ mnemonic, name }: ImportAccountWithMnemonicParameters): Promise<Account> {
+    const formattedMnemonic = mnemonic
+      .trim()
+      .split(/[\s,]+/) // split on whitespace and commas
+      .join(' '); // join back together with whitespace
 
-        if (!passkey) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        await this._accountStore.upsert([
-          {
-            address,
-            credentialID: passkey.credentialID,
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      case AuthenticationMethod.Password:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
-        await this._accountStore.upsert([
-          {
-            address,
-            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      default:
-        throw new NotAuthenticatedError('not authenticated');
+    if (isValidMnemonic(formattedMnemonic)) {
+      throw new InvalidAccountError('invalid mnemonic');
     }
 
-    return {
-      address,
+    return await this._addAccount({
       name,
-    };
+      privateKey: privateKeyFromMnemonic(formattedMnemonic),
+    });
+  }
+
+  /**
+   * Imports an account from a private key.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {ImportAccountWithPrivateKeyParameters} params - The private key of the account to be imported and an
+   * optional name for the account.
+   * @returns {Promise<Account>} A promise that resolves to the imported account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async importAccountFromPrivateKey({
+    name,
+    privateKey,
+  }: ImportAccountWithPrivateKeyParameters): Promise<Account> {
+    return await this._addAccount({
+      name,
+      privateKey,
+    });
   }
 
   /**
