@@ -1,11 +1,9 @@
+import { voiTestnet } from '@kibisis/chains';
 import type { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
 const config: CreateKatavaultParameters = {
+  chains: [voiTestnet],
   debug: true,
-  user: {
-    displayName: `Kieran O'Neill`,
-    username: `magnetartare`,
-  },
 };
 
 export default config;

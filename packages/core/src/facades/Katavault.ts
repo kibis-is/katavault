@@ -491,7 +491,7 @@ export default class Katavault {
 
   /**
    * Removes a chain from the list of supported chains based on the provided genesis hash.
-   * @param {string} genesisHash - The base64 encoded hash of the chain to be removed.
+   * @param {string} genesisHash - The base64 encoded genesis hash of the chain to be removed.
    * @public
    */
   public removeChainByGenesisHash(genesisHash: string): void {

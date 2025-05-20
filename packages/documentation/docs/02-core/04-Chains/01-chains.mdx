@@ -1,0 +1,69 @@
+---
+sidebar_label: chains
+slug: /core/chains/chains
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# chains
+
+> Gets the supported chains.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { algorand, type ChainWithNetworkParameters, voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [algorand, voi],
+    });
+    let chains: ChainWithNetworkParameters[];
+
+    await katavault.authenticateWithPasskey({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+
+    chains = katavault.chains();
+
+    console.log(chains);
+    /*
+    [
+      {
+        displayName: 'Algorand',
+        genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
+        ...
+      },
+      {
+        displayName: 'Voi Network',
+        genesisHash: 'r20fSQI8gWe/kFZziNonSPCXLwcQmH/nxROvnnueWOk=',
+        ...
+      },
+    ]
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`ChainWithNetworkParameters[]`
+
+The supported chains.

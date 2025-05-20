@@ -1,0 +1,47 @@
+---
+sidebar_label: removeChainByGenesisHash
+slug: /core/chains/remove-chain-by-genesis-hash
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# removeChainByGenesisHash
+
+> Removes a chain from the list of supported chains based on the provided genesis hash.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { algorand, voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [algorand, voi],
+    });
+
+    katavault.removeChainByGenesisHash('wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=');
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### genesisHash
+
+* Type: `string`
+
+The base64 encoded genesis hash of the chain to be removed.

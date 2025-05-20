@@ -5,8 +5,8 @@ import { useContext, useEffect, useState } from 'react';
 import { KatavaultContext } from '@/contexts';
 
 /**
- * Hook for getting the chains.
- * @returns {ChainWithNetworkParameters[]} The supported chains in the wallet.
+ * Hook for getting the supported chains.
+ * @returns {ChainWithNetworkParameters[]} The list of supported chains stored in the wallet.
  */
 export default function useChains(): ChainWithNetworkParameters[] {
   const { katavault, timestamp } = useContext(KatavaultContext);

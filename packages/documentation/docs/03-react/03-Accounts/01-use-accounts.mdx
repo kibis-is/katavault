@@ -95,12 +95,13 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
+    import { voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
+      chains: [voi],
+      client: {
+        name: 'Awesome App!!',
       },
     };
 
