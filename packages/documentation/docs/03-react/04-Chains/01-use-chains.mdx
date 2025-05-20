@@ -1,62 +1,42 @@
 ---
-sidebar_label: useSignMessage
-slug: /react/data/use-sign-message
+sidebar_label: useChains
+slug: /react/data/use-chains
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useSignMessage
+# useChains
 
-> Hook to sign a message.
+> Hook for getting the list of supported chains.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="sign-message"
+  defaultValue="chains"
   values={[
-    { label: 'SignMessage.tsx', value: 'sign-message' },
+    { label: 'Chains.tsx', value: 'chains' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="sign-message">
+  <TabItem value="chains">
 
     ```typescript
-    import { useAccounts, useSignMessage } from '@kibisis/katavault-react';
+    import { useChains } from '@kibisis/katavault-react';
 
-    function SignMessage() {
-      const accounts = useAccounts();
-      const signMessage = useSignMessage();
-      const handleOnSignMessageClick = (address: string) => () => {
-        signMessage({
-          address,
-          encoding: 'hex',
-          message: 'hello humie!',
-        }, {
-          onError: (error) => {
-            console.error(error);
-          },
-          onSuccess: (result: string) => {
-            console.log(`signed message with signature: ${result}`);
-          },
-        });
-      };
+    function Chains() {
+      const chains = useChains();
 
-      return (
+      return chains.map(({ displayName, genesisID }) => (
         <div>
-          {accounts.map(({ address, name }) => (
-            <div>
-              <p>Address: {address}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnSignMessageClick(address)}>Remove</button>
-            </div>
-          ))}
+          <p>Name: {displayName}</p>
+          <p>ID: {genesisID}</p>
         </div>
-      );
+      ));
     }
     ```
 
@@ -65,15 +45,15 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Chains } from './Chains';
     import { AuthScript } from './AuthScript';
-    import { SignMessage } from './SignMessage';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <SignMessage />
+          <Chains />
         </KatavaultProvider>
       );
     }
@@ -115,12 +95,13 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
+    import { voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
+      chains: [voi],
+      client: {
+        name: 'Awesome App!!',
       },
     };
 
@@ -134,24 +115,6 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: SignParameters, options?: { onError, onSuccess }) => void`
+`ChainWithNetworkParameters[]`
 
-The function can be called with callbacks that are invoked on error/success.
-
-#### onError
-
-`(error: BaseError, params: SignParameters) => void | Promimse<void>`
-
-This will be invoked if there was an error.
-
-#### onSuccess
-
-`(result: string | Uint8Array, params: SignParameters) => void | Promimse<void>`
-
-This will be invoked with the signature as the result if the message signing was successful.
-
-:::note
-
-If the `params.encoding` are used, the result will be a string in the specified encoding. Otherwise, the raw signature bytes will be returned.
-
-:::
+The list of supported chains stored in the wallet.

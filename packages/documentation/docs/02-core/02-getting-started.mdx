@@ -15,8 +15,6 @@ import TabItem from '@theme/TabItem';
 
 ## Overview
 
-Katavault is a TypeScript implementation that allows dApps to create/import embedded wallets within the browser.
-
 The core implementation contains the main functionality that handles all the authentication, encryption and storage of wallet keys.
 
 <SectionBreak />
@@ -25,7 +23,13 @@ The core implementation contains the main functionality that handles all the aut
 
 ### 1. Set up Katavault
 
-First, set up the Katavault client:
+Configure the Katavault client.
+
+:::info
+
+While not a requirement, it is **RECOMMENDED** to use [`@kibisis/chains`](https://www.npmjs.com/package/%40kibisis/chains) to handle the chain configuration.
+
+:::
 
 <Tabs
   defaultValue="main"
@@ -35,9 +39,12 @@ First, set up the Katavault client:
   <TabItem value="main">
 
     ```typescript
+    import { voi } from '@kibisis/chains';
     import { createKatavault } from '@kibisis/katavault-core';
 
-    const katavault = await createKatavault();
+    const katavault = await createKatavault({
+      chains: [voi],
+    });
     ```
 
   </TabItem>
@@ -135,7 +142,7 @@ If passkeys are not supported, or the supplied passkey does not support the [PRF
 
 :::note
 
-If Katavault was previously initilized with a password, and the supplied password does not match the saved one a [InvalidPasswordError](04-glossary/03-errors.mdx#invalidpassworderror) error will be thrown.
+If Katavault was previously initialized with a password, and the supplied password does not match the saved one a [InvalidPasswordError](04-glossary/03-errors.mdx#invalidpassworderror) error will be thrown.
 
 :::
 

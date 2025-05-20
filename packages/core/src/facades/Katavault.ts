@@ -1,6 +1,7 @@
+import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
 import { ed25519 } from '@noble/curves/ed25519';
 import { concatBytes } from '@noble/hashes/utils';
-import { IDBPDatabase, openDB } from 'idb';
+import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
 import {
@@ -17,7 +18,12 @@ import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
 import { AuthenticationMethod } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError, InvalidPasswordError, NotAuthenticatedError } from '@/errors';
+import {
+  AccountDoesNotExistError,
+  FailedToFetchNetworkError,
+  InvalidPasswordError,
+  NotAuthenticatedError,
+} from '@/errors';
 
 // types
 import type {
@@ -56,12 +62,14 @@ export default class Katavault {
   // private variables
   private _accountStore: AccountStore;
   private _authenticationStore: AuthenticationStore | null = null;
+  private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: Logger;
   private _user: UserInformation;
   private _vault: IDBPDatabase<VaultSchema>;
 
-  public constructor({ clientInformation, logger }: KatavaultParameters) {
+  public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
+    this._chains = chains;
     this._clientInformation = clientInformation;
     this._logger = logger;
   }
@@ -161,6 +169,98 @@ export default class Katavault {
   /**
    * public methods
    */
+
+  /**
+   * Gets a list of accounts within the wallet.
+   *
+   * **NOTE:** Requires authentication.
+   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
+   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @public
+   */
+  public async accounts(): Promise<Account[]> {
+    const items = await this._accountStore.accounts();
+
+    if (!this.isAuthenticated()) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    let results: Account[] = [];
+
+    for (const account of items) {
+      let credentialID: string | null;
+      let passkey: PasskeyStoreSchema | null;
+      let passwordHash: string | null;
+
+      switch (this._authenticationStore?.__type) {
+        case AuthenticationMethod.Passkey:
+          credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
+          passkey = await this._authenticationStore.store.passkey();
+
+          if (credentialID && passkey && credentialID === passkey.credentialID) {
+            results.push({
+              address: account.address,
+              name: account.name,
+            });
+          }
+
+          break;
+        case AuthenticationMethod.Password:
+          passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
+
+          // check if the account was encrypted using the correct password
+          if (passwordHash && passwordHash === bytesToHex(this._authenticationStore.store.hash())) {
+            results.push({
+              address: account.address,
+              name: account.name,
+            });
+          }
+
+          break;
+        default:
+          break;
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
+   * chain by the genesis hash.
+   * @param {Chain} chain - The chain to be added.
+   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.
+   * @public
+   */
+  public async addChain(chain: Chain): Promise<ChainWithNetworkParameters> {
+    const __logPrefix = `${Katavault.displayName}#addChain`;
+    let index: number;
+    let _chain: ChainWithNetworkParameters;
+    let _error: string;
+
+    try {
+      _chain = await networkParametersFromChain(chain);
+      index = this._chains.findIndex(({ genesisHash }) => genesisHash === _chain.genesisHash);
+
+      // if the chain already exists, update the chain
+      if (index >= 0) {
+        this._chains[index] = _chain;
+
+        return _chain;
+      }
+
+      // otherwise, add the chain
+      this._chains.push(_chain);
+
+      return _chain;
+    } catch (error) {
+      _error = `failed to add chain "${chain.displayName}"`;
+
+      this._logger.error(`${__logPrefix}: ${_error} - `, error);
+
+      throw new FailedToFetchNetworkError(_error);
+    }
+  }
 
   /**
    * Authenticates with a passkey.
@@ -275,58 +375,12 @@ export default class Katavault {
   }
 
   /**
-   * Gets a list of accounts within the wallet.
-   *
-   * **NOTE:** Requires authentication.
-   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * Gets the supported chains.
+   * @returns {ChainWithNetworkParameters[]} The supported chains.
    * @public
    */
-  public async accounts(): Promise<Account[]> {
-    const items = await this._accountStore.accounts();
-
-    if (!this.isAuthenticated()) {
-      throw new NotAuthenticatedError('not authenticated');
-    }
-
-    let results: Account[] = [];
-
-    for (const account of items) {
-      let credentialID: string | null;
-      let passkey: PasskeyStoreSchema | null;
-      let passwordHash: string | null;
-
-      switch (this._authenticationStore?.__type) {
-        case AuthenticationMethod.Passkey:
-          credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
-          passkey = await this._authenticationStore.store.passkey();
-
-          if (credentialID && passkey && credentialID === passkey.credentialID) {
-            results.push({
-              address: account.address,
-              name: account.name,
-            });
-          }
-
-          break;
-        case AuthenticationMethod.Password:
-          passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
-
-          // check if the account was encrypted using the correct password
-          if (passwordHash && passwordHash === bytesToHex(this._authenticationStore.store.hash())) {
-            results.push({
-              address: account.address,
-              name: account.name,
-            });
-          }
-
-          break;
-        default:
-          break;
-      }
-    }
-
-    return results;
+  public chains(): ChainWithNetworkParameters[] {
+    return this._chains;
   }
 
   /**
@@ -433,6 +487,15 @@ export default class Katavault {
     results = await this._accountStore.remove([address]);
 
     this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
+  }
+
+  /**
+   * Removes a chain from the list of supported chains based on the provided genesis hash.
+   * @param {string} genesisHash - The base64 encoded genesis hash of the chain to be removed.
+   * @public
+   */
+  public removeChainByGenesisHash(genesisHash: string): void {
+    this._chains = this._chains.filter(({ genesisHash: _genesisHash }) => _genesisHash !== genesisHash);
   }
 
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;

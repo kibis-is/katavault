@@ -1,0 +1,63 @@
+---
+sidebar_label: addChain
+slug: /core/chains/add-chain
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# addChain
+
+> Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing chain by the genesis hash.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { algorand, voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [voi],
+    });
+
+    await katavault.addChain(algorand);
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### chain
+
+* Type: `ChainWithNetworkParameters`
+
+The chain to be added.
+
+<SectionBreak />
+
+## Returns
+
+`Promise<ChainWithNetworkParameters>`
+
+A promise that resolves to the chain with the fetched network parameters.
+
+<SectionBreak />
+
+## Throws
+
+### [FailedToFetchNetworkError](04-glossary/03-errors.mdx#failedtofetchnetworkerror)
+
+If the chain's network parameters could not be fetched.

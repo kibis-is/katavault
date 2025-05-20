@@ -1,56 +1,58 @@
 ---
-sidebar_label: useRemoveAccount
-slug: /react/accounts/use-remove-account
+sidebar_label: useAddChain
+slug: /react/chains/use-add-chain
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useRemoveAccount
+# useAddChain
 
-> Hook to remove an account.
+> Hook to add a chain.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="accounts"
+  defaultValue="chains"
   values={[
-    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'Chains.tsx', value: 'chains' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="accounts">
+  <TabItem value="chains">
 
     ```typescript
-    import { useAccounts, useRemoveAccount } from '@kibisis/katavault-react';
+    import { algorand, type ChainWithNetworkParameters } from '@kibisis/chains';
+    import { useAddChain, useChains } from '@kibisis/katavault-react';
 
-    function Accounts() {
-      const accounts = useAccounts();
-      const removeAccount = useRemoveAccount();
-      const handleOnRemoveAccountClick = useCallback((address: string) => () => {
-        removeAccount(address, {
+    function Chains() {
+      const chains = useChains();
+      const addChain = useAddChain();
+      const handleOnAddAlgorandClick = useCallback(() => {
+        addChain(algorand, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: () => {
-            console.log(`removed account ${address}`);
+          onSuccess: (result: ChainWithNetworkParameters) => {
+            console.log(`added new chain ${account.genesisID}`);
           },
         });
-      }, [removeAccount]);
+      }, [addChain]);
 
       return (
         <div>
-          {accounts.map(({ address, name }) => (
+          {chains.map(({ displayName, genesisID }) => (
             <div>
-              <p>Address: {address}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnRemoveAccountClick(address)}>Remove</button>
+              <p>Name: {displayName}</p>
+              <p>ID: {genesisID}</p>
             </div>
-          ))}
+          )}
+
+          <button onClick={handleOnAddAlgorandClick}>Add Algorand</button>
         </div>
       );
     }
@@ -61,7 +63,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Accounts } from './Accounts';
+    import { Chains } from './Chains';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -69,7 +71,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Accounts />
+          <Chains />
         </KatavaultProvider>
       );
     }
@@ -131,18 +133,18 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+`(params?: Chain, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: string) => void | Promimse<void>`
+`(error: BaseError, params?: Chain) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: undefined, params: string) => void | Promimse<void>`
+`(result: ChainWithNetworkParameters, params?: Chain) => void | Promimse<void>`
 
-This will be invoked if the account removal was successful.
+This will be invoked if the chain was added successfully.

@@ -60,5 +60,8 @@
     "@kibisis/katavault-core": "workspace:",
     "algosdk": "^3.x",
     "react": "^18.x"
+  },
+  "dependencies": {
+    "@kibisis/chains": "catalog:"
   }
 }
