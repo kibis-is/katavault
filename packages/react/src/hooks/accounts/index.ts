@@ -4,3 +4,4 @@ export { default as useGenerateCredentialAccount } from './useGenerateCredential
 export { default as useImportAccountWithMnemonic } from './useImportAccountWithMnemonic';
 export { default as useImportAccountWithPrivateKey } from './useImportAccountWithPrivateKey';
 export { default as useRemoveAccount } from './useRemoveAccount';
+export { default as useSetAccountNameByAddress } from './useSetAccountNameByAddress';

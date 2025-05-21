@@ -60,7 +60,7 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 | Name     | Type     | Required | Default | Description                                                                            |
 |----------|----------|----------|---------|----------------------------------------------------------------------------------------|
-| nmemonic | `string` | yes      | -       | A whitespace or comma separated 25-word mnemonic seed phrase containing BIP-039 words. |
+| mnemonic | `string` | yes      | -       | A whitespace or comma separated 25-word mnemonic seed phrase containing BIP-039 words. |
 | name     | `string` | no       | -       | The name of the account.                                                               |
 
 <SectionBreak />
@@ -71,6 +71,15 @@ import SectionBreak from '@site/src/components/SectionBreak';
 |------------|--------------|----------|---------|----------------------------------------------------------|
 | name       | `string`     | no       | -       | The name of the account.                                 |
 | privateKey | `Uint8Array` | yes      | -       | The raw private key used to derive the Ed25519 key pair. |
+
+<SectionBreak />
+
+## SetAccountNameByAddressParameters
+
+| Name    | Type     | Required | Default | Description                           |
+|---------|----------|----------|---------|---------------------------------------|
+| address | `string` | yes      | -       | The address of the account to update. |
+| name    | `string` | yes      | -       | The name of the account.              |
 
 <SectionBreak />
 

@@ -42,6 +42,7 @@ import type {
   KatavaultParameters,
   Logger,
   PasskeyStoreSchema,
+  SetAccountNameByAddressParameters,
   SignMessageParameters,
   UserInformation,
   VaultSchema,
@@ -646,6 +647,33 @@ export default class Katavault {
     this._chains = this._chains.filter(({ genesisHash: _genesisHash }) => _genesisHash !== genesisHash);
   }
 
+  /**
+   * Updates the name of the account.
+   * @param {SetAccountNameByAddressParameters} params - The address and name to set.
+   * @returns {Promise<Account>} A promise that resolves to the updated account.
+   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
+   * @public
+   */
+  public async setAccountNameByAddress({ address, name }: SetAccountNameByAddressParameters): Promise<Account> {
+    const account = await this._accountStore.accountByAddress(address);
+
+    if (!account) {
+      throw new AccountDoesNotExistError(`account "${address}" does not exist`);
+    }
+
+    await this._accountStore.upsert([
+      {
+        ...account,
+        name,
+      },
+    ]);
+
+    return {
+      address,
+      name,
+    };
+  }
+
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
   public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;
   /**
@@ -653,7 +681,7 @@ export default class Katavault {
    *
    * **NOTE:** Requires authentication.
    * **NOTE:** The message is prepended with "MX" for domain separation.
-   * @param {SignMessageParameters} parameters - The signer, the message and optional output encoding.
+   * @param {SignMessageParameters} params - The signer, the message and optional output encoding.
    * @returns {Promise<string | Uint8Array>} A promise that resolves to the signature of the signed message. If the
    * encoding parameter was specified, the signature will be encoded in that format, otherwise signature will be in raw
    * bytes.
