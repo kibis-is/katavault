@@ -1,3 +1,10 @@
+# [@kibisis/katavault-core-v1.1.0-beta.2](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.1.0-beta.1...@kibisis/katavault-core-v1.1.0-beta.2) (2025-05-21)
+
+
+### Features
+
+* generate credential accounts ([#8](https://github.com/kibis-is/katavault/issues/8)) ([6ac3b42](https://github.com/kibis-is/katavault/commit/6ac3b421da2339be152da3b291b249b4faea70f6))
+
 # [@kibisis/katavault-core-v1.1.0-beta.1](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.0.0...@kibisis/katavault-core-v1.1.0-beta.1) (2025-05-20)
 
 
