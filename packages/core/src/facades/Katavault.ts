@@ -58,6 +58,7 @@ import {
   hexToBytes,
   isValidMnemonic,
   privateKeyFromMnemonic,
+  privateKeyFromPasswordCredentials,
   utf8ToBytes,
 } from '@/utilities';
 import { encode as encodeUtf8 } from '@stablelib/utf8';
@@ -71,7 +72,7 @@ export default class Katavault {
   private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: Logger;
-  private _user: UserInformation;
+  private _user: UserInformation | null = null;
   private _vault: IDBPDatabase<VaultSchema>;
 
   public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
@@ -83,6 +84,61 @@ export default class Katavault {
   /**
    * private methods
    */
+
+  /**
+   * Adds the account to the provider.
+   * @param {AddAccountParameters} params - The account to be added.
+   * @returns {Promise<Account>} A promise that resolves to the added account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @private
+   */
+  private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
+    const address = addressFromPrivateKey(privateKey);
+    let encryptedKeyData: Uint8Array;
+    let passkey: PasskeyStoreSchema | null;
+
+    switch (this._authenticationStore?.__type) {
+      case AuthenticationMethod.Passkey:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+        passkey = await this._authenticationStore.store.passkey();
+
+        if (!passkey) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        await this._accountStore.upsert([
+          {
+            address,
+            credentialID: passkey.credentialID,
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      case AuthenticationMethod.Password:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+
+        await this._accountStore.upsert([
+          {
+            address,
+            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      default:
+        throw new NotAuthenticatedError('not authenticated');
+    }
+
+    return {
+      address,
+      name,
+    };
+  }
 
   /**
    * Gets the decrypted account private key by address.
@@ -170,61 +226,6 @@ export default class Katavault {
         }
       },
     });
-  }
-
-  /**
-   * Adds the account to the provider.
-   * @param {AddAccountParameters} params - The account to be added.
-   * @returns {Promise<Account>} A promise that resolves to the added account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @private
-   */
-  private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
-    const address = addressFromPrivateKey(privateKey);
-    let encryptedKeyData: Uint8Array;
-    let passkey: PasskeyStoreSchema | null;
-
-    switch (this._authenticationStore?.__type) {
-      case AuthenticationMethod.Passkey:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-        passkey = await this._authenticationStore.store.passkey();
-
-        if (!passkey) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        await this._accountStore.upsert([
-          {
-            address,
-            credentialID: passkey.credentialID,
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      case AuthenticationMethod.Password:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
-        await this._accountStore.upsert([
-          {
-            address,
-            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      default:
-        throw new NotAuthenticatedError('not authenticated');
-    }
-
-    return {
-      address,
-      name,
-    };
   }
 
   /**
@@ -477,6 +478,84 @@ export default class Katavault {
       name,
       privateKey: generatePrivateKey(),
     });
+  }
+
+  /**
+   * Generates a credential account in the wallet. The credential account is an account derived from the user's
+   * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
+   * of the username, password and hostname.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
+   * @returns {Promise<Account>} A promise that resolves to the generated credential account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async generateCredentialAccount(name?: string): Promise<Account> {
+    let address: string;
+    let encryptedKeyData: Uint8Array;
+    let keyMaterial: Uint8Array | null;
+    let passkey: PasskeyStoreSchema | null;
+    let password: string | null;
+    let privateKey: Uint8Array;
+
+    switch (this._authenticationStore?.__type) {
+      case AuthenticationMethod.Passkey:
+        keyMaterial = this._authenticationStore.store.keyMaterial();
+        passkey = await this._authenticationStore.store.passkey();
+
+        if (!keyMaterial || !passkey) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        address = addressFromPrivateKey(keyMaterial);
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
+
+        await this._accountStore.upsert([
+          {
+            address,
+            credentialID: passkey.credentialID,
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        return {
+          address,
+          name,
+        };
+      case AuthenticationMethod.Password:
+        password = this._authenticationStore.store.password();
+
+        if (!password || !this._user) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        privateKey = await privateKeyFromPasswordCredentials({
+          hostname: this._clientInformation.hostname,
+          password,
+          username: this._user.username,
+        });
+        address = addressFromPrivateKey(privateKey);
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+
+        await this._accountStore.upsert([
+          {
+            address,
+            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        return {
+          address,
+          name,
+        };
+      default:
+        throw new NotAuthenticatedError('not authenticated');
+    }
   }
 
   /**

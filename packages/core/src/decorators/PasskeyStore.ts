@@ -340,6 +340,16 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   }
 
   /**
+   * Retrieves the key material associated with the current instance.
+   * @return {Uint8Array | null} A Uint8Array containing the key material if it is set, or null if no key material is
+   * available.
+   * @public
+   */
+  public keyMaterial(): Uint8Array | null {
+    return this._keyMaterial;
+  }
+
+  /**
    * Gets the passkey.
    * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the passkey or null if no passkey exists.
    * @public

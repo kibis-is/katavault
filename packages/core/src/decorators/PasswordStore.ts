@@ -161,6 +161,15 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
   }
 
   /**
+   * Retrieves the stored password.
+   * @return {string | null} The current password if available, otherwise null.
+   * @public
+   */
+  public password(): string | null {
+    return this._password;
+  }
+
+  /**
    * Sets a hexadecimal encoded encrypted challenge.
    * @param {string} value - A hexadecimal encoded encrypted challenge.
    * @returns {string} The hexadecimal encoded encrypted challenge.
