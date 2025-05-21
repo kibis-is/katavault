@@ -1,60 +1,58 @@
 ---
-sidebar_label: useSignMessage
-slug: /react/data/use-sign-message
+sidebar_label: useAddChain
+slug: /react/chains/use-add-chain
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useSignMessage
+# useAddChain
 
-> Hook to sign a message.
+> Hook to add a chain.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="sign-message"
+  defaultValue="chains"
   values={[
-    { label: 'SignMessage.tsx', value: 'sign-message' },
+    { label: 'Chains.tsx', value: 'chains' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="sign-message">
+  <TabItem value="chains">
 
     ```typescript
-    import { useAccounts, useSignMessage } from '@kibisis/katavault-react';
+    import { algorand, type ChainWithNetworkParameters } from '@kibisis/chains';
+    import { useAddChain, useChains } from '@kibisis/katavault-react';
 
-    function SignMessage() {
-      const accounts = useAccounts();
-      const signMessage = useSignMessage();
-      const handleOnSignMessageClick = (address: string) => () => {
-        signMessage({
-          address,
-          encoding: 'hex',
-          message: 'hello humie!',
-        }, {
+    function Chains() {
+      const chains = useChains();
+      const addChain = useAddChain();
+      const handleOnAddAlgorandClick = useCallback(() => {
+        addChain(algorand, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: (result: string) => {
-            console.log(`signed message with signature: ${result}`);
+          onSuccess: (result: ChainWithNetworkParameters) => {
+            console.log(`added new chain ${account.genesisID}`);
           },
         });
-      };
+      }, [addChain]);
 
       return (
         <div>
-          {accounts.map(({ address, name }) => (
+          {chains.map(({ displayName, genesisID }) => (
             <div>
-              <p>Address: {address}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnSignMessageClick(address)}>Remove</button>
+              <p>Name: {displayName}</p>
+              <p>ID: {genesisID}</p>
             </div>
-          ))}
+          )}
+
+          <button onClick={handleOnAddAlgorandClick}>Add Algorand</button>
         </div>
       );
     }
@@ -65,15 +63,15 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Chains } from './Chains';
     import { AuthScript } from './AuthScript';
-    import { SignMessage } from './SignMessage';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <SignMessage />
+          <Chains />
         </KatavaultProvider>
       );
     }
@@ -135,24 +133,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: SignParameters, options?: { onError, onSuccess }) => void`
+`(params?: Chain, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: SignParameters) => void | Promimse<void>`
+`(error: BaseError, params?: Chain) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: string | Uint8Array, params: SignParameters) => void | Promimse<void>`
+`(result: ChainWithNetworkParameters, params?: Chain) => void | Promimse<void>`
 
-This will be invoked with the signature as the result if the message signing was successful.
+This will be invoked if the chain was added successfully.
 
-:::note
+## See also
 
-If the `params.encoding` are used, the result will be a string in the specified encoding. Otherwise, the raw signature bytes will be returned.
-
-:::
+* [chains](02-core/04-chains/02-add-chain.mdx)

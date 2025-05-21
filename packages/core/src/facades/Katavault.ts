@@ -21,6 +21,7 @@ import { AuthenticationMethod } from '@/enums';
 import {
   AccountDoesNotExistError,
   FailedToFetchNetworkError,
+  InvalidAccountError,
   InvalidPasswordError,
   NotAuthenticatedError,
 } from '@/errors';
@@ -30,14 +31,18 @@ import type {
   Account,
   AccountStoreItemWithPasskey,
   AccountStoreItemWithPassword,
+  AddAccountParameters,
   AuthenticateWithPasskeyParameters,
   AuthenticateWithPasswordParameters,
   AuthenticationStore,
   ClientInformation,
+  ImportAccountWithMnemonicParameters,
+  ImportAccountWithPrivateKeyParameters,
   InitializeVaultParameters,
   KatavaultParameters,
   Logger,
   PasskeyStoreSchema,
+  SetAccountNameByAddressParameters,
   SignMessageParameters,
   UserInformation,
   VaultSchema,
@@ -52,6 +57,9 @@ import {
   createVaultName,
   generatePrivateKey,
   hexToBytes,
+  isValidMnemonic,
+  privateKeyFromMnemonic,
+  privateKeyFromPasswordCredentials,
   utf8ToBytes,
 } from '@/utilities';
 import { encode as encodeUtf8 } from '@stablelib/utf8';
@@ -65,7 +73,7 @@ export default class Katavault {
   private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: Logger;
-  private _user: UserInformation;
+  private _user: UserInformation | null = null;
   private _vault: IDBPDatabase<VaultSchema>;
 
   public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
@@ -77,6 +85,61 @@ export default class Katavault {
   /**
    * private methods
    */
+
+  /**
+   * Adds the account to the provider.
+   * @param {AddAccountParameters} params - The account to be added.
+   * @returns {Promise<Account>} A promise that resolves to the added account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @private
+   */
+  private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
+    const address = addressFromPrivateKey(privateKey);
+    let encryptedKeyData: Uint8Array;
+    let passkey: PasskeyStoreSchema | null;
+
+    switch (this._authenticationStore?.__type) {
+      case AuthenticationMethod.Passkey:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+        passkey = await this._authenticationStore.store.passkey();
+
+        if (!passkey) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        await this._accountStore.upsert([
+          {
+            address,
+            credentialID: passkey.credentialID,
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      case AuthenticationMethod.Password:
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+
+        await this._accountStore.upsert([
+          {
+            address,
+            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
+            keyData: bytesToHex(encryptedKeyData),
+            name,
+          },
+        ]);
+
+        break;
+      default:
+        throw new NotAuthenticatedError('not authenticated');
+    }
+
+    return {
+      address,
+      name,
+    };
+  }
 
   /**
    * Gets the decrypted account private key by address.
@@ -412,19 +475,43 @@ export default class Katavault {
    * @public
    */
   public async generateAccount(name?: string): Promise<Account> {
-    const privateKey: Uint8Array = generatePrivateKey();
-    const address = addressFromPrivateKey(privateKey);
+    return await this._addAccount({
+      name,
+      privateKey: generatePrivateKey(),
+    });
+  }
+
+  /**
+   * Generates a credential account in the wallet. The credential account is an account derived from the user's
+   * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
+   * of the username, password and hostname.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
+   * @returns {Promise<Account>} A promise that resolves to the generated credential account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async generateCredentialAccount(name?: string): Promise<Account> {
+    let address: string;
     let encryptedKeyData: Uint8Array;
+    let keyMaterial: Uint8Array | null;
     let passkey: PasskeyStoreSchema | null;
+    let password: string | null;
+    let privateKey: Uint8Array;
 
     switch (this._authenticationStore?.__type) {
       case AuthenticationMethod.Passkey:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+        keyMaterial = this._authenticationStore.store.keyMaterial();
         passkey = await this._authenticationStore.store.passkey();
 
-        if (!passkey) {
+        if (!keyMaterial || !passkey) {
           throw new NotAuthenticatedError('not authenticated');
         }
+
+        address = addressFromPrivateKey(keyMaterial);
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
 
         await this._accountStore.upsert([
           {
@@ -435,8 +522,23 @@ export default class Katavault {
           },
         ]);
 
-        break;
+        return {
+          address,
+          name,
+        };
       case AuthenticationMethod.Password:
+        password = this._authenticationStore.store.password();
+
+        if (!password || !this._user) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        privateKey = await privateKeyFromPasswordCredentials({
+          hostname: this._clientInformation.hostname,
+          password,
+          username: this._user.username,
+        });
+        address = addressFromPrivateKey(privateKey);
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
 
         await this._accountStore.upsert([
@@ -448,15 +550,62 @@ export default class Katavault {
           },
         ]);
 
-        break;
+        return {
+          address,
+          name,
+        };
       default:
         throw new NotAuthenticatedError('not authenticated');
     }
+  }
 
-    return {
-      address,
+  /**
+   * Imports an account from a 25-word mnemonic.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {ImportAccountWithPrivateKeyParameters} params - The 25-word mnemonic of the account to be imported and an
+   * optional name for the account.
+   * @returns {Promise<Account>} A promise that resolves to the imported account.
+   * @throws {InvalidAccountError} If the supplied mnemonic is not valid.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async importAccountFromMnemonic({ mnemonic, name }: ImportAccountWithMnemonicParameters): Promise<Account> {
+    const formattedMnemonic = mnemonic
+      .trim()
+      .split(/[\s,]+/) // split on whitespace and commas
+      .join(' '); // join back together with whitespace
+
+    if (isValidMnemonic(formattedMnemonic)) {
+      throw new InvalidAccountError('invalid mnemonic');
+    }
+
+    return await this._addAccount({
       name,
-    };
+      privateKey: privateKeyFromMnemonic(formattedMnemonic),
+    });
+  }
+
+  /**
+   * Imports an account from a private key.
+   *
+   * **NOTE:** Requires authentication.
+   * @param {ImportAccountWithPrivateKeyParameters} params - The private key of the account to be imported and an
+   * optional name for the account.
+   * @returns {Promise<Account>} A promise that resolves to the imported account.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async importAccountFromPrivateKey({
+    name,
+    privateKey,
+  }: ImportAccountWithPrivateKeyParameters): Promise<Account> {
+    return await this._addAccount({
+      name,
+      privateKey,
+    });
   }
 
   /**
@@ -498,6 +647,33 @@ export default class Katavault {
     this._chains = this._chains.filter(({ genesisHash: _genesisHash }) => _genesisHash !== genesisHash);
   }
 
+  /**
+   * Updates the name of the account.
+   * @param {SetAccountNameByAddressParameters} params - The address and name to set.
+   * @returns {Promise<Account>} A promise that resolves to the updated account.
+   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
+   * @public
+   */
+  public async setAccountNameByAddress({ address, name }: SetAccountNameByAddressParameters): Promise<Account> {
+    const account = await this._accountStore.accountByAddress(address);
+
+    if (!account) {
+      throw new AccountDoesNotExistError(`account "${address}" does not exist`);
+    }
+
+    await this._accountStore.upsert([
+      {
+        ...account,
+        name,
+      },
+    ]);
+
+    return {
+      address,
+      name,
+    };
+  }
+
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
   public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;
   /**
@@ -505,7 +681,7 @@ export default class Katavault {
    *
    * **NOTE:** Requires authentication.
    * **NOTE:** The message is prepended with "MX" for domain separation.
-   * @param {SignMessageParameters} parameters - The signer, the message and optional output encoding.
+   * @param {SignMessageParameters} params - The signer, the message and optional output encoding.
    * @returns {Promise<string | Uint8Array>} A promise that resolves to the signature of the signed message. If the
    * encoding parameter was specified, the signature will be encoded in that format, otherwise signature will be in raw
    * bytes.

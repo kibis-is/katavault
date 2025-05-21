@@ -20,3 +20,27 @@ An end-user application that interacts with a provider; e.g. a dApp.
 ## Provider
 
 An application that manages private keys and performs signing operations; e.g. a wallet.
+
+<SectionBreak />
+
+## Credential account
+
+In the context of Katavault, the credential account is a special account derived from the authentication credentials. The account derivation method depends on the method used to authenticate:
+
+### Passkey authentication
+
+When a passkey is used to authenticate, the account can simply be derived using the passkey encryption as the key material returned from the passkey (that is usually used for encryption) has high enough entropy to be used as a private key in an AVM account.
+
+### Password authentication
+
+Deriving a private key from a password is a bit more complicated than the passkey account.
+
+1. First, a salt is created which is the concatenation of the client hostname (i.e., "example.com") and the username.
+2. Next, a secret is created which is the concatenation of the username and password.
+3. Finally, passing the salt and secret created in the last two steps to the [scrypt](https://www.tarsnap.com/scrypt.html) key derivation function (KDF), the key is created.
+
+:::note
+
+The security of the private key rests solely on the entropy of the password. To try and achieve 128-bit entropy, it is advised to use **AT LEAST** 7 random UTF-8 characters — and don't be afraid to advise the use emojis; these are UTF-8 characters too! 😉
+
+:::

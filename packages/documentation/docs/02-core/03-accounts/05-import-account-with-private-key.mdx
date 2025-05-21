@@ -1,0 +1,86 @@
+---
+sidebar_label: importAccountFromPrivateKey
+slug: /core/accounts/import-account-with-private-key
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# importAccountFromPrivateKey
+
+> Imports an account from a private key.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { voi } from '@kibisis/chains';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [voi],
+    });
+    let account: Account;
+
+    await katavault.authenticateWithPasskey({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+
+    account = await katavault.importAccountFromPrivateKey({
+      name: 'MyAVMWallet',
+      privateKey: window.crypto.randomBytes(32),
+    });
+
+    console.log(account);
+    /*
+    {
+      address: 'NWAETAF7ULBD57DVW4JTH5ZENV5C3XOYLU66VLR3WVOUNBJWX5GOJLQZCI',
+      name: 'MyAVMWallet',
+    }
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### params
+
+* Type: [`ImportAccountWithPrivateKeyParameters`](04-glossary/02-types.mdx#importaccountwithprivatekeyparameters)
+
+The private key of the account to be imported and an optional name for the account.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<Account>`](04-glossary/02-types.mdx#account)
+
+A promise that resolves to the imported account.
+
+<SectionBreak />
+
+## Throws
+
+### [EncryptionError](04-glossary/03-errors.mdx#encryptionerror)
+
+If the account's private key failed to be encrypted.
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If the provider has not been authenticated.

@@ -1,54 +1,57 @@
 ---
-sidebar_label: useRemoveChainByGenesisHash
-slug: /react/chains/use-remove-chain-by-genesis-hash
+sidebar_label: useSetAccountNameByAddress
+slug: /core/accounts/use-set-account-name-by-address
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useRemoveChainByGenesisHash
+# useSetAccountNameByAddress
 
-> Hook to remove a chain by a genesis hash.
+> Hook to set the name for an account by its address.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="chains"
+  defaultValue="accounts"
   values={[
-    { label: 'Chains.tsx', value: 'chains' },
+    { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="chains">
+  <TabItem value="accounts">
 
     ```typescript
-    import { useChains, useRemoveChainByGenesisHash } from '@kibisis/katavault-react';
+    import { useAccounts, useSetAccountNameByAddress } from '@kibisis/katavault-react';
 
-    function Chains() {
-      const chains = useChains();
-      const removeChainByGenesisHash = useRemoveChainByGenesisHash();
-      const handleOnRemoveChainClick = useCallback((genesisHash: string) => () => {
-        removeChainByGenesisHash(genesisHash, {
+    function Accounts() {
+      const accounts = useAccounts();
+      const setAccountNameByAddress = useSetAccountNameByAddress();
+      const handleOnUpdateAccountClick = useCallback((address: string) => () => {
+        setAccountNameByAddress({
+          address,
+          name: 'New name',
+        }, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: () => {
-            console.log(`removed chain ${genesisHash}`);
+          onSuccess: ({ name }) => {
+            console.log(`updated account ${address} with name ${name}`);
           },
         });
-      }, [removeAccount]);
+      }, [setAccountNameByAddress]);
 
       return (
         <div>
-          {chains.map(({ displayName, genesisHash, genesisID }) => (
+          {accounts.map(({ address, name }) => (
             <div>
-              <p>Name: {displayName}</p>
-              <p>ID: {genesisID}</p>
-              <button onClick={handleOnRemoveChainClick(genesisHash)}>Remove</button>
+              <p>Address: {address}</p>
+              <p>Name: {name ?? '-'}</p>
+              <button onClick={handleOnUpdateAccountClick(address)}>Update</button>
             </div>
           ))}
         </div>
@@ -61,7 +64,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Chains } from './Chains';
+    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -69,7 +72,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Chains />
+          <Accounts />
         </KatavaultProvider>
       );
     }
@@ -131,18 +134,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+`(params: SetAccountNameByAddressParameters, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: string) => void | Promimse<void>`
+`(error: BaseError, params: SetAccountNameByAddressParameters) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: undefined, params: string) => void | Promimse<void>`
+`(result: undefined, params: SetAccountNameByAddressParameters) => void | Promimse<void>`
 
-This will be invoked if the chain removal was successful.
+This will be invoked if the account update was successful.
+
+## See also
+
+* [setAccountNameByAddress](02-core/03-accounts/07-set-account-name-by-address.mdx)

@@ -11,11 +11,15 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunctionWithOptionalParams } from '@/types';
 
 /**
- * Hook to generate an account.
+ * Hook to generate a credential account.
  * @returns {HookFunctionWithOptionalParams<string | undefined, Account, BaseError>} A function that can be used to
- * generate a new account.
+ * generate the credential account.
  */
-export default function useGenerateAccount(): HookFunctionWithOptionalParams<string | undefined, Account, BaseError> {
+export default function useGenerateCredentialAccount(): HookFunctionWithOptionalParams<
+  string | undefined,
+  Account,
+  BaseError
+> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -26,7 +30,7 @@ export default function useGenerateAccount(): HookFunctionWithOptionalParams<str
       }
 
       try {
-        const result = await katavault.generateAccount(params);
+        const result = await katavault.generateCredentialAccount(params);
 
         if (onUpdate) {
           onUpdate();

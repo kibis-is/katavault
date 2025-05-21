@@ -1,42 +1,62 @@
 ---
-sidebar_label: useChains
-slug: /react/data/use-chains
+sidebar_label: useImportAccountWithMnemonic
+slug: /react/accounts/use-import-account-with-mnemonic
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useChains
+# useImportAccountWithMnemonic
 
-> Hook for getting the list of supported chains.
+> Hook to import an account with a 25-word mnemonic seed phrase.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="chains"
+  defaultValue="accounts"
   values={[
-    { label: 'Chains.tsx', value: 'chains' },
+    { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="chains">
+  <TabItem value="accounts">
 
     ```typescript
-    import { useChains } from '@kibisis/katavault-react';
+    import { useAccounts, useImportAccountWithMnemonic } from '@kibisis/katavault-react';
 
-    function Chains() {
-      const chains = useChains();
+    function Accounts() {
+      const accounts = useAccounts();
+      const importAccountWithMnemonic = useImportAccountWithMnemonic();
+      const handleOnAddAccountClick = useCallback(() => {
+        importAccountWithMnemonic({
+          mnemonic: 'under detect dog...',
+          name: 'Personal',
+        }, {
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: (result: Account) => {
+            console.log(`added new account ${account.address}`);
+          },
+        });
+      }, [importAccountWithMnemonic]);
 
-      return chains.map(({ displayName, genesisID }) => (
+      return (
         <div>
-          <p>Name: {displayName}</p>
-          <p>ID: {genesisID}</p>
+          {accounts.map(({ address, name }) => (
+            <div>
+              <p>Address: {address}</p>
+              <p>Name: {name ?? '-'}</p>
+            </div>
+          ))}
+
+          <button onClick={handleOnAddAccountClick}>Import account</button>
         </div>
-      ));
+      );
     }
     ```
 
@@ -45,7 +65,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Chains } from './Chains';
+    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -53,7 +73,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Chains />
+          <Accounts />
         </KatavaultProvider>
       );
     }
@@ -115,6 +135,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`ChainWithNetworkParameters[]`
+`(params: ImportAccountWithMnemonicParameters, options?: { onError, onSuccess }) => void`
 
-The list of supported chains stored in the wallet.
+The function can be called with callbacks that are invoked on error/success.
+
+#### onError
+
+`(error: BaseError, params: ImportAccountWithMnemonicParameters) => void | Promimse<void>`
+
+This will be invoked if there was an error.
+
+#### onSuccess
+
+`(result: Account, params: ImportAccountWithMnemonicParameters) => void | Promimse<void>`
+
+This will be invoked if the account import was successful.
+
+## See also
+
+* [importAccountWithMnemonic](02-core/03-accounts/04-import-account-with-mnemonic.mdx)

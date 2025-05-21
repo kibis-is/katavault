@@ -1,0 +1,1 @@
+export const ED25519_PRIVATE_KEY_BYTE_LENGTH = 32;

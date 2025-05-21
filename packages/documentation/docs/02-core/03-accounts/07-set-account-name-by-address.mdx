@@ -1,15 +1,15 @@
 ---
-sidebar_label: generateAccount
-slug: /core/accounts/generate-account
+sidebar_label: setAccountNameByAddress
+slug: /core/accounts/set-account-name-by-address
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# generateAccount
+# setAccountNameByAddress
 
-> Generates a new account in the wallet.
+> Updates the name of the account.
 
 <SectionBreak />
 
@@ -24,12 +24,11 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { voi } from '@kibisis/chains';
-    import { type Account, createKatavault } from '@kibisis/katavault-core';
+    import { createKatavault } from '@kibisis/katavault-core';
 
     const katavault = await createKatavault({
       chains: [voi],
     });
-    let account: Account;
 
     await katavault.authenticateWithPasskey({
       user: {
@@ -37,16 +36,10 @@ import TabItem from '@theme/TabItem';
         username: 'kibi@kibis.is',
       },
     });
-
-    account = await katavault.generateAccount('Personal');
-
-    console.log(account);
-    /*
-    {
+    await katavault.setAccountNameByAddress({
       address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
-      name: 'Personal',
-    }
-    */
+      name: 'New name',
+    });
     ```
 
   </TabItem>
@@ -56,28 +49,15 @@ import TabItem from '@theme/TabItem';
 
 ## Parameters
 
-### name (optional)
+### params
 
-* Type: `string`
-* Default: `undefined`
+* Type: [`SetAccountNameByAddressParameters`](04-glossary/02-types.mdx#setaccountnamebyaddressparameters)
 
-A name for the account.
-
-<SectionBreak />
-
-## Returns
-
-[`Promise<Account>`](04-glossary/02-types.mdx#account)
-
-A promise that resolves to the created account.
+The address of the account and the new name to set.
 
 <SectionBreak />
 
 ## Throws
-
-### [EncryptionError](04-glossary/03-errors.mdx#encryptionerror)
-
-If the account's private key failed to be encrypted.
 
 ### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
 

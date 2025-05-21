@@ -223,7 +223,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
             { alg: -257, type: 'public-key' }, // RS256
           ],
           rp: {
-            id: client.host,
+            id: client.hostname,
             name: client.name,
           },
           user: {
@@ -337,6 +337,16 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     );
 
     return bufferSourceToUint8Array(encryptedBytes);
+  }
+
+  /**
+   * Retrieves the key material associated with the current instance.
+   * @return {Uint8Array | null} A Uint8Array containing the key material if it is set, or null if no key material is
+   * available.
+   * @public
+   */
+  public keyMaterial(): Uint8Array | null {
+    return this._keyMaterial;
   }
 
   /**

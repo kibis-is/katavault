@@ -56,6 +56,33 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 <SectionBreak />
 
+## ImportAccountWithMnemonicParameters
+
+| Name     | Type     | Required | Default | Description                                                                            |
+|----------|----------|----------|---------|----------------------------------------------------------------------------------------|
+| mnemonic | `string` | yes      | -       | A whitespace or comma separated 25-word mnemonic seed phrase containing BIP-039 words. |
+| name     | `string` | no       | -       | The name of the account.                                                               |
+
+<SectionBreak />
+
+## ImportAccountWithPrivateKeyParameters
+
+| Name       | Type         | Required | Default | Description                                              |
+|------------|--------------|----------|---------|----------------------------------------------------------|
+| name       | `string`     | no       | -       | The name of the account.                                 |
+| privateKey | `Uint8Array` | yes      | -       | The raw private key used to derive the Ed25519 key pair. |
+
+<SectionBreak />
+
+## SetAccountNameByAddressParameters
+
+| Name    | Type     | Required | Default | Description                           |
+|---------|----------|----------|---------|---------------------------------------|
+| address | `string` | yes      | -       | The address of the account to update. |
+| name    | `string` | yes      | -       | The name of the account.              |
+
+<SectionBreak />
+
 ## SignParameters
 
 | Name     | Type                     | Required | Default     | Description                                                                                                           |

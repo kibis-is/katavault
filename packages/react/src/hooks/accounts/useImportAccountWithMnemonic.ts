@@ -1,4 +1,4 @@
-import { type Account, BaseError } from '@kibisis/katavault-core';
+import { type Account, BaseError, type ImportAccountWithMnemonicParameters } from '@kibisis/katavault-core';
 import { useContext } from 'react';
 
 // contexts
@@ -8,14 +8,18 @@ import { KatavaultContext } from '@/contexts';
 import { NotInitializedError } from '@/errors';
 
 // types
-import type { HookFunctionWithOptionalParams } from '@/types';
+import type { HookFunction } from '@/types';
 
 /**
- * Hook to generate an account.
- * @returns {HookFunctionWithOptionalParams<string | undefined, Account, BaseError>} A function that can be used to
- * generate a new account.
+ * Hook to import an account with a 25-word mnemonic seed phrase.
+ * @returns {HookFunction<ImportAccountWithMnemonicParameters, Account, BaseError>} A function that can be used to
+ * import the new account.
  */
-export default function useGenerateAccount(): HookFunctionWithOptionalParams<string | undefined, Account, BaseError> {
+export default function useImportAccountWithMnemonic(): HookFunction<
+  ImportAccountWithMnemonicParameters,
+  Account,
+  BaseError
+> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -26,7 +30,7 @@ export default function useGenerateAccount(): HookFunctionWithOptionalParams<str
       }
 
       try {
-        const result = await katavault.generateAccount(params);
+        const result = await katavault.importAccountFromMnemonic(params);
 
         if (onUpdate) {
           onUpdate();

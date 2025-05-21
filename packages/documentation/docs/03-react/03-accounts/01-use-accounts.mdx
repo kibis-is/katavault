@@ -1,60 +1,42 @@
 ---
-sidebar_label: useAddChain
-slug: /react/chains/use-add-chain
+sidebar_label: useAccounts
+slug: /react/accounts/use-accounts
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useAddChain
+# useAccounts
 
-> Hook to add a chain.
+> Hook for getting the list of accounts stored in the wallet.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="chains"
+  defaultValue="accounts"
   values={[
-    { label: 'Chains.tsx', value: 'chains' },
+    { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="chains">
+  <TabItem value="accounts">
 
     ```typescript
-    import { algorand, type ChainWithNetworkParameters } from '@kibisis/chains';
-    import { useAddChain, useChains } from '@kibisis/katavault-react';
+    import { useAccounts } from '@kibisis/katavault-react';
 
-    function Chains() {
-      const chains = useChains();
-      const addChain = useAddChain();
-      const handleOnAddAlgorandClick = useCallback(() => {
-        addChain(algorand, {
-          onError: (error) => {
-            console.error(error);
-          },
-          onSuccess: (result: ChainWithNetworkParameters) => {
-            console.log(`added new chain ${account.genesisID}`);
-          },
-        });
-      }, [addChain]);
+    function Accounts() {
+      const accounts = useAccounts();
 
-      return (
+      return accounts.map(({ address, name }) => (
         <div>
-          {chains.map(({ displayName, genesisID }) => (
-            <div>
-              <p>Name: {displayName}</p>
-              <p>ID: {genesisID}</p>
-            </div>
-          )}
-
-          <button onClick={handleOnAddAlgorandClick}>Add Algorand</button>
+          <p>Address: {address}</p>
+          <p>Name: {name ?? '-'}</p>
         </div>
-      );
+      ));
     }
     ```
 
@@ -63,7 +45,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Chains } from './Chains';
+    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -71,7 +53,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Chains />
+          <Accounts />
         </KatavaultProvider>
       );
     }
@@ -133,18 +115,10 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params?: Chain, options?: { onError, onSuccess }) => void`
+[`Account[]`](04-glossary/02-types.mdx#account)
 
-The function can be called with callbacks that are invoked on error/success.
+The list of accounts stored in the wallet.
 
-#### onError
+## See also
 
-`(error: BaseError, params?: Chain) => void | Promimse<void>`
-
-This will be invoked if there was an error.
-
-#### onSuccess
-
-`(result: ChainWithNetworkParameters, params?: Chain) => void | Promimse<void>`
-
-This will be invoked if the chain was added successfully.
+* [accounts](02-core/03-accounts/01-accounts.mdx)

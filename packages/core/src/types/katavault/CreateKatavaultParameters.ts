@@ -11,7 +11,7 @@ import type { ClientInformation } from '@/types';
 interface CreateKatavaultParameters {
   debug?: boolean;
   chains: [Chain, ...Chain[]];
-  client?: Omit<ClientInformation, 'host'>;
+  client?: Omit<ClientInformation, 'hostname'>;
 }
 
 export default CreateKatavaultParameters;
