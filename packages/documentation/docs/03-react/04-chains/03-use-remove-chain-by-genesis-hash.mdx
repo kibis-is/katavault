@@ -1,60 +1,56 @@
 ---
-sidebar_label: useImportAccountWithPrivateKey
-slug: /react/accounts/use-import-account-with-private-key
+sidebar_label: useRemoveChainByGenesisHash
+slug: /react/chains/use-remove-chain-by-genesis-hash
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useImportAccountWithPrivateKey
+# useRemoveChainByGenesisHash
 
-> Hook to import an account with a private key.
+> Hook to remove a chain by a genesis hash.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="accounts"
+  defaultValue="chains"
   values={[
-    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'Chains.tsx', value: 'chains' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="accounts">
+  <TabItem value="chains">
 
     ```typescript
-    import { useAccounts, useImportAccountWithPrivateKey } from '@kibisis/katavault-react';
+    import { useChains, useRemoveChainByGenesisHash } from '@kibisis/katavault-react';
 
-    function Accounts() {
-      const accounts = useAccounts();
-      const importAccountWithPrivateKey = useImportAccountWithPrivateKey();
-      const handleOnAddAccountClick = useCallback(() => {
-        importAccountWithPrivateKey({
-          name: 'Personal',
-          privateKey: window.crypto.randomBytes(32),
-        }, {
+    function Chains() {
+      const chains = useChains();
+      const removeChainByGenesisHash = useRemoveChainByGenesisHash();
+      const handleOnRemoveChainClick = useCallback((genesisHash: string) => () => {
+        removeChainByGenesisHash(genesisHash, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: (result: Account) => {
-            console.log(`added new account ${account.address}`);
+          onSuccess: () => {
+            console.log(`removed chain ${genesisHash}`);
           },
         });
-      }, [importAccountWithPrivateKey]);
+      }, [removeAccount]);
 
       return (
         <div>
-          {accounts.map(({ address, name }) => (
+          {chains.map(({ displayName, genesisHash, genesisID }) => (
             <div>
-              <p>Address: {address}</p>
-              <p>Name: {name ?? '-'}</p>
+              <p>Name: {displayName}</p>
+              <p>ID: {genesisID}</p>
+              <button onClick={handleOnRemoveChainClick(genesisHash)}>Remove</button>
             </div>
           ))}
-
-          <button onClick={handleOnAddAccountClick}>Import account</button>
         </div>
       );
     }
@@ -65,7 +61,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Accounts } from './Accounts';
+    import { Chains } from './Chains';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -73,7 +69,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Accounts />
+          <Chains />
         </KatavaultProvider>
       );
     }
@@ -135,18 +131,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: ImportAccountWithPrivateKeyParameters, options?: { onError, onSuccess }) => void`
+`(params: string, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
+`(error: BaseError, params: string) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: Account, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
+`(result: undefined, params: string) => void | Promimse<void>`
 
-This will be invoked if the account import was successful.
+This will be invoked if the chain removal was successful.
+
+## See also
+
+* [chains](02-core/04-chains/03-remove-chain-by-genesis-hash.mdx)

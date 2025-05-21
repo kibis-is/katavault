@@ -1,56 +1,60 @@
 ---
-sidebar_label: useRemoveChainByGenesisHash
-slug: /react/chains/use-remove-chain-by-genesis-hash
+sidebar_label: useImportAccountWithPrivateKey
+slug: /react/accounts/use-import-account-with-private-key
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useRemoveChainByGenesisHash
+# useImportAccountWithPrivateKey
 
-> Hook to remove a chain by a genesis hash.
+> Hook to import an account with a private key.
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="chains"
+  defaultValue="accounts"
   values={[
-    { label: 'Chains.tsx', value: 'chains' },
+    { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="chains">
+  <TabItem value="accounts">
 
     ```typescript
-    import { useChains, useRemoveChainByGenesisHash } from '@kibisis/katavault-react';
+    import { useAccounts, useImportAccountWithPrivateKey } from '@kibisis/katavault-react';
 
-    function Chains() {
-      const chains = useChains();
-      const removeChainByGenesisHash = useRemoveChainByGenesisHash();
-      const handleOnRemoveChainClick = useCallback((genesisHash: string) => () => {
-        removeChainByGenesisHash(genesisHash, {
+    function Accounts() {
+      const accounts = useAccounts();
+      const importAccountWithPrivateKey = useImportAccountWithPrivateKey();
+      const handleOnAddAccountClick = useCallback(() => {
+        importAccountWithPrivateKey({
+          name: 'Personal',
+          privateKey: window.crypto.randomBytes(32),
+        }, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: () => {
-            console.log(`removed chain ${genesisHash}`);
+          onSuccess: (result: Account) => {
+            console.log(`added new account ${account.address}`);
           },
         });
-      }, [removeAccount]);
+      }, [importAccountWithPrivateKey]);
 
       return (
         <div>
-          {chains.map(({ displayName, genesisHash, genesisID }) => (
+          {accounts.map(({ address, name }) => (
             <div>
-              <p>Name: {displayName}</p>
-              <p>ID: {genesisID}</p>
-              <button onClick={handleOnRemoveChainClick(genesisHash)}>Remove</button>
+              <p>Address: {address}</p>
+              <p>Name: {name ?? '-'}</p>
             </div>
           ))}
+
+          <button onClick={handleOnAddAccountClick}>Import account</button>
         </div>
       );
     }
@@ -61,7 +65,7 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Chains } from './Chains';
+    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
     import config from './config';
 
@@ -69,7 +73,7 @@ import TabItem from '@theme/TabItem';
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Chains />
+          <Accounts />
         </KatavaultProvider>
       );
     }
@@ -131,18 +135,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+`(params: ImportAccountWithPrivateKeyParameters, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: string) => void | Promimse<void>`
+`(error: BaseError, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: undefined, params: string) => void | Promimse<void>`
+`(result: Account, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
 
-This will be invoked if the chain removal was successful.
+This will be invoked if the account import was successful.
+
+## See also
+
+* [importAccountWithPrivateKey](02-core/03-accounts/05-import-account-with-private-key.mdx)
