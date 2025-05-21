@@ -1,3 +1,11 @@
+# [@kibisis/katavault-react-v1.1.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.0.0...@kibisis/katavault-react-v1.1.0) (2025-05-21)
+
+
+### Features
+
+* add chain configuration ([#7](https://github.com/kibis-is/katavault/issues/7)) ([71ae661](https://github.com/kibis-is/katavault/commit/71ae661050d717af3a7ed2393427c5af36ec4c80))
+* generate credential accounts ([#8](https://github.com/kibis-is/katavault/issues/8)) ([6ac3b42](https://github.com/kibis-is/katavault/commit/6ac3b421da2339be152da3b291b249b4faea70f6))
+
 # [@kibisis/katavault-react-v1.1.0-beta.2](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.1.0-beta.1...@kibisis/katavault-react-v1.1.0-beta.2) (2025-05-21)
 
 
