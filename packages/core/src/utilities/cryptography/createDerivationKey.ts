@@ -1,4 +1,4 @@
-import { sha512 } from '@noble/hashes/esm/sha512';
+import { sha512 } from '@noble/hashes/sha512';
 import scrypt from 'scrypt-async';
 
 // types

@@ -1,0 +1,152 @@
+---
+sidebar_label: useImportAccountWithPrivateKey
+slug: /react/accounts/use-import-account-with-private-key
+---
+
+import SectionBreak from '@site/src/components/SectionBreak';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# useImportAccountWithPrivateKey
+
+> Hook to import an account with a private key.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="accounts"
+  values={[
+    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="accounts">
+
+    ```typescript
+    import { useAccounts, useImportAccountWithPrivateKey } from '@kibisis/katavault-react';
+
+    function Accounts() {
+      const accounts = useAccounts();
+      const importAccountWithPrivateKey = useImportAccountWithPrivateKey();
+      const handleOnAddAccountClick = useCallback(() => {
+        importAccountWithPrivateKey({
+          name: 'Personal',
+          privateKey: window.crypto.randomBytes(32),
+        }, {
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: (result: Account) => {
+            console.log(`added new account ${account.address}`);
+          },
+        });
+      }, [importAccountWithPrivateKey]);
+
+      return (
+        <div>
+          {accounts.map(({ address, name }) => (
+            <div>
+              <p>Address: {address}</p>
+              <p>Name: {name ?? '-'}</p>
+            </div>
+          ))}
+
+          <button onClick={handleOnAddAccountClick}>Import account</button>
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Accounts } from './Accounts';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <Accounts />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticateWithPasskey,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticateWithPasskey({
+          user: {
+            name: 'Kibi',
+            username: 'kibi@kibis.is',
+          },
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`(params: ImportAccountWithPrivateKeyParameters, options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### onError
+
+`(error: BaseError, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
+
+This will be invoked if there was an error.
+
+#### onSuccess
+
+`(result: Account, params: ImportAccountWithPrivateKeyParameters) => void | Promimse<void>`
+
+This will be invoked if the account import was successful.
