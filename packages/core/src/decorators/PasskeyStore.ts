@@ -223,7 +223,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
             { alg: -257, type: 'public-key' }, // RS256
           ],
           rp: {
-            id: client.host,
+            id: client.hostname,
             name: client.name,
           },
           user: {

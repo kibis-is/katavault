@@ -1,5 +1,4 @@
 import { decode as decodeUtf8, encode as encodeUtf8 } from '@stablelib/utf8';
-import scrypt from 'scrypt-async';
 import { sha512 } from '@noble/hashes/sha512';
 import { randomBytes } from '@noble/hashes/utils';
 import { secretbox } from 'tweetnacl';
@@ -14,10 +13,10 @@ import BaseStore from './BaseStore';
 import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/errors';
 
 // types
-import type { BaseAuthenticationStore, CreateDerivedKeyParameters, StoreParameters } from '@/types';
+import type { BaseAuthenticationStore, StoreParameters } from '@/types';
 
 // utilities
-import { hexToBytes } from '@/utilities';
+import { createDerivationKey, hexToBytes } from '@/utilities';
 
 export default class PasswordStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
@@ -30,36 +29,6 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
 
   public constructor(params: StoreParameters) {
     super(params);
-  }
-
-  /**
-   * private static methods
-   */
-
-  /**
-   * Generates a hashed key derivation using for a password using a salt.
-   * @param {CreateDerivedKeyParameters} params - The password and the salt.
-   * @returns {Promise<Uint8Array>} a promise that resolves to the derived encryption key.
-   * @private
-   * @static
-   */
-  private static _createDerivedKeyFromPassword({ password, salt }: CreateDerivedKeyParameters): Promise<Uint8Array> {
-    return new Promise<Uint8Array>((resolve) => {
-      const hashedSecret = sha512(password);
-
-      scrypt(
-        hashedSecret,
-        salt,
-        {
-          N: 16384, // cpu/memory cost parameter (must be power of two; alternatively, you can specify logN where N = 2^logN).
-          r: 8, // block size parameter
-          p: 1, // parallelization parameter
-          dkLen: secretbox.keyLength, // derived key length
-          encoding: 'binary',
-        },
-        (derivedKey: Uint8Array) => resolve(derivedKey)
-      );
-    });
   }
 
   /**
@@ -114,9 +83,10 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
       throw new DecryptionError('invalid salt');
     }
 
-    encryptionKey = await PasswordStore._createDerivedKeyFromPassword({
-      password: encodeUtf8(this._password),
+    encryptionKey = await createDerivationKey({
+      keyLength: secretbox.keyLength,
       salt,
+      secret: encodeUtf8(this._password),
     });
     decryptedBytes = secretbox.open(encryptedBytes, nonce, encryptionKey);
 
@@ -152,9 +122,10 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     }
 
     salt = randomBytes(PasswordStore._saltByteSize);
-    encryptionKey = await PasswordStore._createDerivedKeyFromPassword({
-      password: encodeUtf8(this._password),
+    encryptionKey = await createDerivationKey({
+      keyLength: secretbox.keyLength,
       salt,
+      secret: encodeUtf8(this._password),
     });
     nonce = randomBytes(secretbox.nonceLength);
 

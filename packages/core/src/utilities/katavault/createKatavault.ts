@@ -38,7 +38,7 @@ export default async function createKatavault({
   return new Katavault({
     chains: _chains,
     clientInformation: {
-      host: window.location.hostname,
+      hostname: window.location.hostname,
       icon: client?.icon || faviconURL() || undefined,
       name: client?.name ?? documentTitle(),
     },
