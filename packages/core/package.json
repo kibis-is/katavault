@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@preact/preset-vite": "^2.10.2",
     "@types/node": "catalog:",
     "algosdk": "^3.x",
     "chalk": "catalog:",
@@ -40,11 +41,13 @@
     "fake-indexeddb": "^6.0.0",
     "globals": "catalog:",
     "prettier": "catalog:",
+    "sass": "^1.70.0",
     "shx": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
@@ -56,12 +59,16 @@
     "@agoralabs-sh/bytes": "^1.0.0",
     "@agoralabs-sh/uuid": "^1.1.0",
     "@kibisis/chains": "catalog:",
+    "@kibisis/utilities": "catalog:",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
     "@stablelib/base64": "^2.0.1",
     "@stablelib/hex": "^2.0.1",
+    "@stablelib/random": "^2.0.1",
     "@stablelib/utf8": "^2.0.1",
+    "clsx": "^2.1.0",
     "idb": "^8.0.2",
+    "preact": "^10.26.9",
     "scrypt-async": "^2.0.1",
     "tweetnacl": "^1.0.3"
   }

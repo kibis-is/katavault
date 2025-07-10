@@ -1,11 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "jsxImportSource": "preact",
     "declarationMap": true,
     "moduleResolution": "Bundler",
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

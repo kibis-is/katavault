@@ -5,7 +5,7 @@ import { randomBytes } from '@noble/hashes/utils';
 import { IDB_PASSKEY_STORE_NAME } from '@/constants';
 
 // decorators
-import BaseStore from './BaseStore';
+import BaseStore from '@/decorators/_base/BaseStore';
 
 // errors
 import {

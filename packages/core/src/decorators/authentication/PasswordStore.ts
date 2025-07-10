@@ -7,7 +7,7 @@ import { secretbox } from 'tweetnacl';
 import { IDB_PASSWORD_STORE_NAME } from '@/constants';
 
 // decorators
-import BaseStore from './BaseStore';
+import BaseStore from '@/decorators/_base/BaseStore';
 
 // errors
 import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/errors';

@@ -1,0 +1,66 @@
+@use "@styles/variables";
+@use "sass:map";
+
+.stack {
+  align-items: flex-start;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+
+  &--align-center {
+    align-items: center;
+  }
+
+  &--align-end {
+    align-items: flex-end;
+  }
+
+  &--justify-between {
+    justify-content: space-between;
+  }
+
+  &--full-width {
+    width: 100%;
+  }
+
+  &--grow {
+    flex-grow: 1;
+  }
+
+  &--justify-center {
+    justify-content: center;
+  }
+
+  &--justify-end {
+    justify-content: flex-end;
+  }
+
+  &--justify-evenly {
+    justify-content: space-evenly;
+  }
+
+  &--spacing-xs {
+    gap: map.get(variables.$spacing, xs);
+  }
+
+  &--spacing-sm {
+    gap: map.get(variables.$spacing, sm);
+  }
+
+  &--spacing-md {
+    gap: map.get(variables.$spacing, md);
+  }
+
+  &--spacing-lg {
+    gap: map.get(variables.$spacing, lg);
+  }
+
+  &--spacing-xl {
+    gap: map.get(variables.$spacing, xl);
+  }
+
+  &--vertical {
+    flex-direction: column;
+  }
+}

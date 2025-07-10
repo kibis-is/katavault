@@ -1,4 +1,5 @@
 import { type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
+import { createLogger } from '@kibisis/utilities';
 
 // facades
 import { Katavault } from '@/facades';
@@ -7,7 +8,7 @@ import { Katavault } from '@/facades';
 import type { CreateKatavaultParameters } from '@/types';
 
 // utilities
-import { createLogger, documentTitle, faviconURL } from '@/utilities';
+import { documentTitle, faviconURL } from '@/utilities';
 
 /**
  * Creates an instance of Katavault.

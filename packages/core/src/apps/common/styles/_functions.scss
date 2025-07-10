@@ -1,0 +1,7 @@
+@function get-color-value($theme: "light", $light-value, $dark-value) {
+  @if $theme == "dark" {
+    @return $dark-value;
+  }
+
+  @return $light-value;
+}

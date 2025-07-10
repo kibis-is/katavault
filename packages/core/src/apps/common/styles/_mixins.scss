@@ -1,0 +1,12 @@
+@use "variables";
+
+@mixin button-transition {
+  transition: background-color 300ms ease;
+}
+
+@mixin reset-text-styles {
+  font-family: variables.$font-family;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}

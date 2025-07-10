@@ -1,0 +1,30 @@
+@use "palette";
+@use "sass:map";
+
+/* borders */
+$border-radius: (
+  xs: 0,
+  sm: 12px,
+  md: 14px,
+  lg: 18px,
+  xl: 24px,
+  full: 9999px,
+);
+
+/* breakpoints */
+$tablet-width: 768px;
+$desktop-width: 1024px;
+
+/* fonts */
+$font-family: "Nunito", sans-serif;
+$font-size: 0.875rem; // 14px
+
+/* spacing */
+$spacing: (
+  xs: 0.325rem,
+  sm: 0.75rem,
+  md: 1.5rem,
+  lg: 2rem,
+  xl: 2.5rem,
+  xxl: 3rem,
+);

@@ -1,6 +1,8 @@
 import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
+import type { ILogger } from '@kibisis/utilities';
 import { ed25519 } from '@noble/curves/ed25519';
 import { concatBytes } from '@noble/hashes/utils';
+import { encode as encodeUtf8 } from '@stablelib/utf8';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
@@ -12,7 +14,7 @@ import {
 } from '@/constants';
 
 // decorators
-import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
+import { AccountStore, PasskeyStore, PasswordStore, UIManager } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -40,7 +42,6 @@ import type {
   ImportAccountWithPrivateKeyParameters,
   InitializeVaultParameters,
   KatavaultParameters,
-  Logger,
   PasskeyStoreSchema,
   SetAccountNameByAddressParameters,
   SignMessageParameters,
@@ -62,7 +63,6 @@ import {
   privateKeyFromPasswordCredentials,
   utf8ToBytes,
 } from '@/utilities';
-import { encode as encodeUtf8 } from '@stablelib/utf8';
 
 export default class Katavault {
   // public static variables
@@ -72,7 +72,8 @@ export default class Katavault {
   private _authenticationStore: AuthenticationStore | null = null;
   private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
-  private readonly _logger: Logger;
+  private readonly _logger: ILogger;
+  private readonly _uiManager: UIManager;
   private _user: UserInformation | null = null;
   private _vault: IDBPDatabase<VaultSchema>;
 
@@ -80,6 +81,7 @@ export default class Katavault {
     this._chains = chains;
     this._clientInformation = clientInformation;
     this._logger = logger;
+    this._uiManager = new UIManager({ logger });
   }
 
   /**
@@ -323,6 +325,14 @@ export default class Katavault {
 
       throw new FailedToFetchNetworkError(_error);
     }
+  }
+
+  public async authenticate(): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#authenticate`;
+
+    await this._uiManager.renderAuthenticationApp({
+      colorMode: 'dark',
+    });
   }
 
   /**

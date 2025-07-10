@@ -2,7 +2,7 @@
 import { IDB_ACCOUNTS_STORE_NAME } from '@/constants';
 
 // decorators
-import BaseStore from './BaseStore';
+import BaseStore from '@/decorators/_base/BaseStore';
 
 // types
 import type { AccountStoreItemWithPasskey, AccountStoreItemWithPassword, StoreParameters } from '@/types';
