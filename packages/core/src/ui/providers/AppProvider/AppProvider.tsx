@@ -12,7 +12,7 @@ import { ConfigStore } from '@/decorators';
 import type { AppState } from '@/ui/types';
 import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, logger, vault }) => {// states
+const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, i18n, logger, vault }) => {// states
   const [timestamp, setTimestamp] = useState<number>(0);
   const [state, setState] = useState<AppState | null>(null);// callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
@@ -24,11 +24,12 @@ const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, lo
           logger,
           vault,
         }),
+        i18n,
         logger,
       });
       setTimestamp(Date.now());
     })();
-  }, [logger, vault]);
+  }, [i18n, logger, vault]);
 
   return (
     <AppContext.Provider value={{

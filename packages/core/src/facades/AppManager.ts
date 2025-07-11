@@ -1,4 +1,5 @@
 import type { ILogger } from '@kibisis/utilities';
+import I18next, { type i18n as I18n } from 'i18next';
 import { h, render } from 'preact';
 
 // containers
@@ -10,13 +11,17 @@ import { AppTypeEnum } from '@/enums';
 // errors
 import { FailedToRenderUIError, UserCanceledUIRequestError } from '@/errors';
 
+// translations
+import { en } from '@/ui/translations';
+
 // types
-import type { AuthenticationStore, CommonParameters, RenderAppParameters } from '@/types';
+import type { AuthenticateResult, CommonParameters, RenderAppParameters } from '@/types';
 
 export default class AppManager {
   // public static variables
   public static readonly displayName = 'AppManager';
   // private variables
+  private _i18n: I18n | null = null;
   private readonly _logger: ILogger;
 
   public constructor({ logger }: CommonParameters) {
@@ -34,6 +39,24 @@ export default class AppManager {
     if (rootElement) {
       rootElement.remove();
     }
+  }
+
+  private _getOrInitializeI18n(): I18n {
+    if (!this._i18n) {
+      this._i18n = I18next.createInstance({
+        fallbackLng: 'en',
+        interpolation: {
+          escapeValue: false,
+        },
+        resources: {
+          en: {
+            translation: en,
+          },
+        },
+      });
+    }
+
+    return this._i18n;
   }
 
   private _rootElement(type: AppTypeEnum): HTMLElement {
@@ -67,10 +90,11 @@ export default class AppManager {
    * public methods
    */
 
-  public async renderAuthenticationApp({ vault }: RenderAppParameters): Promise<AuthenticationStore> {
-    return new Promise<AuthenticationStore>((resolve, reject) => {
+  public async renderAuthenticationApp({ vault }: RenderAppParameters): Promise<AuthenticateResult> {
+    return new Promise<AuthenticateResult>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
+          i18n: this._getOrInitializeI18n(),
           logger: this._logger,
           onClose: () => {
             this._closeApp(AppTypeEnum.Authentication);

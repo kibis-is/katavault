@@ -10,9 +10,13 @@ import AppProvider from '@/ui/providers/AppProvider';
 import type { BaseAppProps } from '@/ui/types';
 import type { AppProps } from './types';
 
-const App: FunctionComponent<BaseAppProps & AppProps> = ({ logger, vault, ...otherProps }) => {
+const App: FunctionComponent<BaseAppProps & AppProps> = ({ il8n, logger, vault, ...otherProps }) => {
   return (
-    <AppProvider logger={logger} vault={vault} >
+    <AppProvider
+      il8n={il8n}
+      logger={logger}
+      vault={vault}
+    >
       <Root {...otherProps} />
     </AppProvider>
   );

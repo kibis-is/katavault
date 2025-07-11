@@ -332,15 +332,18 @@ export default class Katavault {
    * @public
    */
   public async authenticate(): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticate`;
     const vault = await this._initializeVault();
-    let result: AuthenticationStore;
-
-    result = await this._appManager.renderAuthenticationApp({
+    const { authenticationStore, user } = await this._appManager.renderAuthenticationApp({
       vault,
     });
 
-    console.log(`${__logPrefix}:`, result);
+    this._accountStore = new AccountStore({
+      logger: this._logger,
+      vault,
+    });
+    this._authenticationStore = authenticationStore;
+    this._user = user;
+    this._vault = vault;
   }
 
   /**
