@@ -25,7 +25,7 @@ export default mergeConfig(
       },
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "@/apps/styles/global.scss";`, // include the global scss file in the library build
+          additionalData: `@use "@/ui/styles/global.scss";`, // include the global scss file in the library build
           api: 'modern-compiler',
         },
       },
@@ -40,8 +40,8 @@ export default mergeConfig(
     resolve: {
       alias: {
         // resolutions needed for sass, typescript resolutions handled by the vite-tsconfig-paths plugin
-        '@/apps/fonts': resolve(__dirname, 'src/apps/fonts'),
-        '@/apps/styles': resolve(__dirname, 'src/apps/styles'),
+        '@/ui/fonts': resolve(__dirname, 'src/apps/fonts'),
+        '@/ui/styles': resolve(__dirname, 'src/apps/styles'),
       },
     },
   })

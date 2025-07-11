@@ -2,7 +2,7 @@ import type { ILogger } from '@kibisis/utilities';
 import { h, render } from 'preact';
 
 // containers
-import AuthenticationApp from '@/apps/apps/authentication';
+import AuthenticationApp from '@/ui/apps/authentication';
 
 // enums
 import { AppTypeEnum } from '@/enums';
