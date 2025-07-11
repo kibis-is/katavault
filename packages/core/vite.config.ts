@@ -40,8 +40,8 @@ export default mergeConfig(
     resolve: {
       alias: {
         // resolutions needed for sass, typescript resolutions handled by the vite-tsconfig-paths plugin
-        '@/ui/fonts': resolve(__dirname, 'src/apps/fonts'),
-        '@/ui/styles': resolve(__dirname, 'src/apps/styles'),
+        '@/ui/fonts': resolve(__dirname, 'src/ui/fonts'),
+        '@/ui/styles': resolve(__dirname, 'src/ui/styles'),
       },
     },
   })
