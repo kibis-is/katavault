@@ -1,0 +1,44 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+.button {
+  @include mixins.button-transition;
+  align-items: center;
+  appearance: none;
+  background-color: palette.button-background-color("light");
+  border: none;
+  border-radius: map.get(variables.$border-radius, "full");
+  color: palette.button-font-color("light");
+  cursor: pointer;
+  display: inline-flex;
+  font-family: variables.$font-family;
+  font-size: 1rem; // 16px
+  font-style: normal;
+  font-weight: 600;
+  height: 3rem;
+  justify-content: center;
+  line-height: 1.2;
+  min-width: 3rem; // 48px
+  padding-inline-end: 1.5rem; // 24px
+  padding-inline-start: 1.5rem; // 24px
+  text-align: center;
+
+  &[data-color-mode="dark"] {
+    background-color: palette.button-background-color("dark");
+    color: palette.button-font-color("dark");
+  }
+
+  &:hover {
+    background-color: palette.button-hover-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: palette.button-hover-background-color("dark");
+    }
+  }
+
+  &--full-width {
+    width: 100%;
+  }
+}

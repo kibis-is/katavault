@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
+import { useMemo } from 'preact/hooks';
 
 // styles
 import styles from './styles.module.scss';
@@ -15,38 +16,33 @@ const Heading: FunctionComponent<TypographyProps> = ({
   size = 'md',
   textAlign = 'center',
 }) => {
-  let sizeStyle = styles.headingMd;
-  let textAlignStyle = styles.headingCenter;
-
-  switch (size) {
-    case 'xs':
-      sizeStyle = styles.headingXs;
-      break;
-    case 'sm':
-      sizeStyle = styles.headingSm;
-      break;
-    case 'lg':
-      sizeStyle = styles.headingLg;
-      break;
-    case 'xl':
-      sizeStyle = styles.headingXl;
-      break;
-    case 'md':
-    default:
-      break;
-  }
-
-  switch (textAlign) {
-    case 'left':
-      textAlignStyle = styles.headingLeft;
-      break;
-    case 'right':
-      textAlignStyle = styles.headingRight;
-      break;
-    case 'center':
-    default:
-      break;
-  }
+  // memos
+  const sizeStyle = useMemo(() => {
+    switch (size) {
+      case 'xs':
+        return styles.headingXs;
+      case 'sm':
+        return styles.headingSm;
+      case 'lg':
+        return styles.headingLg;
+      case 'xl':
+        return styles.headingXl;
+      case 'md':
+      default:
+        return styles.headingMd;
+    }
+  }, [size]);
+  const textAlignStyle = useMemo(() => {
+    switch (textAlign) {
+      case 'left':
+        return styles.headingLeft;
+      case 'right':
+        return styles.headingRight;
+      case 'center':
+      default:
+        return styles.headingCenter;
+    }
+  }, [textAlign]);
 
   return (
     <h1
