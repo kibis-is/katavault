@@ -1,0 +1,20 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+
+.link {
+  color: palette.link-font-color("light");
+  display: inline-flex;
+
+  &[data-theme="dark"] {
+    color: palette.link-font-color("dark");
+  }
+
+  &:hover {
+    color: palette.link-active-font-color("dark");
+
+    &[data-theme="dark"] {
+      color: palette.link-active-font-color("dark");
+    }
+  }
+}

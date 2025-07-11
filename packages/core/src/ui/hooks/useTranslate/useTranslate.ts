@@ -1,20 +1,12 @@
 import type { TFunction } from 'i18next';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useContext } from 'preact/hooks';
 
 // contexts
 import { AppContext } from '@/ui/contexts';
 
 export default function useTranslate(): TFunction {
-  const { state, timestamp } = useContext(AppContext);
-  const [translate, setTranslate] = useState<TFunction>((() => undefined) as TFunction);
+  // contexts
+  const { state } = useContext(AppContext);
 
-  useEffect(() => {
-    if (!state) {
-      return;
-    }
-
-    setTranslate(state.i18n.t);
-  }, [timestamp]);
-
-  return translate;
+  return state?.i18n.t || ((() => '') as TFunction);
 }

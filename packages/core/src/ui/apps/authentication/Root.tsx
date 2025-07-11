@@ -3,6 +3,7 @@ import type { FunctionComponent } from 'preact';
 import { useCallback } from 'preact/hooks';
 
 // components
+import Footer from '@/ui/components/Footer';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
 import Spacer from '@/ui/components/Spacer';
@@ -65,6 +66,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
         <Spacer />
 
         {/*footer*/}
+        <Footer colorMode={colorMode} />
       </VStack>
     </div>
   );

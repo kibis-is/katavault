@@ -12,31 +12,40 @@ import { ConfigStore } from '@/decorators';
 import type { AppState } from '@/ui/types';
 import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, i18n, logger, vault }) => {// states
+const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, i18n, logger, vault }) => {
+  // states
   const [timestamp, setTimestamp] = useState<number>(0);
-  const [state, setState] = useState<AppState | null>(null);// callbacks
+  const [state, setState] = useState<AppState>({
+    configStore: new ConfigStore({
+      logger,
+      vault,
+    }),
+    i18n,
+    logger,
+  });
+  // callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
 
   useEffect(() => {
-    (async () => {
-      setState({
-        configStore: new ConfigStore({
-          logger,
-          vault,
-        }),
-        i18n,
+    setState({
+      configStore: new ConfigStore({
         logger,
-      });
-      setTimestamp(Date.now());
-    })();
+        vault,
+      }),
+      i18n,
+      logger,
+    });
+    onUpdate();
   }, [i18n, logger, vault]);
 
   return (
-    <AppContext.Provider value={{
-      onUpdate,
-      state,
-      timestamp,
-    }}>
+    <AppContext.Provider
+      value={{
+        onUpdate,
+        state,
+        timestamp,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

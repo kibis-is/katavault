@@ -41,7 +41,7 @@ export default class AppManager {
     }
   }
 
-  private _getOrInitializeI18n(): I18n {
+  private async _getOrInitializeI18n(): Promise<I18n> {
     if (!this._i18n) {
       this._i18n = I18next.createInstance({
         fallbackLng: 'en',
@@ -54,6 +54,8 @@ export default class AppManager {
           },
         },
       });
+
+      await this._i18n.init();
     }
 
     return this._i18n;
@@ -91,10 +93,12 @@ export default class AppManager {
    */
 
   public async renderAuthenticationApp({ vault }: RenderAppParameters): Promise<AuthenticateResult> {
+    const i18n = await this._getOrInitializeI18n();
+
     return new Promise<AuthenticateResult>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
-          i18n: this._getOrInitializeI18n(),
+          i18n,
           logger: this._logger,
           onClose: () => {
             this._closeApp(AppTypeEnum.Authentication);
