@@ -3,6 +3,7 @@ import type { FunctionComponent } from 'preact';
 import { useCallback } from 'preact/hooks';
 
 // components
+import CircularLoaderWithIcon from '@/ui/components/CircularLoaderWithIcon';
 import Footer from '@/ui/components/Footer';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
@@ -61,6 +62,8 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
           <Text colorMode={colorMode} size="lg" >
             Authenticate!!
           </Text>
+
+          <CircularLoaderWithIcon colorMode={colorMode} icon={<SunnyIcon />} />
         </VStack>
 
         <Spacer />

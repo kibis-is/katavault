@@ -1,0 +1,83 @@
+@use "@/ui/styles/palette";
+@use "sass:map";
+
+.loader {
+  animation: rotation 1s linear infinite;
+  border-color: map.get(palette.$primary-light-palette, 500);
+  border-bottom-color: map.get(palette.$gray-palette, 300);
+  border-style: solid;
+  border-width: 3px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: inline-block;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    border-color: map.get(palette.$primary-dark-palette, 500);
+    border-bottom-color: map.get(palette.$white-alpha-palette, 400);
+  }
+
+  &--lg {
+    border-width: 5px;
+  }
+
+  &--xl {
+    border-width: 8px;
+  }
+
+  &__container {
+    align-items: center;
+    display: flex;
+    height: 6rem;
+    justify-content: center;
+    position: relative;
+    width: 6rem;
+
+    &--xs {
+      height: 3rem; // 48px
+      width: 3rem; // 48px
+    }
+
+    &--sm {
+      height: 4rem; // 64px
+      width: 4rem; // 64px
+    }
+
+    &--lg {
+      height: 9rem; // 144px
+      width: 9rem; // 144px
+    }
+
+    &--xl {
+      height: 14rem; // 244px
+      width: 14rem; // 244px
+    }
+  }
+
+  &__icon {
+    height: 2rem; // 32px
+    width: 2rem; // 32px
+
+    &--xs {
+      height: 1rem; // 16px
+      width: 1rem; // 16px
+    }
+
+    &--sm {
+      height: 1.25rem; // 20px
+      width: 1.25rem; // 20px
+    }
+
+    &--lg {
+      height: 3.5rem; // 56px
+      width: 3.5rem; // 56px
+    }
+
+    &--xl {
+      height: 6rem; // 96px
+      width: 6rem; // 96px
+    }
+  }
+}
