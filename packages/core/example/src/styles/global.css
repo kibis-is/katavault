@@ -1,4 +1,5 @@
 :root {
+  --font-family: "Nunito", sans-serif;
   --primary-300-color: #E707FB;
   --primary-400-color: #BC03CD;
   --primary-500-color: #8d029b;
@@ -6,7 +7,7 @@
   --gray-400-color: #a1a1aa;
   --gray-500-color: #71717a;
   color: var(--gray-500-color);
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-family);
   font-optical-sizing: auto;
 }
 

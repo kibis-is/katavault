@@ -1,0 +1,49 @@
+@use "@/apps/styles/mixins";
+@use "@/apps/styles/palette";
+@use "@/apps/styles/variables";
+@use "sass:map";
+
+$icon-size: 1.25rem; // 20px
+
+.icon-button {
+  @include mixins.button-transition;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  border-radius: map.get(variables.$border-radius, sm);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  min-width: auto;
+  padding: 0.625rem; // 10px
+
+  &:focus {
+    border-color: palette.focus-border-color("light");
+    border-style: solid;
+    border-width: 1px;
+    outline: none;
+  }
+
+  &:hover {
+    background-color: map.get(palette.$gray-palette, 100);
+  }
+
+  &__icon {
+    height: $icon-size;
+    width: $icon-size;
+  }
+}
+
+[data-color-mode="dark"] {
+  .icon-button {
+    &:focus {
+      border-color: palette.focus-border-color("dark");
+    }
+
+    &:hover {
+      background-color: map.get(palette.$white-alpha-palette, 100);
+    }
+  }
+}
+
+

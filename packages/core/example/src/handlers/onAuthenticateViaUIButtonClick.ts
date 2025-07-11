@@ -1,0 +1,30 @@
+import type { ILogger } from '@kibisis/utilities';
+import { BaseError, Katavault, USER_CANCELED_UI_REQUEST_ERROR } from '@kibisis/katavault-core';
+
+// utilities
+import { updateAccountsTable } from '../utilities';
+
+export default function onAuthenticateViaUIButtonClick(katavault: Katavault, logger: ILogger) {
+  return async () => {
+    const __logPrefix = 'onAuthenticateViaUIButtonClick';
+
+    try {
+      await katavault.authenticate();
+
+      await updateAccountsTable(katavault, logger);
+    } catch (error) {
+      if ((error as BaseError).isKatavaultError) {
+        switch ((error as BaseError).type) {
+          case USER_CANCELED_UI_REQUEST_ERROR:
+            logger.debug(`${__logPrefix}: user canceled ui request`);
+
+            return;
+          default:
+            break;
+        }
+      }
+
+      logger.error(`${__logPrefix}:`, error);
+    }
+  };
+}

@@ -14,7 +14,7 @@ import {
 } from '@/constants';
 
 // decorators
-import { AccountStore, PasskeyStore, PasswordStore, UIManager } from '@/decorators';
+import { AccountStore, AppManager, PasskeyStore, PasswordStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -35,7 +35,9 @@ import type {
   AccountStoreItemWithPassword,
   AddAccountParameters,
   AuthenticateWithPasskeyParameters,
+  AuthenticateWithPasskeyResult,
   AuthenticateWithPasswordParameters,
+  AuthenticateWithPasswordResult,
   AuthenticationStore,
   ClientInformation,
   ImportAccountWithMnemonicParameters,
@@ -69,11 +71,11 @@ export default class Katavault {
   public static readonly displayName = 'Katavault';
   // private variables
   private _accountStore: AccountStore;
+  private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
   private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: ILogger;
-  private readonly _uiManager: UIManager;
   private _user: UserInformation | null = null;
   private _vault: IDBPDatabase<VaultSchema>;
 
@@ -81,7 +83,7 @@ export default class Katavault {
     this._chains = chains;
     this._clientInformation = clientInformation;
     this._logger = logger;
-    this._uiManager = new UIManager({ logger });
+    this._appManager = new AppManager({ logger });
   }
 
   /**
@@ -327,12 +329,20 @@ export default class Katavault {
     }
   }
 
+  /**
+   * Opens up a modal to allow the user to choose how to authenticate.
+   * @throws {UserCanceledUIRequestError} If the user canceled the request.
+   * @public
+   */
   public async authenticate(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#authenticate`;
+    let result: AuthenticateWithPasskeyResult | AuthenticateWithPasswordResult;
 
-    await this._uiManager.renderAuthenticationApp({
+    result = await this._appManager.renderAuthenticationApp({
       colorMode: 'dark',
     });
+
+    console.log(`${__logPrefix}:`, result);
   }
 
   /**

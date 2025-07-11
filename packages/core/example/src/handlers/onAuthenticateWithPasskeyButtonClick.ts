@@ -1,9 +1,10 @@
-import { BaseError, Katavault, type Logger, USER_CANCELED_PASSKEY_REQUEST_ERROR } from '@kibisis/katavault-core';
+import type { ILogger } from '@kibisis/utilities';
+import { BaseError, Katavault, USER_CANCELED_PASSKEY_REQUEST_ERROR } from '@kibisis/katavault-core';
 
 // utilities
 import { updateAccountsTable } from '../utilities';
 
-export default function onAuthenticateWithPasskeyButtonClick(katavault: Katavault, logger: Logger) {
+export default function onAuthenticateWithPasskeyButtonClick(katavault: Katavault, logger: ILogger) {
   return async () => {
     const __logPrefix = 'onAuthenticateWithPasskeyButtonClick';
 
