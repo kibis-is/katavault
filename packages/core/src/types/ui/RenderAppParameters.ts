@@ -1,8 +1,8 @@
 // types
-import type ColorMode from './ColorMode';
+import type { Vault } from '@/types';
 
 interface RenderAppParameters {
-  colorMode: ColorMode;
+  vault: Vault;
 }
 
 export default RenderAppParameters;

@@ -8,13 +8,15 @@ import { type IDBPDatabase, openDB } from 'idb';
 // constants
 import {
   IDB_ACCOUNTS_STORE_NAME,
+  IDB_CONFIG_STORE_NAME,
+  IDB_DB_NAME,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
   SIGN_MESSAGE_PREFIX,
 } from '@/constants';
 
 // decorators
-import { AccountStore, AppManager, PasskeyStore, PasswordStore } from '@/decorators';
+import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -28,6 +30,9 @@ import {
   NotAuthenticatedError,
 } from '@/errors';
 
+// facades
+import AppManager from './AppManager';
+
 // types
 import type {
   Account,
@@ -35,19 +40,17 @@ import type {
   AccountStoreItemWithPassword,
   AddAccountParameters,
   AuthenticateWithPasskeyParameters,
-  AuthenticateWithPasskeyResult,
   AuthenticateWithPasswordParameters,
-  AuthenticateWithPasswordResult,
   AuthenticationStore,
   ClientInformation,
   ImportAccountWithMnemonicParameters,
   ImportAccountWithPrivateKeyParameters,
-  InitializeVaultParameters,
   KatavaultParameters,
   PasskeyStoreSchema,
   SetAccountNameByAddressParameters,
   SignMessageParameters,
   UserInformation,
+  Vault,
   VaultSchema,
   WithEncoding,
 } from '@/types';
@@ -57,7 +60,6 @@ import {
   addressFromPrivateKey,
   bytesToBase64,
   bytesToHex,
-  createVaultName,
   generatePrivateKey,
   hexToBytes,
   isValidMnemonic,
@@ -206,28 +208,23 @@ export default class Katavault {
 
   /**
    * Initializes the vault connection.
-   * @param {InitializeVaultParameters} params - The user information to identify the vault.
-   * @returns {Promise<IDBPDatabase<VaultSchema>>} A promise that resolves to the initialized vault.
+   * @returns {Promise<Vault>} A promise that resolves to the initialized vault.
    * @private
-   * @static
    */
-  private static async _initializeVault({
-    logger,
-    user,
-  }: InitializeVaultParameters): Promise<IDBPDatabase<VaultSchema>> {
+  private async _initializeVault(): Promise<Vault> {
     const __logPrefix = `${Katavault.displayName}#_initializeVault`;
-    const name = createVaultName(user.username);
 
-    return await openDB<VaultSchema>(name, undefined, {
+    return await openDB<VaultSchema>(IDB_DB_NAME, undefined, {
       upgrade: (_db, oldVersion, newVersion) => {
         // we are creating a new database
         if (oldVersion <= 0 && newVersion && newVersion > 0) {
           // create the stores
           _db.createObjectStore(IDB_ACCOUNTS_STORE_NAME);
+          _db.createObjectStore(IDB_CONFIG_STORE_NAME);
           _db.createObjectStore(IDB_PASSKEY_STORE_NAME);
           _db.createObjectStore(IDB_PASSWORD_STORE_NAME);
 
-          logger.debug(`${__logPrefix}: created new vault "${name}"`);
+          this._logger.debug(`${__logPrefix}: created new vault "${IDB_DB_NAME}"`);
         }
       },
     });
@@ -336,10 +333,11 @@ export default class Katavault {
    */
   public async authenticate(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#authenticate`;
-    let result: AuthenticateWithPasskeyResult | AuthenticateWithPasswordResult;
+    const vault = await this._initializeVault();
+    let result: AuthenticationStore;
 
     result = await this._appManager.renderAuthenticationApp({
-      colorMode: 'dark',
+      vault,
     });
 
     console.log(`${__logPrefix}:`, result);
@@ -356,10 +354,7 @@ export default class Katavault {
    */
   public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#authenticateWithPasskey`;
-    const vault = await Katavault._initializeVault({
-      logger: this._logger,
-      user,
-    });
+    const vault = await this._initializeVault();
     const store = new PasskeyStore({
       logger: this._logger,
       vault,
@@ -410,10 +405,7 @@ export default class Katavault {
    */
   public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
-    const vault = await Katavault._initializeVault({
-      logger: this._logger,
-      user,
-    });
+    const vault = await this._initializeVault();
     const store = new PasswordStore({
       logger: this._logger,
       vault,

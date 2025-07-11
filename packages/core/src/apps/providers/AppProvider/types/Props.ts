@@ -3,10 +3,9 @@ import type { ILogger } from '@kibisis/utilities';
 // types
 import type { Vault } from '@/types';
 
-interface BaseAppProps {
+interface Props {
   logger: ILogger;
-  onClose: () => void;
   vault: Vault;
 }
 
-export default BaseAppProps;
+export default Props;

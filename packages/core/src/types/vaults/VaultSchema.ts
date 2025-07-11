@@ -1,6 +1,6 @@
 // types
-import type { AccountStoreSchema, PasskeyStoreSchema, PasswordStoreSchema } from '@/types';
+import type { AccountStoreSchema, ConfigStoreSchema, PasskeyStoreSchema, PasswordStoreSchema } from '@/types';
 
-type VaultSchema = AccountStoreSchema | PasskeyStoreSchema | PasswordStoreSchema;
+type VaultSchema = AccountStoreSchema | ConfigStoreSchema | PasskeyStoreSchema | PasswordStoreSchema;
 
 export default VaultSchema;

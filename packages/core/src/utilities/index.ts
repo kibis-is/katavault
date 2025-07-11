@@ -3,4 +3,3 @@ export * from './client';
 export * from './cryptography';
 export * from './encoding';
 export * from './katavault';
-export * from './vaults';

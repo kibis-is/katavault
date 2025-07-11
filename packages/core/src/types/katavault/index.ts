@@ -3,6 +3,5 @@ export type { default as CreateKatavaultParameters } from './CreateKatavaultPara
 export type { default as ImportAccountParameters } from './ImportAccountParameters';
 export type { default as ImportAccountWithMnemonicParameters } from './ImportAccountWithMnemonicParameters';
 export type { default as ImportAccountWithPrivateKeyParameters } from './ImportAccountWithPrivateKeyParameters';
-export type { default as InitializeVaultParameters } from './InitializeVaultParameters';
 export type { default as KatavaultParameters } from './KatavaultParameters';
 export type { default as SetAccountNameByAddressParameters } from './SetAccountNameByAddressParameters';

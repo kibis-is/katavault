@@ -12,6 +12,10 @@ import VStack from '@/apps/components/VStack';
 // constants
 import { DEFAULT_PADDING } from '@/apps/constants';
 
+// hooks
+import useColorMode from '@/apps/hooks/useColorMode';
+import useToggleColorMode from '@/apps/hooks/useToggleColorMode';
+
 // icons
 import CloseIcon from '@/apps/icons/CloseIcon';
 import MoonIcon from '@/apps/icons/MoonIcon';
@@ -21,13 +25,15 @@ import SunnyIcon from '@/apps/icons/SunnyIcon';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseAppProps } from '@/apps/types';
-import type { Props } from './types';
+import type { RootProps } from './types';
 
-const AuthenticationApp: FunctionComponent<BaseAppProps & Props> = ({ colorMode, onClose }) => {
+const Root: FunctionComponent<RootProps> = ({ onClose }) => {
+  // hooks
+  const colorMode = useColorMode();
+  const toggleColorMode = useToggleColorMode();
   // handlers
   const handleOnClose = useCallback(() => onClose(), [onClose]);
-  const handleOnToggleColorModeClick = useCallback(() => console.log(colorMode === 'dark' ? 'light' : 'dark'), [colorMode]);
+  const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
     <div className={clsx(styles.modal)} data-color-mode={colorMode}>
@@ -64,6 +70,4 @@ const AuthenticationApp: FunctionComponent<BaseAppProps & Props> = ({ colorMode,
   );
 };
 
-AuthenticationApp.displayName = 'AuthenticationApp';
-
-export default AuthenticationApp;
+export default Root;

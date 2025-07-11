@@ -1,9 +1,8 @@
 import type { ILogger } from '@kibisis/utilities';
-import { randomString } from '@stablelib/random';
 import { h, render } from 'preact';
 
 // containers
-import AuthenticationApp from '@/apps/containers/AuthenticationApp';
+import AuthenticationApp from '@/apps/apps/authentication';
 
 // enums
 import { AppTypeEnum } from '@/enums';
@@ -12,23 +11,16 @@ import { AppTypeEnum } from '@/enums';
 import { FailedToRenderUIError, UserCanceledUIRequestError } from '@/errors';
 
 // types
-import type {
-  AuthenticateWithPasskeyResult,
-  AuthenticateWithPasswordResult,
-  CommonParameters,
-  RenderAppParameters,
-} from '@/types';
+import type { AuthenticationStore, CommonParameters, RenderAppParameters } from '@/types';
 
 export default class AppManager {
   // public static variables
   public static readonly displayName = 'AppManager';
   // private variables
   private readonly _logger: ILogger;
-  private readonly _id: string;
 
   public constructor({ logger }: CommonParameters) {
     this._logger = logger;
-    this._id = randomString(16);
   }
 
   /**
@@ -68,20 +60,17 @@ export default class AppManager {
   }
 
   private _rootElementID(type: AppTypeEnum): string {
-    return `katavault_${type}_${this._id}`;
+    return `katavault_${type}`;
   }
 
   /**
    * public methods
    */
 
-  public async renderAuthenticationApp({
-    colorMode,
-  }: RenderAppParameters): Promise<AuthenticateWithPasskeyResult | AuthenticateWithPasswordResult> {
-    return new Promise<AuthenticateWithPasskeyResult | AuthenticateWithPasswordResult>((resolve, reject) => {
+  public async renderAuthenticationApp({ vault }: RenderAppParameters): Promise<AuthenticationStore> {
+    return new Promise<AuthenticationStore>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
-          colorMode,
           logger: this._logger,
           onClose: () => {
             this._closeApp(AppTypeEnum.Authentication);
@@ -89,6 +78,7 @@ export default class AppManager {
           },
           onError: reject,
           onSuccess: resolve,
+          vault,
         }),
         this._rootElement(AppTypeEnum.Authentication)
       );
