@@ -28,7 +28,7 @@ const Footer: FunctionComponent<BaseComponentProps> = ({ colorMode }) => {
   const translate = useTranslate();
 
   return (
-    <VStack align="center" fullWidth={true} justify="center" paddingBottom={DEFAULT_PADDING} paddingX={DEFAULT_PADDING}>
+    <VStack align="center" fullWidth={true} justify="center" padding={DEFAULT_PADDING}>
       <HStack align="center" justify="center" spacing="sm">
         <Text colorMode={colorMode} size="xs" textAlign="center">
           {translate('captions.poweredBy')}

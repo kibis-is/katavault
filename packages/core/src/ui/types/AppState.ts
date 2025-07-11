@@ -1,13 +1,14 @@
 import type { ILogger } from '@kibisis/utilities';
 import type { i18n as I18n } from 'i18next';
 
-// decorators
-import { ConfigStore } from '@/decorators';
+// types
+import type { ClientInformation, Vault } from '@/types';
 
 interface AppState {
-  configStore: ConfigStore;
+  clientInformation: ClientInformation;
   i18n: I18n;
   logger: ILogger;
+  vault: Vault;
 }
 
 export default AppState;

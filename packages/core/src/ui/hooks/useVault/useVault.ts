@@ -1,20 +1,22 @@
-import { ILogger } from '@kibisis/utilities';
 import { useContext, useEffect, useState } from 'preact/hooks';
 
 // contexts
 import { AppContext } from '@/ui/contexts';
 
-export default function useLogger(): ILogger | null {
+// types
+import type { Vault } from '@/types';
+
+export default function useVault(): Vault | null {
   const { state, timestamp } = useContext(AppContext);
-  const [logger, setLogger] = useState<ILogger | null>(state?.logger ?? null);
+  const [vault, setVault] = useState<Vault | null>(state?.vault ?? null);
 
   useEffect(() => {
     if (!state) {
       return;
     }
 
-    setLogger(state.logger);
+    setVault(state.vault);
   }, [timestamp]);
 
-  return logger;
+  return vault;
 }

@@ -5,38 +5,31 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 // contexts
 import { AppContext } from '@/ui/contexts';
 
-// decorators
-import { ConfigStore } from '@/decorators';
-
 // types
 import type { AppState } from '@/ui/types';
 import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, i18n, logger, vault }) => {
+const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, clientInformation, i18n, logger, vault }) => {
   // states
   const [timestamp, setTimestamp] = useState<number>(0);
   const [state, setState] = useState<AppState>({
-    configStore: new ConfigStore({
-      logger,
-      vault,
-    }),
+    clientInformation,
     i18n,
     logger,
+    vault,
   });
   // callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
 
   useEffect(() => {
     setState({
-      configStore: new ConfigStore({
-        logger,
-        vault,
-      }),
+      clientInformation,
       i18n,
       logger,
+      vault,
     });
     onUpdate();
-  }, [i18n, logger, vault]);
+  }, [clientInformation, i18n, logger, vault]);
 
   return (
     <AppContext.Provider

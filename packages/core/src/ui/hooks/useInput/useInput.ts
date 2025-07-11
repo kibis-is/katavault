@@ -26,7 +26,6 @@ export default function useInput<InputElement extends HTMLInputElement | HTMLTex
   // callbacks
   const _validate = useCallback(() => {
     const _error = validateInput({
-      field: name,
       translate,
       required,
       value,
@@ -41,7 +40,6 @@ export default function useInput<InputElement extends HTMLInputElement | HTMLTex
     (event: FocusEvent<InputElement>) => {
       setError(
         validateInput({
-          field: name,
           translate,
           required,
           value: event.currentTarget.value,
@@ -65,7 +63,6 @@ export default function useInput<InputElement extends HTMLInputElement | HTMLTex
 
       setError(
         validateInput({
-          field: name,
           translate,
           required,
           value: _value,

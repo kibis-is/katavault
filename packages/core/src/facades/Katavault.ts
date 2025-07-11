@@ -2,7 +2,6 @@ import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain
 import type { ILogger } from '@kibisis/utilities';
 import { ed25519 } from '@noble/curves/ed25519';
 import { concatBytes } from '@noble/hashes/utils';
-import { encode as encodeUtf8 } from '@stablelib/utf8';
 import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
@@ -16,7 +15,7 @@ import {
 } from '@/constants';
 
 // decorators
-import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
+import { AccountStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -26,7 +25,6 @@ import {
   AccountDoesNotExistError,
   FailedToFetchNetworkError,
   InvalidAccountError,
-  InvalidPasswordError,
   NotAuthenticatedError,
 } from '@/errors';
 
@@ -58,6 +56,8 @@ import type {
 // utilities
 import {
   addressFromPrivateKey,
+  authenticateWithPassword,
+  authenticateWithPasskey,
   bytesToBase64,
   bytesToHex,
   generatePrivateKey,
@@ -328,12 +328,19 @@ export default class Katavault {
 
   /**
    * Opens up a modal to allow the user to choose how to authenticate.
+   * @throws {DecryptionError} If the stored challenge failed to be decrypted.
+   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
+   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
+   * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * @throws {UserCanceledUIRequestError} If the user canceled the request.
    * @public
    */
   public async authenticate(): Promise<void> {
     const vault = await this._initializeVault();
     const { authenticationStore, user } = await this._appManager.renderAuthenticationApp({
+      clientInformation: this._clientInformation,
       vault,
     });
 
@@ -349,6 +356,7 @@ export default class Katavault {
   /**
    * Authenticates with a passkey.
    * @param {AuthenticateWithPasskeyParameters} params - The user information.
+   * @param {UserInformation} params.user - The user information.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
@@ -356,45 +364,21 @@ export default class Katavault {
    * @public
    */
   public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPasskey`;
     const vault = await this._initializeVault();
-    const store = new PasskeyStore({
-      logger: this._logger,
-      vault,
-    });
-    let keyMaterial: Uint8Array;
-    let passkey = await store.passkey();
 
-    // if there is no passkey register a new one
-    if (!passkey) {
-      this._logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
-
-      passkey = await PasskeyStore.register({
-        client: this._clientInformation,
+    this._authenticationStore = {
+      __type: AuthenticationMethod.Passkey,
+      store: await authenticateWithPasskey({
+        clientInformation: this._clientInformation,
         logger: this._logger,
         user,
-      });
-
-      await store.setPasskey(passkey);
-    }
-
-    this._logger.debug(`${__logPrefix}: authenticating new credential "${passkey.credentialID}"`);
-
-    keyMaterial = await PasskeyStore.authenticate({
-      logger: this._logger,
-      ...passkey,
-    });
-
-    store.setKeyMaterial(keyMaterial);
-
+        vault,
+      }),
+    };
     this._accountStore = new AccountStore({
       logger: this._logger,
       vault,
     });
-    this._authenticationStore = {
-      __type: AuthenticationMethod.Passkey,
-      store,
-    };
     this._user = user;
     this._vault = vault;
   }
@@ -402,52 +386,28 @@ export default class Katavault {
   /**
    * Authenticates with the supplied password.
    * @param {AuthenticateWithPasswordParameters} params - The password and user information.
+   * @param {string} params.password - The password.
+   * @param {UserInformation} params.user - The user information.
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
    * @public
    */
   public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
     const vault = await this._initializeVault();
-    const store = new PasswordStore({
-      logger: this._logger,
-      vault,
-    });
-    let encryptedChallenge = await store.challenge();
-    let isVerified: boolean;
 
-    // set the password
-    store.setPassword(password);
-
-    // if there is no stored challenge, encrypt a new one into the store.
-    if (!encryptedChallenge) {
-      this._logger.debug(`${__logPrefix}: initializing new password store`);
-
-      encryptedChallenge = bytesToHex(await store.encryptBytes(encodeUtf8(PasswordStore.challenge)));
-
-      await store.setChallenge(encryptedChallenge);
-      await store.setLastUsedAt();
-    }
-
-    // if stored challenge exists, verify the supplied password
-    if (encryptedChallenge) {
-      this._logger.debug(`${__logPrefix}: password store exists`);
-
-      isVerified = await store.verify();
-
-      if (!isVerified) {
-        throw new InvalidPasswordError('incorrect password');
-      }
-    }
-
+    this._authenticationStore = {
+      __type: AuthenticationMethod.Password,
+      store: await authenticateWithPassword({
+        logger: this._logger,
+        password,
+        user,
+        vault,
+      }),
+    };
     this._accountStore = new AccountStore({
       logger: this._logger,
       vault,
     });
-    this._authenticationStore = {
-      __type: AuthenticationMethod.Password,
-      store,
-    };
     this._user = user;
     this._vault = vault;
   }

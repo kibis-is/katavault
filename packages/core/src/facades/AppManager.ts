@@ -92,20 +92,27 @@ export default class AppManager {
    * public methods
    */
 
-  public async renderAuthenticationApp({ vault }: RenderAppParameters): Promise<AuthenticateResult> {
+  public async renderAuthenticationApp({ clientInformation, vault }: RenderAppParameters): Promise<AuthenticateResult> {
     const i18n = await this._getOrInitializeI18n();
 
     return new Promise<AuthenticateResult>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
+          clientInformation,
           i18n,
           logger: this._logger,
           onClose: () => {
             this._closeApp(AppTypeEnum.Authentication);
             reject(new UserCanceledUIRequestError('user canceled authentication request'));
           },
-          onError: reject,
-          onSuccess: resolve,
+          onError: (error) => {
+            this._closeApp(AppTypeEnum.Authentication);
+            reject(error);
+          },
+          onSuccess: (result) => {
+            this._closeApp(AppTypeEnum.Authentication);
+            resolve(result);
+          },
           vault,
         }),
         this._rootElement(AppTypeEnum.Authentication)

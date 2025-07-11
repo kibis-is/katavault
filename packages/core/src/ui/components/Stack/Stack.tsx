@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
+import { useMemo } from 'preact/hooks';
 
 // styles
 import styles from './styles.module.scss';
@@ -30,59 +31,49 @@ const Stack: FunctionComponent<StackProps> = ({
   spacing,
   width,
 }) => {
-  let alignStyle = styles.stackAlignStart;
-  let justifyStyle = styles.stackJustifyStart;
-  let spacingStyle: string | null = null;
-
-  switch (align) {
-    case 'center':
-      alignStyle = styles.stackAlignCenter;
-      break;
-    case 'end':
-      alignStyle = styles.stackAlignEnd;
-      break;
-    case 'start':
-    default:
-      break;
-  }
-
-  switch (justify) {
-    case 'between':
-      justifyStyle = styles.stackJustifyBetween;
-      break;
-    case 'center':
-      justifyStyle = styles.stackJustifyCenter;
-      break;
-    case 'end':
-      justifyStyle = styles.stackJustifyEnd;
-      break;
-    case 'evenly':
-      justifyStyle = styles.stackJustifyEvenly;
-      break;
-    case 'start':
-    default:
-      break;
-  }
-
-  switch (spacing) {
-    case 'xs':
-      spacingStyle = styles.stackSpacingXs;
-      break;
-    case 'sm':
-      spacingStyle = styles.stackSpacingSm;
-      break;
-    case 'md':
-      spacingStyle = styles.stackSpacingMd;
-      break;
-    case 'lg':
-      spacingStyle = styles.stackSpacingLg;
-      break;
-    case 'xl':
-      spacingStyle = styles.stackSpacingXl;
-      break;
-    default:
-      break;
-  }
+  // memos
+  const alignStyle = useMemo(() => {
+    switch (align) {
+      case 'center':
+        return styles.stackAlignCenter;
+      case 'end':
+        return styles.stackAlignEnd;
+      case 'start':
+      default:
+        return styles.stackAlignStart;
+    }
+  }, [align]);
+  const justifyStyle = useMemo(() => {
+    switch (justify) {
+      case 'between':
+        return styles.stackJustifyBetween;
+      case 'center':
+        return styles.stackJustifyCenter;
+      case 'end':
+        return styles.stackJustifyEnd;
+      case 'evenly':
+        return styles.stackJustifyEvenly;
+      case 'start':
+      default:
+        return styles.stackJustifyStart;
+    }
+  }, [justify]);
+  const spacingStyle = useMemo(() => {
+    switch (spacing) {
+      case 'xs':
+        return styles.stackSpacingXs;
+      case 'sm':
+        return styles.stackSpacingSm;
+      case 'md':
+        return styles.stackSpacingMd;
+      case 'lg':
+        return styles.stackSpacingLg;
+      case 'xl':
+        return styles.stackSpacingXl;
+      default:
+        return null;
+    }
+  }, [spacing]);
 
   return (
     <div

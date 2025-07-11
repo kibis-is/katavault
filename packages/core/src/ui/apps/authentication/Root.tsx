@@ -4,32 +4,46 @@ import { useCallback, useState } from 'preact/hooks';
 
 // components
 import Button from '@/ui/components/Button';
+import CircularLoaderWithIcon from '@/ui/components/CircularLoaderWithIcon';
 import Footer from '@/ui/components/Footer';
 import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
 import Input from '@/ui/components/Input';
 import Spacer from '@/ui/components/Spacer';
+import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
 
+// decorators
+import { PasskeyStore } from '@/decorators';
+
 // enums
 import { AuthenticationMethod } from '@/enums';
 
+// errors
+import { BaseError } from '@/errors';
+
 // hooks
+import useClientInformation from '@/ui/hooks/useClientInformation';
 import useColorMode from '@/ui/hooks/useColorMode';
+import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
+import useLogger from '@/ui/hooks/useLogger';
 import useInput from '@/ui/hooks/useInput';
 import useToggleColorMode from '@/ui/hooks/useToggleColorMode';
 import useTranslate from '@/ui/hooks/useTranslate';
+import useVault from '@/ui/hooks/useVault';
 
 // icons
 import ArrowLeftIcon from '@/ui/icons/ArrowLeftIcon';
 import ArrowRightIcon from '@/ui/icons/ArrowRightIcon';
 import CloseIcon from '@/ui/icons/CloseIcon';
 import MoonIcon from '@/ui/icons/MoonIcon';
+import NoPasskeyIcon from '@/ui/icons/NoPasskeyIcon';
 import PasskeyIcon from '@/ui/icons/PasskeyIcon';
+import RotateIcon from '@/ui/icons/RotateIcon';
 import SignInIcon from '@/ui/icons/SignInIcon';
 import SunnyIcon from '@/ui/icons/SunnyIcon';
 
@@ -37,45 +51,110 @@ import SunnyIcon from '@/ui/icons/SunnyIcon';
 import styles from './styles.module.scss';
 
 // types
+import type { UserInformation } from '@/types';
 import type { RootProps } from './types';
 
-const Root: FunctionComponent<RootProps> = ({ onClose }) => {
+// utilities
+import { authenticateWithPasskey } from '@/utilities';
+
+const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
   // hooks
+  const clientInformation = useClientInformation();
   const colorMode = useColorMode();
+  const defaultTextColor = useDefaultTextColor(colorMode);
   const {
-    validate: validateUsername,
-    ...usernameInputProps
+    validate: validatePassword,
+    reset: resetPassword,
+    ...passwordInputProps
   } = useInput({
+    name: 'password',
+    required: true,
+  });
+  const { validate: validateUsername, ...usernameInputProps } = useInput({
     name: 'username',
     required: true,
   });
+  const logger = useLogger();
   const toggleColorMode = useToggleColorMode();
   const translate = useTranslate();
+  const vault = useVault();
   // states
+  const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [method, setMethod] = useState<AuthenticationMethod | null>(null);
   // callbacks
-  const handleOnBackClick = useCallback(() => setMethod(null), [setMethod]);
+  const handleOnBackClick = useCallback(() => {
+    if (method) {
+      resetPassword();
+    }
+
+    setMethod(null);
+  }, [method, setMethod]);
   const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
   const handleOnContinueWithPasswordClick = useCallback(() => {
-    if (validateUsername(usernameInputProps.value)) {
+    if (validateUsername()) {
       return;
     }
 
     setMethod(AuthenticationMethod.Password);
-  }, [setMethod, translate, validateUsername, usernameInputProps.value]);
-  const handleOnSignInWithPasskeyClick = useCallback(() => setMethod(AuthenticationMethod.Passkey), [setMethod]);
+  }, [setMethod, validateUsername]);
+  const handleOnSignInWithPasskeyClick = useCallback(async () => {
+    const __logPrefix= `${Root.displayName}#handleOnSignInWithPasskeyClick`;
+    let store: PasskeyStore;
+    let user: UserInformation;
+
+    setPasskeyError(null);
+
+    if (!clientInformation || !logger || !vault) {
+      return;
+    }
+
+    if (validateUsername()) {
+      return;
+    }
+
+    setMethod(AuthenticationMethod.Passkey);
+
+    try {
+      user = {
+        displayName: usernameInputProps.value,
+        username: usernameInputProps.value,
+      };
+      store = await authenticateWithPasskey({
+        clientInformation,
+        logger,
+        user,
+        vault,
+      });
+
+      onSuccess({
+        authenticationStore: {
+          __type: AuthenticationMethod.Passkey,
+          store,
+        },
+        user,
+      });
+    } catch (error) {
+      logger.error(`${__logPrefix}:`, error);
+      setPasskeyError(error);
+    }
+  }, [clientInformation, setMethod, usernameInputProps.value, validateUsername]);
+  const handleOnSignInWithPasswordClick = useCallback(() => {
+    if (validatePassword()) {
+      return;
+    }
+  }, [validatePassword]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
-    <div className={clsx(styles.container)} data-color-mode={colorMode}>
+    <div className={clsx(styles.container)}>
       {/*overlay*/}
       <div className={clsx(styles.overlay)}></div>
 
       {/*modal*/}
-      <VStack align="center" className={clsx(styles.modal)}>
+      <div className={clsx(styles.modal)} data-color-mode={colorMode}>
         {/*header*/}
         <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
-          {method === AuthenticationMethod.Password && (
+          {(method === AuthenticationMethod.Password || (method === AuthenticationMethod.Passkey && passkeyError)) && (
             <HStack align="center" justify="start" spacing="xs">
               {/*back button*/}
               <IconButton colorMode={colorMode} icon={<ArrowLeftIcon />} onClick={handleOnBackClick} />
@@ -98,25 +177,67 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
         </HStack>
 
         {/*content*/}
-        <VStack align="center" fullWidth={true} grow={true} justify="center" padding={DEFAULT_PADDING} spacing="md">
+        <VStack align="center" fullWidth={true} grow={true} paddingX={DEFAULT_PADDING} spacing="md">
           {(() => {
             switch (method) {
+              case AuthenticationMethod.Passkey:
+                if (passkeyError) {
+                  return (
+                    <>
+                      <NoPasskeyIcon className={clsx(styles.passkeyIcon)} color={defaultTextColor} />
+
+                      <Text colorMode={colorMode} textAlign="center">
+                        {translate('errors.descriptions.type', {
+                          context: passkeyError.type,
+                        })}
+                      </Text>
+
+                      <Spacer />
+
+                      <Button
+                        colorMode={colorMode}
+                        fullWidth={true}
+                        onClick={handleOnSignInWithPasskeyClick}
+                        rightIcon={<RotateIcon />}
+                      >
+                        {translate('buttons.retry')}
+                      </Button>
+                    </>
+                  );
+                }
+
+                return (
+                  <>
+                    <CircularLoaderWithIcon colorMode={colorMode} icon={<PasskeyIcon />} size="lg" />
+
+                    <Text colorMode={colorMode} textAlign="center">
+                      {translate('captions.verifyPasskey')}
+                    </Text>
+                  </>
+                );
               case AuthenticationMethod.Password:
                 return (
                   <>
                     <Heading colorMode={colorMode}>{translate('headings.enterYourPassword')}</Heading>
 
                     <Input
-                      {...usernameInputProps}
-                      autocomplete="username email"
+                      {...passwordInputProps}
+                      autocomplete="current-password"
                       colorMode={colorMode}
-                      placeholder={translate('placeholders.emailUsername')}
-                      type="text"
+                      placeholder={translate('placeholders.password')}
+                      type="password"
                     />
 
+                    <Spacer />
+
                     <VStack align="center" fullWidth={true} justify="center" spacing="sm">
-                      <Button colorMode={colorMode} fullWidth={true} rightIcon={<SignInIcon />}>
-                        {translate('buttons.signInWithPassword')}
+                      <Button
+                        colorMode={colorMode}
+                        fullWidth={true}
+                        onClick={handleOnSignInWithPasswordClick}
+                        rightIcon={<SignInIcon />}
+                      >
+                        {translate('buttons.signIn')}
                       </Button>
                     </VStack>
                   </>
@@ -130,9 +251,11 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
                       {...usernameInputProps}
                       autocomplete="username email"
                       colorMode={colorMode}
-                      placeholder={translate('placeholders.emailUsername')}
+                      placeholder={translate('placeholders.usernameEmail')}
                       type="text"
                     />
+
+                    <Spacer />
 
                     <VStack align="center" fullWidth={true} justify="center" spacing="sm">
                       <Button
@@ -144,14 +267,16 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
                         {translate('buttons.continueWithPassword')}
                       </Button>
 
-                      <Button
-                        colorMode={colorMode}
-                        fullWidth={true}
-                        onClick={handleOnSignInWithPasskeyClick}
-                        rightIcon={<PasskeyIcon />}
-                      >
-                        {translate('buttons.signInWithPasskey')}
-                      </Button>
+                      {PasskeyStore.isSupported() && (
+                        <Button
+                          colorMode={colorMode}
+                          fullWidth={true}
+                          onClick={handleOnSignInWithPasskeyClick}
+                          rightIcon={<PasskeyIcon />}
+                        >
+                          {translate('buttons.signInWithPasskey')}
+                        </Button>
+                      )}
                     </VStack>
                   </>
                 );
@@ -161,9 +286,11 @@ const Root: FunctionComponent<RootProps> = ({ onClose }) => {
 
         {/*footer*/}
         <Footer colorMode={colorMode} />
-      </VStack>
+      </div>
     </div>
   );
 };
+
+Root.displayName = 'Root';
 
 export default Root;

@@ -19,21 +19,21 @@ const CircularLoaderWithIcon: FunctionComponent<BaseComponentProps & Props> = ({
   const [containerSizeStyle, iconSizeStyle, loaderSizeStyle] = useMemo(() => {
     switch (size) {
       case 'xs':
-        return [styles.loaderContainerXs, styles.loaderIconXs, styles.loaderXs];
+        return [styles.containerXs, styles.iconXs, styles.loaderXs];
       case 'sm':
-        return [styles.loaderContainerSm, styles.loaderIconSm, styles.loaderSm];
+        return [styles.containerSm, styles.iconSm, styles.loaderSm];
       case 'lg':
-        return [styles.loaderContainerLg, styles.loaderIconLg, styles.loaderLg];
+        return [styles.containerLg, styles.iconLg, styles.loaderLg];
       case 'xl':
-        return [styles.loaderContainerXl, styles.loaderIconXl, styles.loaderXl];
+        return [styles.containerXl, styles.iconXl, styles.loaderXl];
       case 'md':
       default:
-        return [styles.loaderContainerMd, styles.loaderIconMd, styles.loaderMd];
+        return [styles.containerMd, styles.iconMd, styles.loaderMd];
     }
   }, [size]);
 
   return (
-    <div className={clsx(styles.loaderContainer, containerSizeStyle)}>
+    <div className={clsx(styles.container, containerSizeStyle)}>
       <span
         className={clsx(styles.loader, loaderSizeStyle)}
         data-color-mode={colorMode}
@@ -49,7 +49,7 @@ const CircularLoaderWithIcon: FunctionComponent<BaseComponentProps & Props> = ({
 
       {cloneElement(icon, {
         ...icon.props,
-        className: clsx(styles.loaderIcon, iconSizeStyle),
+        className: clsx(styles.icon, iconSizeStyle),
         color: defaultTextColor,
       })}
     </div>

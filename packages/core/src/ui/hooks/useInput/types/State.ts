@@ -11,7 +11,7 @@ interface State<InputElement extends HTMLInputElement | HTMLTextAreaElement> {
   setCharactersRemaining: (value: number) => void;
   setError: (value: string | null) => void;
   setValue: (value: string) => void;
-  validate: (value: string) => string | null;
+  validate: () => string | null;
   value: string;
 }
 

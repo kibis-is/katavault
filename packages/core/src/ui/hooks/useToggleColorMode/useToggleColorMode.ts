@@ -3,6 +3,9 @@ import { useContext } from 'preact/hooks';
 // contexts
 import { AppContext } from '@/ui/contexts';
 
+// decorators
+import { ConfigStore } from '@/decorators';
+
 // types
 import type { ConfigStoreSchema } from '@/types';
 
@@ -12,15 +15,20 @@ export default function useToggleColorMode(): () => void {
 
   return () => {
     (async () => {
+      let store: ConfigStore;
       let config: ConfigStoreSchema | null;
 
       if (!state) {
         return;
       }
 
-      config = await state.configStore.config();
+      store = new ConfigStore({
+        logger: state.logger,
+        vault: state.vault,
+      });
+      config = await store.config();
 
-      await state.configStore.setConfig({
+      await store.setConfig({
         ...config,
         colorMode: config?.colorMode === 'dark' ? 'light' : 'dark',
       });

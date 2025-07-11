@@ -1,7 +1,8 @@
 // types
-import type { Vault } from '@/types';
+import type { ClientInformation, Vault } from '@/types';
 
 interface RenderAppParameters {
+  clientInformation: ClientInformation;
   vault: Vault;
 }
 

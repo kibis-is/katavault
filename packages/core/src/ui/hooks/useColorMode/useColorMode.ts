@@ -3,6 +3,9 @@ import { useContext, useEffect, useState } from 'preact/hooks';
 // contexts
 import { AppContext } from '@/ui/contexts';
 
+// decorators
+import { ConfigStore } from '@/decorators';
+
 // types
 import { ColorMode, ConfigStoreSchema } from '@/types';
 
@@ -12,13 +15,18 @@ export default function useColorMode(): ColorMode {
 
   useEffect(() => {
     (async () => {
+      let store: ConfigStore;
       let config: ConfigStoreSchema | null;
 
       if (!state) {
         return;
       }
 
-      config = await state.configStore.config();
+      store = new ConfigStore({
+        logger: state.logger,
+        vault: state.vault,
+      });
+      config = await store.config();
 
       if (!config) {
         return;
