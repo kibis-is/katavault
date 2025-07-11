@@ -3,51 +3,51 @@
 @use "@/ui/styles/variables";
 @use "sass:map";
 
-.modal {
-  align-items: center;
+.container {
+  align-items: flex-end;
   bottom: 0;
   display: flex;
   justify-content: center;
   left: 0;
-  position: absolute;
+  position: fixed;
   right: 0;
   top: 0;
   z-index: 9999;
 
-  &__container {
-    animation: slideUpFadeIn 300ms ease forwards;
-    background-color: palette.background-color("light");
-    min-height: 500px;
-    max-width: variables.$tablet-width;
-    z-index: 0;
-
-    @include media.tablet-and-up {
-      border-radius: map.get(variables.$border-radius, md);
-      height: auto;
-    }
-  }
-
-  &__overlay {
+  @include media.tablet-and-up {
     align-items: center;
-    background-color: palette.$black-color;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    left: 0;
-    opacity: 0.4;
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: -1;
   }
 }
 
-/* dark theme */
+.modal {
+  animation: slideUpFadeIn 300ms ease forwards;
+  background-color: palette.background-color("light");
+  border-radius: map.get(variables.$border-radius, md) map.get(variables.$border-radius, md) 0 0;
+  height: auto;
+  min-height: 500px;
+  width: 100%;
+  z-index: 0;
 
-[data-color-mode="dark"] {
-  .modal {
-    &__container {
-      background-color: palette.background-color("dark");
-    }
+  @include media.tablet-and-up {
+    border-radius: map.get(variables.$border-radius, md);
+    max-width: 500px;
   }
+
+  &[data-color-mode="dark"] {
+    background-color: palette.background-color("dark");
+  }
+}
+
+.overlay {
+  align-items: center;
+  background-color: palette.$black-color;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  opacity: 0.4;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
 }

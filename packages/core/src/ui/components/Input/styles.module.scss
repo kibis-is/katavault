@@ -2,6 +2,27 @@
 @use "@/ui/styles/variables";
 @use "sass:map";
 
+@mixin sub-text-styles {
+  box-sizing: border-box;
+  font-size: 0.625rem; // 10px
+  padding-inline: 0.75rem;
+  width: 100%;
+}
+
+.error-text {
+  @include sub-text-styles;
+  color: map.get(palette.$red-palette, 500);
+}
+
+.hint-text {
+  @include sub-text-styles;
+  color: palette.sub-font-color("light");
+
+  &[data-color-mode="dark"] {
+    color: palette.sub-font-color("dark");
+  }
+}
+
 .input {
   appearance: none;
   background: transparent;
@@ -17,7 +38,7 @@
   line-height: 1.5rem; // 24px
   min-height: 3rem;
   outline: 0;
-  padding-inline: map.get(variables.$spacing, "md");
+  padding-inline: 1rem;
   text-align: start;
   width: 100%;
 

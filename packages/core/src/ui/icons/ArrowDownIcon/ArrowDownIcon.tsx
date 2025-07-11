@@ -3,7 +3,7 @@ import type { FunctionComponent } from 'preact';
 // types
 import type { IconProps } from '@/ui/types';
 
-const ArrowRightIcon: FunctionComponent<IconProps> = ({
+const ArrowDownIcon: FunctionComponent<IconProps> = ({
   color,
   ...svgProps
 }) => (
@@ -18,12 +18,12 @@ const ArrowRightIcon: FunctionComponent<IconProps> = ({
     {...svgProps}
   >
     <path
-      d="M5 12h14"
+      d="M12 5v14"
     />
     <path
-      d="m12 5 7 7-7 7"
+      d="m19 12-7 7-7-7"
     />
   </svg>
 );
 
-export default ArrowRightIcon;
+export default ArrowDownIcon;

@@ -1,5 +1,6 @@
 interface Props {
   error?: string;
+  hint?: string;
   label?: string;
 }
 

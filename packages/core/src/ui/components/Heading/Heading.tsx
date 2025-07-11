@@ -6,11 +6,12 @@ import { useMemo } from 'preact/hooks';
 import styles from './styles.module.scss';
 
 // types
-import type { TypographyProps } from '@/ui/types';
+import type { BaseComponentProps, TypographyProps } from '@/ui/types';
 
-const Heading: FunctionComponent<TypographyProps> = ({
+const Heading: FunctionComponent<BaseComponentProps & TypographyProps> = ({
   bold = false,
   children,
+  color,
   colorMode,
   fullWidth = false,
   size = 'md',
@@ -54,6 +55,11 @@ const Heading: FunctionComponent<TypographyProps> = ({
         fullWidth && styles.headingFullWidth
       )}
       data-color-mode={colorMode}
+      style={{
+        ...(color && {
+          color,
+        }),
+      }}
     >
       {children}
     </h1>
