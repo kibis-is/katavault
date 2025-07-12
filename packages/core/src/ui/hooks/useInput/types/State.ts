@@ -1,4 +1,4 @@
-import type { ChangeEvent, FocusEvent } from 'react';
+import type { ChangeEvent, FocusEvent } from 'preact/compat';
 
 interface State<InputElement extends HTMLInputElement | HTMLTextAreaElement> {
   charactersRemaining?: number;

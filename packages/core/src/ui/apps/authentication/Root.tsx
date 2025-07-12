@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
+import type { KeyboardEvent } from 'preact/compat';
 import { useCallback, useState } from 'preact/hooks';
 
 // components
@@ -203,8 +204,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       return;
     }
 
-    // ... otherwise, we are coming from the signin/sign up page
-
+    // ... otherwise, we are coming from the sign in/signup page
     resetPasswordInput();
     setPasswordError(null);
     setHasPasskeyInVault(false);
@@ -257,7 +257,9 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
     usernameInputProps.value,
     validateUsernameInput,
   ]);
+  const handleOnPasswordKeyUp = useCallback(async (event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && await handleOnAuthenticateWithPasswordClick(), [handleOnAuthenticateWithPasswordClick]);
   const handleOnToggleColorModeClick = useCallback(() => onSetColorMode(colorMode === 'light' ? 'dark' : 'light'), [colorMode, onSetColorMode]);
+  const handleOnUsernameKeyUp = useCallback(async (event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && await handleOnContinueClick(), [handleOnContinueClick]);
 
   return (
     <div className={clsx(styles.container)}>
@@ -345,6 +347,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                           {...passwordInputProps}
                           autocomplete="current-password"
                           colorMode={colorMode}
+                          onKeyUp={handleOnPasswordKeyUp}
                           placeholder={translate('placeholders.password')}
                           type="password"
                         />
@@ -373,7 +376,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                     )}
 
                     {hasPasskeyInVault && hasPasswordInVault && (
-                      <HStack align="center" fullWidth={true} grow={true} justify="center" spacing="sm">
+                      <HStack align="center" fullWidth={true} justify="center" spacing="sm">
                         <div className={clsx(styles.divider)} />
 
                         <Text colorMode={colorMode} size="lg">
@@ -407,6 +410,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                     {...passwordInputProps}
                     autocomplete="new-password"
                     colorMode={colorMode}
+                    onKeyUp={handleOnPasswordKeyUp}
                     placeholder={translate('placeholders.password')}
                     type="password"
                   />
@@ -434,7 +438,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
 
                   {PasskeyStore.isSupported() && (
                     <>
-                      <HStack align="center" fullWidth={true} grow={true} justify="center" spacing="sm">
+                      <HStack align="center" fullWidth={true} justify="center" spacing="sm">
                         <div className={clsx(styles.divider)} />
 
                         <Text colorMode={colorMode} size="lg">
@@ -467,6 +471,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                   {...usernameInputProps}
                   autocomplete="username email"
                   colorMode={colorMode}
+                  onKeyUp={handleOnUsernameKeyUp}
                   placeholder={translate('placeholders.usernameEmail')}
                   type="text"
                 />

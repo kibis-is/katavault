@@ -21,8 +21,8 @@ const Input: FunctionComponent<JSX.InputHTMLAttributes & BaseComponentProps & Pr
   return (
     <VStack align="center" fullWidth={true} justify="center" spacing="xs">
       {label && (
-        <span className={clsx(styles.label)}>
-          {label}{inputProps.required && <span className={clsx(styles.label, styles.labelAsterisk)}> *</span>}
+        <span className={clsx(styles.label)} data-color-mode={colorMode}>
+          {label}{inputProps.required && <span className={clsx(styles.label, styles.labelAsterisk)} data-color-mode={colorMode}> *</span>}
         </span>
       )}
 
@@ -32,15 +32,15 @@ const Input: FunctionComponent<JSX.InputHTMLAttributes & BaseComponentProps & Pr
         data-color-mode={colorMode}
       />
 
-      {error && (
-        <span className={clsx(styles.errorText)}>
-          {error}
+      {hint && (
+        <span className={clsx(styles.hintText)} data-color-mode={colorMode}>
+          {hint}
         </span>
       )}
 
-      {hint && (
-        <span className={clsx(styles.hintText)}>
-          {hint}
+      {error && (
+        <span className={clsx(styles.errorText)} data-color-mode={colorMode}>
+          {error}
         </span>
       )}
     </VStack>

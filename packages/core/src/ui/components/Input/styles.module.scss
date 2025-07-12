@@ -12,6 +12,10 @@
 .error-text {
   @include sub-text-styles;
   color: map.get(palette.$red-palette, 500);
+
+  &[data-color-mode="dark"] {
+    color: map.get(palette.$red-palette, 400);
+  }
 }
 
 .hint-text {
@@ -90,5 +94,11 @@
   &--asterisk {
     color: map.get(palette.$red-palette, 500);
     padding: 0;
+  }
+
+  &[data-color-mode="dark"] {
+    &--asterisk {
+      color: map.get(palette.$red-palette, 400);
+    }
   }
 }
