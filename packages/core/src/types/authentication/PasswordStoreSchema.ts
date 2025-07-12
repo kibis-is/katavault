@@ -1,5 +1,5 @@
 /**
- * @property {string} challenge - The hex encoded encrypted challenge.
+ * @property {string} challenge - The encrypted challenge encoded with base64.
  * @property {string} lastUsedAt - A timestamp, in milliseconds, for when the password was last used.
  */
 interface PasswordStoreSchema {

@@ -27,7 +27,7 @@ import type {
 } from '@/types';
 
 // utilities
-import { bytesToHex, bufferSourceToUint8Array, hexToBytes } from '@/utilities';
+import { bufferSourceToUint8Array, base64ToBytes, utf8ToBytes, bytesToBase64 } from '@/utilities';
 
 export default class PasskeyStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
@@ -75,7 +75,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     return await crypto.subtle.deriveKey(
       {
         name: PasskeyStore._derivationKeyAlgorithm,
-        info: hexToBytes(credentialID),
+        info: base64ToBytes(credentialID),
         salt: new Uint8Array(), // use an empty salt
         hash: PasskeyStore._derivationKeyHashAlgorithm,
       },
@@ -115,7 +115,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
         publicKey: {
           allowCredentials: [
             {
-              id: hexToBytes(passkey.credentialID),
+              id: base64ToBytes(passkey.credentialID),
               transports: passkey.transports,
               type: 'public-key',
             },
@@ -126,7 +126,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
             // @ts-ignore
             prf: {
               eval: {
-                first: hexToBytes(passkey.salt),
+                first: base64ToBytes(passkey.salt),
               },
             },
           },
@@ -227,7 +227,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
             name: client.name,
           },
           user: {
-            id: new TextEncoder().encode(generate()),
+            id: utf8ToBytes(generate()),
             name: user.username,
             displayName: user.displayName ?? user.username,
           },
@@ -263,9 +263,9 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     }
 
     return {
-      credentialID: bytesToHex(new Uint8Array(credential.rawId)),
-      initializationVector: bytesToHex(randomBytes(PasskeyStore._initializationVectorByteSize)),
-      salt: bytesToHex(salt),
+      credentialID: bytesToBase64(new Uint8Array(credential.rawId)),
+      initializationVector: bytesToBase64(randomBytes(PasskeyStore._initializationVectorByteSize)),
+      salt: bytesToBase64(salt),
       transports: (credential.response as AuthenticatorAttestationResponse).getTransports() as AuthenticatorTransport[],
     };
   }
@@ -297,7 +297,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     decryptedBytes = await crypto.subtle.decrypt(
       {
         name: PasskeyStore._encryptionKeyAlgorithm,
-        iv: hexToBytes(passkey.initializationVector),
+        iv: base64ToBytes(passkey.initializationVector),
       },
       encryptionKey,
       encryptedBytes
@@ -330,7 +330,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     encryptedBytes = await crypto.subtle.encrypt(
       {
         name: PasskeyStore._encryptionKeyAlgorithm,
-        iv: hexToBytes(passkey.initializationVector),
+        iv: base64ToBytes(passkey.initializationVector),
       },
       encryptionKey,
       bytes

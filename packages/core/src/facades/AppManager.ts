@@ -15,7 +15,7 @@ import { FailedToRenderUIError, UserCanceledUIRequestError } from '@/errors';
 import { en } from '@/ui/translations';
 
 // types
-import type { AuthenticateResult, CommonParameters, RenderAppParameters } from '@/types';
+import type { AuthenticateAppResult, CommonParameters, RenderAppParameters } from '@/types';
 
 export default class AppManager {
   // public static variables
@@ -92,10 +92,10 @@ export default class AppManager {
    * public methods
    */
 
-  public async renderAuthenticationApp({ clientInformation, vault }: RenderAppParameters): Promise<AuthenticateResult> {
+  public async renderAuthenticationApp({ clientInformation }: RenderAppParameters): Promise<AuthenticateAppResult> {
     const i18n = await this._getOrInitializeI18n();
 
-    return new Promise<AuthenticateResult>((resolve, reject) => {
+    return new Promise<AuthenticateAppResult>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
           clientInformation,
@@ -113,7 +113,6 @@ export default class AppManager {
             this._closeApp(AppTypeEnum.Authentication);
             resolve(result);
           },
-          vault,
         }),
         this._rootElement(AppTypeEnum.Authentication)
       );

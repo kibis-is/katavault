@@ -1,6 +1,6 @@
 enum AccountTypeEnum {
+  Connected = 'connected',
   Ephemeral = 'ephemeral',
-  External = 'external',
 }
 
 export default AccountTypeEnum;

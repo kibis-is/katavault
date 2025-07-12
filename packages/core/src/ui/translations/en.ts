@@ -2,14 +2,18 @@ import type { ResourceLanguage } from 'i18next';
 
 export default {
   buttons: {
-    continueWithPassword: 'Continue with password',
+    continue: 'Continue',
     retry: 'Retry',
     signInWithPasskey: 'Sign in with passkey',
-    signIn: 'Sign in',
+    signupWithPasskey: 'Signup with a passkey',
+    signInWithPassword: 'Sign in with password',
+    signupWithPassword: 'Signup with a password',
   },
   captions: {
-    verifyPasskey: 'Please follow the instructions to verify your passkey.',
+    enterAPassword: 'Enter a password',
+    or: 'Or',
     poweredBy: 'Powered by',
+    verifyPasskey: 'Please follow the instructions to verify your passkey.',
   },
   errors: {
     descriptions: {
@@ -25,8 +29,9 @@ export default {
     },
   },
   headings: {
-    enterYourPassword: 'Enter your password',
-    loginOrSignUp: 'Login or sign up',
+    finishCreatingANewAccount: 'Finish creating a new account',
+    signInOrCreateANewAccount: 'Sign in or create a new account',
+    welcomeBack: 'Welcome back!',
   },
   placeholders: {
     password: 'Password',

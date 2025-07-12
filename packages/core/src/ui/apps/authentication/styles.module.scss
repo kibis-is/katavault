@@ -19,6 +19,16 @@
   }
 }
 
+.divider {
+  background-color: palette.border-color("light");
+  height: 1px;
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    background-color: palette.border-color("dark");
+  }
+}
+
 .modal {
   align-items: center;
   animation: slideUpFadeIn 300ms ease forwards;

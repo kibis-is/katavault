@@ -20,7 +20,7 @@ import { INVALID_PASSWORD_ERROR } from '@/constants';
 import { DEFAULT_PADDING } from '@/ui/constants';
 
 // decorators
-import { PasskeyStore, PasswordStore } from '@/decorators';
+import { PasskeyStore, PasswordStore, SettingsStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethodEnum } from '@/enums';
@@ -30,13 +30,10 @@ import { BaseError } from '@/errors';
 
 // hooks
 import useClientInformation from '@/ui/hooks/useClientInformation';
-import useColorMode from '@/ui/hooks/useColorMode';
 import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
 import useLogger from '@/ui/hooks/useLogger';
 import useInput from '@/ui/hooks/useInput';
-import useToggleColorMode from '@/ui/hooks/useToggleColorMode';
 import useTranslate from '@/ui/hooks/useTranslate';
-import useVault from '@/ui/hooks/useVault';
 
 // icons
 import ArrowLeftIcon from '@/ui/icons/ArrowLeftIcon';
@@ -53,16 +50,16 @@ import SunnyIcon from '@/ui/icons/SunnyIcon';
 import styles from './styles.module.scss';
 
 // types
-import type { UserInformation } from '@/types';
-import type { RootProps } from './types';
+import type { SettingsStoreSchema, Vault } from '@/types';
+import type { BaseAppProps } from '@/ui/types';
+import type { AppProps, RootProps } from './types';
 
 // utilities
-import { authenticateWithPasskey, authenticateWithPassword } from '@/utilities';
+import { authenticateWithPasskey, authenticateWithPassword, initializeVault } from '@/utilities';
 
-const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
+const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootProps> = ({ colorMode, onClose, onSetColorMode, onSuccess }) => {
   // hooks
   const clientInformation = useClientInformation();
-  const colorMode = useColorMode();
   const defaultTextColor = useDefaultTextColor(colorMode);
   const {
     validate: validatePasswordInput,
@@ -78,33 +75,18 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
     required: true,
   });
   const logger = useLogger();
-  const toggleColorMode = useToggleColorMode();
   const translate = useTranslate();
-  const vault = useVault();
   // states
-  const [method, setMethod] = useState<AuthenticationMethodEnum | null>(null);
+  const [hasPasskeyInVault, setHasPasskeyInVault] = useState<boolean>(false);
+  const [hasPasswordInVault, setHasPasswordInVault] = useState<boolean>(false);
+  const [isUsingPasskey, setIsUsingPasskey] = useState<boolean>(false);
   const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [passwordError, setPasswordError] = useState<BaseError | null>(null);
+  const [vault, setVault] = useState<Vault | null>(null);
   // callbacks
-  const handleOnBackClick = useCallback(() => {
-    if (method) {
-      resetPasswordInput();
-    }
-
-    setMethod(null);
-  }, [method, setMethod]);
-  const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
-  const handleOnContinueWithPasswordClick = useCallback(() => {
-    if (validateUsernameInput()) {
-      return;
-    }
-
-    setMethod(AuthenticationMethodEnum.Password);
-  }, [setMethod, validateUsernameInput]);
-  const handleOnSignInWithPasskeyClick = useCallback(async () => {
-    const __logPrefix= `${Root.displayName}#handleOnSignInWithPasskeyClick`;
+  const handleOnAuthenticateWithPasskeyClick = useCallback(async () => {
+    const __logPrefix= `${Root.displayName}#handleOnAuthenticateWithPasskeyClick`;
     let store: PasskeyStore;
-    let user: UserInformation;
 
     setPasskeyError(null);
 
@@ -112,22 +94,24 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       return;
     }
 
-    if (validateUsernameInput()) {
-      return;
-    }
-
-    setMethod(AuthenticationMethodEnum.Passkey);
+    setIsUsingPasskey(true);
 
     try {
-      user = {
-        displayName: usernameInputProps.value,
-        username: usernameInputProps.value,
-      };
       store = await authenticateWithPasskey({
         clientInformation,
         logger,
-        user,
+        user: {
+          displayName: usernameInputProps.value,
+          username: usernameInputProps.value,
+        },
         vault,
+      });
+
+      await new SettingsStore({
+        logger,
+        vault,
+      }).setSettings({
+        colorMode,
       });
 
       onSuccess({
@@ -135,17 +119,25 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
           __type: AuthenticationMethodEnum.Passkey,
           store,
         },
-        user,
+        vault,
       });
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
       setPasskeyError(error);
     }
-  }, [clientInformation, logger, setMethod, usernameInputProps.value, validateUsernameInput, vault]);
-  const handleOnSignInWithPasswordClick = useCallback(async () => {
-    const __logPrefix= `${Root.displayName}#handleOnSignInWithPasswordClick`;
+  }, [
+    clientInformation,
+    colorMode,
+    logger,
+    onSuccess,
+    setIsUsingPasskey,
+    setPasskeyError,
+    usernameInputProps.value,
+    vault,
+  ]);
+  const handleOnAuthenticateWithPasswordClick = useCallback(async () => {
+    const __logPrefix= `${Root.displayName}#handleOnAuthenticateWithPasswordClick`;
     let store: PasswordStore;
-    let user: UserInformation;
 
     setPasswordError(null);
 
@@ -158,15 +150,21 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
     }
 
     try {
-      user = {
-        displayName: usernameInputProps.value,
-        username: usernameInputProps.value,
-      };
       store = await authenticateWithPassword({
         logger,
         password: passwordInputProps.value,
-        user,
+        user: {
+          displayName: usernameInputProps.value,
+          username: usernameInputProps.value,
+        },
         vault,
+      });
+
+      await new SettingsStore({
+        logger,
+        vault,
+      }).setSettings({
+        colorMode,
       });
 
       onSuccess({
@@ -174,7 +172,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
           __type: AuthenticationMethodEnum.Password,
           store,
         },
-        user,
+        vault,
       });
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
@@ -185,8 +183,81 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
 
       setPasswordError(error);
     }
-  }, [logger, passwordInputProps.value, setPasswordInputError, setPasswordError, translate, validatePasswordInput, vault]);
-  const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
+  }, [
+    colorMode,
+    logger,
+    onSuccess,
+    passwordInputProps.value,
+    setPasswordInputError,
+    setPasswordError,
+    translate,
+    validatePasswordInput,
+    vault,
+  ]);
+  const handleOnBackClick = useCallback(() => {
+    // if on the passkey page
+    if (isUsingPasskey) {
+      setPasskeyError(null);
+      setIsUsingPasskey(false);
+
+      return;
+    }
+
+    // ... otherwise, we are coming from the signin/sign up page
+
+    resetPasswordInput();
+    setPasswordError(null);
+    setHasPasskeyInVault(false);
+    setHasPasswordInVault(false);
+    setVault(null);
+  }, [isUsingPasskey, setIsUsingPasskey, resetPasswordInput, setVault, vault]);
+  const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
+  const handleOnContinueClick = useCallback(async () => {
+    let _hasPasskeyInVault: boolean;
+    let _hasPasswordInVault: boolean;
+    let _settings: SettingsStoreSchema;
+    let _vault: Vault;
+
+    if (!logger || validateUsernameInput()) {
+      return;
+    }
+
+    _vault = await initializeVault({
+      logger,
+      username: usernameInputProps.value,
+    });
+    _hasPasskeyInVault = !!(await new PasskeyStore({
+      logger,
+      vault: _vault,
+    }).passkey());
+    _hasPasswordInVault = !!(await new PasswordStore({
+      logger,
+      vault: _vault,
+    }).challenge());
+
+    setVault(_vault);
+    setHasPasskeyInVault(_hasPasskeyInVault);
+    setHasPasswordInVault(_hasPasswordInVault);
+
+    // if there was a previous login, set the saved color mode
+    if (_hasPasskeyInVault || _hasPasswordInVault) {
+      _settings = await new SettingsStore({
+        logger,
+        vault: _vault,
+      }).settings();
+
+      onSetColorMode(_settings.colorMode);
+    }
+  }, [
+    logger,
+    onSetColorMode,
+    setHasPasskeyInVault,
+    setHasPasswordInVault,
+    setVault,
+    usernameInputProps.value,
+    validateUsernameInput,
+  ]);
+  const handleOnToggleColorModeClick = useCallback(() => onSetColorMode(colorMode === 'light' ? 'dark' : 'light'), [colorMode, onSetColorMode]);
 
   return (
     <div className={clsx(styles.container)}>
@@ -197,7 +268,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       <div className={clsx(styles.modal)} data-color-mode={colorMode}>
         {/*header*/}
         <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
-          {(method === AuthenticationMethodEnum.Password || (method === AuthenticationMethodEnum.Passkey && passkeyError)) && (
+          {vault && (
             <HStack align="center" justify="start" spacing="xs">
               {/*back button*/}
               <IconButton colorMode={colorMode} icon={<ArrowLeftIcon />} onClick={handleOnBackClick} />
@@ -222,8 +293,10 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
         {/*content*/}
         <VStack align="center" fullWidth={true} grow={true} paddingX={DEFAULT_PADDING} spacing="md">
           {(() => {
-            switch (method) {
-              case AuthenticationMethodEnum.Passkey:
+            // if the vault has been initialized, it is time to login or signup
+            if (vault) {
+              // if the passkey authentication is in process
+              if (isUsingPasskey) {
                 if (passkeyError) {
                   return (
                     <>
@@ -240,7 +313,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
                       <Button
                         colorMode={colorMode}
                         fullWidth={true}
-                        onClick={handleOnSignInWithPasskeyClick}
+                        onClick={handleOnAuthenticateWithPasskeyClick}
                         rightIcon={<RotateIcon />}
                       >
                         {translate('buttons.retry')}
@@ -258,83 +331,160 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
                     </Text>
                   </>
                 );
-              case AuthenticationMethodEnum.Password:
+              }
+
+              // if there is either a password or passkey in the vault, it is a login
+              if (hasPasskeyInVault || hasPasswordInVault) {
                 return (
                   <>
-                    <Heading colorMode={colorMode}>{translate('headings.enterYourPassword')}</Heading>
+                    <Heading colorMode={colorMode}>{translate('headings.welcomeBack')}</Heading>
 
-                    <Input
-                      {...passwordInputProps}
-                      autocomplete="current-password new-password"
-                      colorMode={colorMode}
-                      placeholder={translate('placeholders.password')}
-                      type="password"
-                    />
+                    {hasPasswordInVault && (
+                      <>
+                        <Input
+                          {...passwordInputProps}
+                          autocomplete="current-password"
+                          colorMode={colorMode}
+                          placeholder={translate('placeholders.password')}
+                          type="password"
+                        />
 
-                    <Spacer />
+                        <Spacer />
 
-                    {/*error message*/}
-                    {passwordError && (
-                      <ErrorMessage
-                        colorMode={colorMode}
-                        message={translate('errors.descriptions.type', {
-                          context: passwordError.type,
-                        })}
-                      />
-                    )}
+                        {/*error message*/}
+                        {passwordError && (
+                          <ErrorMessage
+                            colorMode={colorMode}
+                            message={translate('errors.descriptions.type', {
+                              context: passwordError.type,
+                            })}
+                          />
+                        )}
 
-                    {/*cta buttons*/}
-                    <VStack align="center" fullWidth={true} justify="center" spacing="sm">
-                      <Button
-                        colorMode={colorMode}
-                        fullWidth={true}
-                        onClick={handleOnSignInWithPasswordClick}
-                        rightIcon={<SignInIcon />}
-                      >
-                        {translate('buttons.signIn')}
-                      </Button>
-                    </VStack>
-                  </>
-                );
-              default:
-                return (
-                  <>
-                    <Heading colorMode={colorMode}>{translate('headings.loginOrSignUp')}</Heading>
-
-                    <Input
-                      {...usernameInputProps}
-                      autocomplete="username email"
-                      colorMode={colorMode}
-                      placeholder={translate('placeholders.usernameEmail')}
-                      type="text"
-                    />
-
-                    <Spacer />
-
-                    <VStack align="center" fullWidth={true} justify="center" spacing="sm">
-                      <Button
-                        colorMode={colorMode}
-                        fullWidth={true}
-                        onClick={handleOnContinueWithPasswordClick}
-                        rightIcon={<ArrowRightIcon />}
-                      >
-                        {translate('buttons.continueWithPassword')}
-                      </Button>
-
-                      {PasskeyStore.isSupported() && (
                         <Button
                           colorMode={colorMode}
                           fullWidth={true}
-                          onClick={handleOnSignInWithPasskeyClick}
-                          rightIcon={<PasskeyIcon />}
+                          onClick={handleOnAuthenticateWithPasswordClick}
+                          rightIcon={<SignInIcon />}
                         >
-                          {translate('buttons.signInWithPasskey')}
+                          {translate('buttons.signInWithPassword')}
                         </Button>
-                      )}
-                    </VStack>
+                      </>
+                    )}
+
+                    {hasPasskeyInVault && hasPasswordInVault && (
+                      <HStack align="center" fullWidth={true} grow={true} justify="center" spacing="sm">
+                        <div className={clsx(styles.divider)} />
+
+                        <Text colorMode={colorMode} size="lg">
+                          {translate('captions.or')}
+                        </Text>
+
+                        <div className={clsx(styles.divider)} />
+                      </HStack>
+                    )}
+
+                    {hasPasskeyInVault && PasskeyStore.isSupported() && (
+                      <Button
+                        colorMode={colorMode}
+                        fullWidth={true}
+                        onClick={handleOnAuthenticateWithPasskeyClick}
+                        rightIcon={<PasskeyIcon />}
+                      >
+                        {translate('buttons.signupWithPasskey')}
+                      </Button>
+                    )}
                   </>
                 );
+              }
+
+              // ... otherwise, it is a fresh signup
+              return (
+                <>
+                  <Heading colorMode={colorMode}>{translate('headings.finishCreatingANewAccount')}</Heading>
+
+                  <Input
+                    {...passwordInputProps}
+                    autocomplete="new-password"
+                    colorMode={colorMode}
+                    placeholder={translate('placeholders.password')}
+                    type="password"
+                  />
+
+                  <Spacer />
+
+                  {/*error message*/}
+                  {passwordError && (
+                    <ErrorMessage
+                      colorMode={colorMode}
+                      message={translate('errors.descriptions.type', {
+                        context: passwordError.type,
+                      })}
+                    />
+                  )}
+
+                  <Button
+                    colorMode={colorMode}
+                    fullWidth={true}
+                    onClick={handleOnAuthenticateWithPasswordClick}
+                    rightIcon={<SignInIcon />}
+                  >
+                    {translate('buttons.signupWithPassword')}
+                  </Button>
+
+                  {PasskeyStore.isSupported() && (
+                    <>
+                      <HStack align="center" fullWidth={true} grow={true} justify="center" spacing="sm">
+                        <div className={clsx(styles.divider)} />
+
+                        <Text colorMode={colorMode} size="lg">
+                          {translate('captions.or')}
+                        </Text>
+
+                        <div className={clsx(styles.divider)} />
+                      </HStack>
+
+                      <Button
+                        colorMode={colorMode}
+                        fullWidth={true}
+                        onClick={handleOnAuthenticateWithPasskeyClick}
+                        rightIcon={<PasskeyIcon />}
+                      >
+                        {translate('buttons.signupWithPasskey')}
+                      </Button>
+                    </>
+                  )}
+                </>
+              );
             }
+
+            // ... otherwise, it is username selection
+            return (
+              <>
+                <Heading colorMode={colorMode}>{translate('headings.signInOrCreateANewAccount')}</Heading>
+
+                <Input
+                  {...usernameInputProps}
+                  autocomplete="username email"
+                  colorMode={colorMode}
+                  placeholder={translate('placeholders.usernameEmail')}
+                  type="text"
+                />
+
+                <Spacer />
+
+                <VStack align="center" fullWidth={true} justify="center" spacing="sm">
+                  <Button
+                    colorMode={colorMode}
+                    fullWidth={true}
+                    onClick={handleOnContinueClick}
+                    rightIcon={<ArrowRightIcon />}
+                  >
+                    {translate('buttons.continue')}
+                  </Button>
+                </VStack>
+              </>
+            );
           })()}
         </VStack>
 

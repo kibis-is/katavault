@@ -1,1 +1,1 @@
-export { default as EphemeralAccountStore } from './EphemeralAccountStore';
+export { default as AccountStore } from './AccountStore';

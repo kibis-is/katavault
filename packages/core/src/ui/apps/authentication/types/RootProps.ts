@@ -1,7 +1,9 @@
 // types
-import type { BaseAppProps } from '@/ui/types';
-import type AppProps from './AppProps';
+import type { ColorMode } from '@/types';
 
-type RootProps = Pick<BaseAppProps, 'onClose'> & AppProps;
+interface RootProps {
+  colorMode: ColorMode;
+  onSetColorMode: (value: ColorMode) => void;
+}
 
 export default RootProps;

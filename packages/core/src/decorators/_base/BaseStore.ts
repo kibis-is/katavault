@@ -1,13 +1,12 @@
 import type { ILogger } from '@kibisis/utilities';
-import type { IDBPDatabase } from 'idb';
 
 // types
-import type { StoreParameters, VaultSchema } from '@/types';
+import type { StoreParameters, Vault } from '@/types';
 
 export default abstract class BaseStore {
   // protected variables
   protected readonly _logger: ILogger;
-  protected readonly _vault: IDBPDatabase<VaultSchema>;
+  protected readonly _vault: Vault;
 
   protected constructor({ logger, vault }: StoreParameters) {
     this._logger = logger;

@@ -4,8 +4,8 @@ import type { ColorMode } from '@/types';
 /**
  * @property {ColorMode} colorMode - The color mode of the apps.
  */
-interface ConfigStoreSchema {
+interface SettingsStoreSchema {
   colorMode: ColorMode;
 }
 
-export default ConfigStoreSchema;
+export default SettingsStoreSchema;

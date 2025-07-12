@@ -1,4 +1,4 @@
 export * from './_base';
 export * from './accounts';
 export * from './authentication';
-export * from './config';
+export * from './settings';

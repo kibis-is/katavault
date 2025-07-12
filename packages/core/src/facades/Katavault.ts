@@ -1,32 +1,22 @@
 import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
 import type { ILogger } from '@kibisis/utilities';
-// import { ed25519 } from '@noble/curves/ed25519';
-// import { concatBytes } from '@noble/hashes/utils';
-import { type IDBPDatabase, openDB } from 'idb';
 
 // constants
 import {
-  IDB_CONFIG_STORE_NAME,
-  IDB_DB_NAME,
-  IDB_EPHEMERAL_ACCOUNTS_STORE_NAME,
+  IDB_ACCOUNTS_STORE_NAME,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
-  // SIGN_MESSAGE_PREFIX,
+  IDB_SETTINGS_STORE_NAME,
 } from '@/constants';
 
 // decorators
-import { EphemeralAccountStore } from '@/decorators';
+import { AccountStore } from '@/decorators';
 
 // enums
 import { AccountTypeEnum, AuthenticationMethodEnum } from '@/enums';
 
 // errors
-import {
-  AccountDoesNotExistError,
-  FailedToFetchNetworkError,
-  // InvalidAccountError,
-  NotAuthenticatedError,
-} from '@/errors';
+import { FailedToFetchNetworkError, NotAuthenticatedError } from '@/errors';
 
 // facades
 import AppManager from './AppManager';
@@ -34,54 +24,42 @@ import AppManager from './AppManager';
 // types
 import type {
   Account,
-  // AddAccountParameters,
-  AuthenticateWithPasskeyParameters,
-  AuthenticateWithPasswordParameters,
+  // AuthenticateWithPasskeyParameters,
+  // AuthenticateWithPasswordParameters,
   AuthenticationStore,
   ClientInformation,
-  EphemeralAccountStoreItemWithPasskey,
-  EphemeralAccountStoreItemWithPassword,
-  // ImportAccountWithMnemonicParameters,
-  // ImportAccountWithPrivateKeyParameters,
+  ConnectedAccountStoreItem,
+  EphemeralAccountStoreItem,
   KatavaultParameters,
   PasskeyStoreSchema,
-  SetAccountNameByKeyParameters,
-  // SignMessageParameters,
   UserInformation,
   Vault,
-  VaultSchema,
-  // WithEncoding,
 } from '@/types';
 
 // utilities
 import {
-  // addressFromPrivateKey,
-  authenticateWithPasskey,
-  authenticateWithPassword,
-  // base58ToBytes,
+  // authenticateWithPasskey,
+  // authenticateWithPassword,
   bytesToBase58,
-  // bytesToBase64,
-  bytesToHex,
-  // generatePrivateKey,
-  // isValidMnemonic,
-  // privateKeyFromMnemonic,
+  credentialID,
+  // initializeVault,
   privateKeyFromPasswordCredentials,
   publicKeyFromPrivateKey,
-  // utf8ToBytes,
+  usernameFromVault,
 } from '@/utilities';
 
 export default class Katavault {
   // public static variables
   public static readonly displayName = 'Katavault';
   // private variables
+  private _accountsStore: AccountStore;
   private readonly _appManager: AppManager;
-  private _authenticationStore: AuthenticationStore | null = null;
+  private _authenticationMethods: AuthenticationStore[];
   private _chains: ChainWithNetworkParameters[];
   private readonly _clientInformation: ClientInformation;
-  private _ephemeralAccountStore: EphemeralAccountStore;
   private readonly _logger: ILogger;
   private _user: UserInformation | null = null;
-  private _vault: IDBPDatabase<VaultSchema>;
+  private _vault: Vault;
 
   public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
     this._chains = chains;
@@ -93,61 +71,6 @@ export default class Katavault {
   /**
    * private methods
    */
-
-  /**
-   * Adds the account to the provider.
-   * @param {AddAccountParameters} params - The account to be added.
-   * @returns {Promise<Account>} A promise that resolves to the added account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @private
-   */
-  // private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
-  //   const address = addressFromPrivateKey(privateKey);
-  //   let encryptedKeyData: Uint8Array;
-  //   let passkey: PasskeyStoreSchema | null;
-  //
-  //   switch (this._authenticationStore?.__type) {
-  //     case AuthenticationMethodEnum.Passkey:
-  //       encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-  //       passkey = await this._authenticationStore.store.passkey();
-  //
-  //       if (!passkey) {
-  //         throw new NotAuthenticatedError('not authenticated');
-  //       }
-  //
-  //       await this._ephemeralAccountStore.upsert([
-  //         {
-  //           address,
-  //           credentialID: passkey.credentialID,
-  //           keyData: bytesToHex(encryptedKeyData),
-  //           name,
-  //         },
-  //       ]);
-  //
-  //       break;
-  //     case AuthenticationMethodEnum.Password:
-  //       encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-  //
-  //       await this._ephemeralAccountStore.upsert([
-  //         {
-  //           address,
-  //           passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-  //           keyData: bytesToHex(encryptedKeyData),
-  //           name,
-  //         },
-  //       ]);
-  //
-  //       break;
-  //     default:
-  //       throw new NotAuthenticatedError('not authenticated');
-  //   }
-  //
-  //   return {
-  //     address,
-  //     name,
-  //   };
-  // }
 
   /**
    * Gets the decrypted ephemeral account's private key by the base58 encoded public key.
@@ -216,99 +139,81 @@ export default class Katavault {
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
-  public async _generateCredentialAccount(name?: string): Promise<Account> {
-    let encodedPublicKey: string;
-    let encryptedKeyData: Uint8Array;
-    let keyMaterial: Uint8Array | null;
-    let passkey: PasskeyStoreSchema | null;
-    let password: string | null;
-    let privateKey: Uint8Array;
-
-    switch (this._authenticationStore?.__type) {
-      case AuthenticationMethodEnum.Passkey:
-        keyMaterial = this._authenticationStore.store.keyMaterial();
-        passkey = await this._authenticationStore.store.passkey();
-
-        if (!keyMaterial || !passkey) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        encodedPublicKey = bytesToBase58(publicKeyFromPrivateKey(keyMaterial));
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
-
-        await this._ephemeralAccountStore.upsert([
-          {
-            __type: AccountTypeEnum.Ephemeral,
-            key: encodedPublicKey,
-            credentialID: passkey.credentialID,
-            keyData: bytesToBase58(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        return {
-          __type: AccountTypeEnum.Ephemeral,
-          key: encodedPublicKey,
-          name,
-        };
-      case AuthenticationMethodEnum.Password:
-        password = this._authenticationStore.store.password();
-
-        if (!password || !this._user) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        privateKey = await privateKeyFromPasswordCredentials({
-          hostname: this._clientInformation.hostname,
-          password,
-          username: this._user.username,
-        });
-        encodedPublicKey = bytesToBase58(publicKeyFromPrivateKey(privateKey));
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
-        await this._ephemeralAccountStore.upsert([
-          {
-            __type: AccountTypeEnum.Ephemeral,
-            key: encodedPublicKey,
-            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-            keyData: bytesToBase58(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        return {
-          __type: AccountTypeEnum.Ephemeral,
-          key: encodedPublicKey,
-          name,
-        };
-      default:
-        throw new NotAuthenticatedError('not authenticated');
-    }
-  }
-
-  /**
-   * Initializes the vault connection.
-   * @returns {Promise<Vault>} A promise that resolves to the initialized vault.
-   * @private
-   */
-  private async _initializeVault(): Promise<Vault> {
-    const __logPrefix = `${Katavault.displayName}#_initializeVault`;
-
-    return await openDB<VaultSchema>(IDB_DB_NAME, undefined, {
-      upgrade: (_db, oldVersion, newVersion) => {
-        // we are creating a new database
-        if (oldVersion <= 0 && newVersion && newVersion > 0) {
-          // create the stores
-          _db.createObjectStore(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME);
-          _db.createObjectStore(IDB_CONFIG_STORE_NAME);
-          _db.createObjectStore(IDB_PASSKEY_STORE_NAME);
-          _db.createObjectStore(IDB_PASSWORD_STORE_NAME);
-
-          this._logger.debug(`${__logPrefix}: created new vault "${IDB_DB_NAME}"`);
-        }
-      },
-    });
-  }
+  // public async _generateCredentialAccount(name?: string): Promise<Account> {
+  //   let encodedPublicKey: string;
+  //   let encryptedKeyData: Uint8Array;
+  //   let keyMaterial: Uint8Array | null;
+  //   let passkey: PasskeyStoreSchema | null;
+  //   let password: string | null;
+  //   let privateKey: Uint8Array;
+  //
+  //   switch (this._authenticationMethods?.__type) {
+  //     case AuthenticationMethodEnum.Passkey:
+  //       keyMaterial = this._authenticationMethods.store.keyMaterial();
+  //       passkey = await this._authenticationMethods.store.passkey();
+  //
+  //       if (!keyMaterial || !passkey) {
+  //         throw new NotAuthenticatedError('not authenticated');
+  //       }
+  //
+  //       encodedPublicKey = bytesToBase58(publicKeyFromPrivateKey(keyMaterial));
+  //       encryptedKeyData = await this._authenticationMethods.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
+  //
+  //       await this._accountsStore.upsert([
+  //         {
+  //           __type: AccountTypeEnum.Ephemeral,
+  //           credentialID: credentialID({
+  //             method: AuthenticationMethodEnum.Passkey,
+  //             passkeyCredentialID: passkey.credentialID,
+  //           }),
+  //           key: encodedPublicKey,
+  //           keyData: bytesToBase58(encryptedKeyData),
+  //           name,
+  //         },
+  //       ]);
+  //
+  //       return {
+  //         __type: AccountTypeEnum.Ephemeral,
+  //         key: encodedPublicKey,
+  //         name,
+  //       };
+  //     case AuthenticationMethodEnum.Password:
+  //       password = this._authenticationMethods.store.password();
+  //
+  //       if (!password || !this._user) {
+  //         throw new NotAuthenticatedError('not authenticated');
+  //       }
+  //
+  //       privateKey = await privateKeyFromPasswordCredentials({
+  //         hostname: this._clientInformation.hostname,
+  //         password,
+  //         username: this._user.username,
+  //       });
+  //       encodedPublicKey = bytesToBase58(publicKeyFromPrivateKey(privateKey));
+  //       encryptedKeyData = await this._authenticationMethods.store.encryptBytes(privateKey);
+  //
+  //       await this._accountsStore.upsert([
+  //         {
+  //           __type: AccountTypeEnum.Ephemeral,
+  //           credentialID: credentialID({
+  //             method: AuthenticationMethodEnum.Password,
+  //             password,
+  //           }),
+  //           key: encodedPublicKey,
+  //           keyData: bytesToBase58(encryptedKeyData),
+  //           name,
+  //         },
+  //       ]);
+  //
+  //       return {
+  //         __type: AccountTypeEnum.Ephemeral,
+  //         key: encodedPublicKey,
+  //         name,
+  //       };
+  //     default:
+  //       throw new NotAuthenticatedError('not authenticated');
+  //   }
+  // }
 
   /**
    * public methods
@@ -323,52 +228,19 @@ export default class Katavault {
    * @public
    */
   public async accounts(): Promise<Account[]> {
-    const ephemeralAccounts = await this._ephemeralAccountStore.accounts();
+    let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
 
     if (!this.isAuthenticated()) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    let results: Account[] = [];
+    accounts = await this._accountsStore.accounts();
 
-    for (const account of ephemeralAccounts) {
-      let credentialID: string | null;
-      let passkey: PasskeyStoreSchema | null;
-      let passwordHash: string | null;
-
-      switch (this._authenticationStore?.__type) {
-        case AuthenticationMethodEnum.Passkey:
-          credentialID = (account as EphemeralAccountStoreItemWithPasskey).credentialID ?? null;
-          passkey = await this._authenticationStore.store.passkey();
-
-          if (credentialID && passkey && credentialID === passkey.credentialID) {
-            results.push({
-              __type: account.__type,
-              key: account.key,
-              name: account.name,
-            });
-          }
-
-          break;
-        case AuthenticationMethodEnum.Password:
-          passwordHash = (account as EphemeralAccountStoreItemWithPassword).passwordHash ?? null;
-
-          // check if the account was encrypted using the correct password
-          if (passwordHash && passwordHash === bytesToHex(this._authenticationStore.store.hash())) {
-            results.push({
-              __type: account.__type,
-              key: account.key,
-              name: account.name,
-            });
-          }
-
-          break;
-        default:
-          break;
-      }
-    }
-
-    return results;
+    return accounts.map(({ __type, key, name }) => ({
+      __type,
+      key,
+      name,
+    }));
   }
 
   /**
@@ -421,29 +293,26 @@ export default class Katavault {
    */
   public async authenticate(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#authenticate`;
-    const vault = await this._initializeVault();
-    const { authenticationStore, user } = await this._appManager.renderAuthenticationApp({
+    const { authenticationStore, vault } = await this._appManager.renderAuthenticationApp({
       clientInformation: this._clientInformation,
-      vault,
     });
     let accounts: Account[];
 
-    this._ephemeralAccountStore = new EphemeralAccountStore({
+    this._accountsStore = new AccountStore({
       logger: this._logger,
       vault,
     });
-    this._authenticationStore = authenticationStore;
-    this._user = user;
+    this._authenticationMethods = [authenticationStore];
     this._vault = vault;
 
-    accounts = await this.accounts();
+    // accounts = await this.accounts();
 
     // if no ephemeral accounts exist, create a new one from the account credentials
-    if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
-      const { key } = await this._generateCredentialAccount(user.displayName ?? user.username);
-
-      this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
-    }
+    // if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
+    //   const { key } = await this._generateCredentialAccount();
+    //
+    //   this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
+    // }
   }
 
   /**
@@ -456,36 +325,39 @@ export default class Katavault {
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * @public
    */
-  public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPasskey`;
-    const vault = await this._initializeVault();
-    let accounts: Account[];
-
-    this._authenticationStore = {
-      __type: AuthenticationMethodEnum.Passkey,
-      store: await authenticateWithPasskey({
-        clientInformation: this._clientInformation,
-        logger: this._logger,
-        user,
-        vault,
-      }),
-    };
-    this._ephemeralAccountStore = new EphemeralAccountStore({
-      logger: this._logger,
-      vault,
-    });
-    this._user = user;
-    this._vault = vault;
-
-    accounts = await this.accounts();
-
-    // if no ephemeral accounts exist, create a new one from the account credentials
-    if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
-      const { key } = await this._generateCredentialAccount(user.displayName ?? user.username);
-
-      this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
-    }
-  }
+  // public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
+  //   const __logPrefix = `${Katavault.displayName}#authenticateWithPasskey`;
+  //   const vault = await initializeVault({
+  //     logger: this._logger,
+  //     username: user.username,
+  //   });
+  //   let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
+  //
+  //   this._authenticationMethods = {
+  //     __type: AuthenticationMethodEnum.Passkey,
+  //     store: await authenticateWithPasskey({
+  //       clientInformation: this._clientInformation,
+  //       logger: this._logger,
+  //       user,
+  //       vault,
+  //     }),
+  //   };
+  //   this._accountsStore = new AccountStore({
+  //     logger: this._logger,
+  //     vault,
+  //   });
+  //   this._user = user;
+  //   this._vault = vault;
+  //
+  //   accounts = await this._accountsStore.accounts();
+  //
+  //   // if no ephemeral account for the credentials exists, create a new one
+  //   if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
+  //     const { key } = await this._generateCredentialAccount(user.displayName ?? user.username);
+  //
+  //     this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
+  //   }
+  // }
 
   /**
    * Authenticates with the supplied password.
@@ -496,36 +368,39 @@ export default class Katavault {
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
    * @public
    */
-  public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
-    const vault = await this._initializeVault();
-    let accounts: Account[];
-
-    this._authenticationStore = {
-      __type: AuthenticationMethodEnum.Password,
-      store: await authenticateWithPassword({
-        logger: this._logger,
-        password,
-        user,
-        vault,
-      }),
-    };
-    this._ephemeralAccountStore = new EphemeralAccountStore({
-      logger: this._logger,
-      vault,
-    });
-    this._user = user;
-    this._vault = vault;
-
-    accounts = await this.accounts();
-
-    // if no ephemeral accounts exist, create a new one from the account credentials
-    if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
-      const { key } = await this._generateCredentialAccount(user.displayName ?? user.username);
-
-      this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
-    }
-  }
+  // public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
+  //   const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
+  //   const vault = await initializeVault({
+  //     logger: this._logger,
+  //     username: user.username,
+  //   });
+  //   let accounts: Account[];
+  //
+  //   this._authenticationMethods = {
+  //     __type: AuthenticationMethodEnum.Password,
+  //     store: await authenticateWithPassword({
+  //       logger: this._logger,
+  //       password,
+  //       user,
+  //       vault,
+  //     }),
+  //   };
+  //   this._accountsStore = new AccountStore({
+  //     logger: this._logger,
+  //     vault,
+  //   });
+  //   this._user = user;
+  //   this._vault = vault;
+  //
+  //   accounts = await this.accounts();
+  //
+  //   // if no ephemeral accounts exist, create a new one from the account credentials
+  //   if (!accounts.some(({ __type }) => __type === AccountTypeEnum.Ephemeral)) {
+  //     const { key } = await this._generateCredentialAccount(user.displayName ?? user.username);
+  //
+  //     this._logger.debug(`${__logPrefix}: created new credential account "${key}" for user "${user.username}"`);
+  //   }
+  // }
 
   /**
    * Gets the supported chains.
@@ -548,77 +423,12 @@ export default class Katavault {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    this._authenticationStore = null;
-    await this._vault.clear(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME);
+    this._authenticationMethods = [];
+    await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
     await this._vault.clear(IDB_PASSKEY_STORE_NAME);
     await this._vault.clear(IDB_PASSWORD_STORE_NAME);
+    await this._vault.clear(IDB_SETTINGS_STORE_NAME);
   }
-
-  /**
-   * Generates a new account in the wallet.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
-   * @returns {Promise<Account>} A promise that resolves to the created account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  // public async generateAccount(name?: string): Promise<Account> {
-  //   return await this._addAccount({
-  //     name,
-  //     privateKey: generatePrivateKey(),
-  //   });
-  // }
-
-  /**
-   * Imports an account from a 25-word mnemonic.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {ImportAccountWithPrivateKeyParameters} params - The 25-word mnemonic of the account to be imported and an
-   * optional name for the account.
-   * @returns {Promise<Account>} A promise that resolves to the imported account.
-   * @throws {InvalidAccountError} If the supplied mnemonic is not valid.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  // public async importAccountFromMnemonic({ mnemonic, name }: ImportAccountWithMnemonicParameters): Promise<Account> {
-  //   const formattedMnemonic = mnemonic
-  //     .trim()
-  //     .split(/[\s,]+/) // split on whitespace and commas
-  //     .join(' '); // join back together with whitespace
-  //
-  //   if (isValidMnemonic(formattedMnemonic)) {
-  //     throw new InvalidAccountError('invalid mnemonic');
-  //   }
-  //
-  //   return await this._addAccount({
-  //     name,
-  //     privateKey: privateKeyFromMnemonic(formattedMnemonic),
-  //   });
-  // }
-
-  /**
-   * Imports an account from a private key.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {ImportAccountWithPrivateKeyParameters} params - The private key of the account to be imported and an
-   * optional name for the account.
-   * @returns {Promise<Account>} A promise that resolves to the imported account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  // public async importAccountFromPrivateKey({
-  //   name,
-  //   privateKey,
-  // }: ImportAccountWithPrivateKeyParameters): Promise<Account> {
-  //   return await this._addAccount({
-  //     name,
-  //     privateKey,
-  //   });
-  // }
 
   /**
    * Checks if Katavault is authenticated.
@@ -626,7 +436,7 @@ export default class Katavault {
    * @private
    */
   public isAuthenticated(): boolean {
-    return !!this._authenticationStore;
+    return !!this._authenticationMethods;
   }
 
   /**
@@ -645,7 +455,7 @@ export default class Katavault {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    results = await this._ephemeralAccountStore.remove([key]);
+    results = await this._accountsStore.remove([key]);
 
     this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
   }
@@ -666,26 +476,26 @@ export default class Katavault {
    * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
    * @public
    */
-  public async setAccountNameByKey({ key, name }: SetAccountNameByKeyParameters): Promise<Account> {
-    const account = await this._ephemeralAccountStore.accountByKey(key);
-
-    if (!account) {
-      throw new AccountDoesNotExistError(`account "${key}" does not exist`);
-    }
-
-    await this._ephemeralAccountStore.upsert([
-      {
-        ...account,
-        name,
-      },
-    ]);
-
-    return {
-      __type: account.__type,
-      key,
-      name,
-    };
-  }
+  // public async setAccountNameByKey({ key, name }: SetAccountNameByKeyParameters): Promise<Account> {
+  //   const account = await this._accountsStore.accountByKey(key);
+  //
+  //   if (!account) {
+  //     throw new AccountDoesNotExistError(`account "${key}" does not exist`);
+  //   }
+  //
+  //   await this._accountsStore.upsert([
+  //     {
+  //       ...account,
+  //       name,
+  //     },
+  //   ]);
+  //
+  //   return {
+  //     __type: account.__type,
+  //     key,
+  //     name,
+  //   };
+  // }
 
   // public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
   // public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;

@@ -5,12 +5,12 @@ import { AccountTypeEnum } from '@/enums';
 import type Account from './Account';
 
 /**
- * @property {AccountTypeEnum.Ephemeral} __type - The type of account: `ephemeral`.
+ * @property {AccountTypeEnum.Connected} __type - The type of account: `connected`.
  * @property {string} key - The public key encoded with base58.
  * @property {string} name - [optional] The name of the account.
  */
-interface EphemeralAccount extends Account {
-  __type: AccountTypeEnum.Ephemeral;
+interface ConnectedAccount extends Account {
+  __type: AccountTypeEnum.Connected;
 }
 
-export default EphemeralAccount;
+export default ConnectedAccount;

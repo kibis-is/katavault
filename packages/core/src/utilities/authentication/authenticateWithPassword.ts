@@ -10,7 +10,7 @@ import { PasswordStore } from '@/decorators';
 import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } from '@/types';
 
 // utilities
-import { bytesToHex } from '@/utilities';
+import { bytesToBase64 } from '@/utilities';
 
 /**
  * Authenticates with the supplied password.
@@ -38,16 +38,6 @@ export default async function authenticateWithPassword({
   // set the password
   store.setPassword(password);
 
-  // if there is no stored challenge, encrypt a new one into the store.
-  if (!encryptedChallenge) {
-    logger.debug(`${__logPrefix}: initializing new password store`);
-
-    encryptedChallenge = bytesToHex(await store.encryptBytes(encodeUtf8(PasswordStore.challenge)));
-
-    await store.setChallenge(encryptedChallenge);
-    await store.setLastUsedAt();
-  }
-
   // if the stored challenge exists, verify the supplied password
   if (encryptedChallenge) {
     logger.debug(`${__logPrefix}: password store exists`);
@@ -57,9 +47,22 @@ export default async function authenticateWithPassword({
     if (!isVerified) {
       throw new InvalidPasswordError('incorrect password');
     }
+
+    logger.debug(`${__logPrefix}: signed in with password`);
+
+    return store;
   }
 
-  logger.debug(`${__logPrefix}: authenticated with password`);
+  // ... otherwise, if there is no stored challenge, encrypt a new one into the store.
+
+  logger.debug(`${__logPrefix}: initializing new password store`);
+
+  encryptedChallenge = bytesToBase64(await store.encryptBytes(encodeUtf8(PasswordStore.challenge)));
+
+  await store.setChallenge(encryptedChallenge);
+  await store.setLastUsedAt();
+
+  logger.debug(`${__logPrefix}: created new credential with password`);
 
   return store;
 }

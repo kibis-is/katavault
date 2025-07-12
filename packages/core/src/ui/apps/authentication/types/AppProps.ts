@@ -2,11 +2,11 @@
 import { BaseError } from '@/errors';
 
 // types
-import type { AuthenticateResult } from '@/types';
+import type { AuthenticateAppResult } from '@/types';
 
 interface AppProps {
   onError: (error: BaseError) => void;
-  onSuccess: (result: AuthenticateResult) => void;
+  onSuccess: (result: AuthenticateAppResult) => void;
 }
 
 export default AppProps;

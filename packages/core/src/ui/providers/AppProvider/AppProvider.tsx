@@ -9,14 +9,13 @@ import { AppContext } from '@/ui/contexts';
 import type { AppState } from '@/ui/types';
 import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, clientInformation, i18n, logger, vault }) => {
+const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, clientInformation, i18n, logger }) => {
   // states
   const [timestamp, setTimestamp] = useState<number>(0);
   const [state, setState] = useState<AppState>({
     clientInformation,
     i18n,
     logger,
-    vault,
   });
   // callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
@@ -26,10 +25,9 @@ const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, cl
       clientInformation,
       i18n,
       logger,
-      vault,
     });
     onUpdate();
-  }, [clientInformation, i18n, logger, vault]);
+  }, [clientInformation, i18n, logger]);
 
   return (
     <AppContext.Provider

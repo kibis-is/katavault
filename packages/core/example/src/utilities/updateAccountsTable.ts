@@ -36,7 +36,7 @@ export default async function updateAccountsTable(katavault: Katavault, logger: 
       <td>${key}</td>
       <td>${name ? name : '-'}</td>
       <td>
-        ${__type === AccountTypeEnum.External ? '<button class="remove-button button--sm">Remove</button>' : '-'}
+        ${__type === AccountTypeEnum.Connected ? '<button class="remove-button button--sm">Remove</button>' : '-'}
       </td>
     </tr>
     `

@@ -1,3 +1,4 @@
+export { default as AuthenticationMethodNotSupportedError } from './AuthenticationMethodNotSupportedError';
 export { default as FailedToAuthenticatePasskeyError } from './FailedToAuthenticatePasskeyError';
 export { default as FailedToRegisterPasskeyError } from './FailedToRegisterPasskeyError';
 export { default as InvalidPasswordError } from './InvalidPasswordError';

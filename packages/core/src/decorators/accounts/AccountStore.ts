@@ -1,19 +1,15 @@
 // constants
-import { IDB_EPHEMERAL_ACCOUNTS_STORE_NAME } from '@/constants';
+import { IDB_ACCOUNTS_STORE_NAME } from '@/constants';
 
 // decorators
 import BaseStore from '@/decorators/_base/BaseStore';
 
 // types
-import type {
-  EphemeralAccountStoreItemWithPasskey,
-  EphemeralAccountStoreItemWithPassword,
-  StoreParameters,
-} from '@/types';
+import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem, StoreParameters } from '@/types';
 
-export default class EphemeralAccountStore extends BaseStore {
+export default class AccountStore extends BaseStore {
   // public static variables
-  public static readonly displayName = 'EphemeralAccountStore';
+  public static readonly displayName = 'AccountStore';
 
   public constructor(params: StoreParameters) {
     super(params);
@@ -26,15 +22,15 @@ export default class EphemeralAccountStore extends BaseStore {
   /**
    * Gets an account by public key. If no item exists, null is returned.
    * @param {string} key - The public key, encoded with base58.
-   * @returns {Promise<EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword | null>} A promise that resolves to
+   * @returns {Promise<ConnectedAccountStoreItem | EphemeralAccountStoreItem | null>} A promise that resolves to
    * the account or null if it doesn't exist.
    * @public
    */
-  public async accountByKey<Item = EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword>(
+  public async accountByKey<Item = ConnectedAccountStoreItem | EphemeralAccountStoreItem>(
     key: string
   ): Promise<Item | null> {
-    const item: EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword | null =
-      (await this._vault.get(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME, key)) || null;
+    const item: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null =
+      (await this._vault.get(IDB_ACCOUNTS_STORE_NAME, key)) || null;
 
     if (!item) {
       return null;
@@ -45,17 +41,15 @@ export default class EphemeralAccountStore extends BaseStore {
 
   /**
    * Gets all accounts in the store.
-   * @returns {Promise<(EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[]>} A promise that
+   * @returns {Promise<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>} A promise that
    * resolves to all accounts.
    * @public
    */
-  public async accounts<Item = EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword>(): Promise<
-    Item[]
-  > {
-    const transaction = this._vault.transaction(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME, 'readonly');
+  public async accounts<Item = ConnectedAccountStoreItem | EphemeralAccountStoreItem>(): Promise<Item[]> {
+    const transaction = this._vault.transaction(IDB_ACCOUNTS_STORE_NAME, 'readonly');
     const keys = await transaction.store.getAllKeys();
-    const results: (EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[] = [];
-    let item: EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword;
+    const results: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[] = [];
+    let item: ConnectedAccountStoreItem | EphemeralAccountStoreItem;
 
     for (const key of keys) {
       item = await transaction.store.get(key);
@@ -74,7 +68,7 @@ export default class EphemeralAccountStore extends BaseStore {
    */
   public async remove(keys: [string, ...string[]]): Promise<string[]> {
     const removedKeys: string[] = [];
-    const transaction = this._vault.transaction(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME, 'readwrite');
+    const transaction = this._vault.transaction(IDB_ACCOUNTS_STORE_NAME, 'readwrite');
     let dbKey: IDBValidKey | null;
 
     for (const key of keys) {
@@ -93,17 +87,17 @@ export default class EphemeralAccountStore extends BaseStore {
   /**
    * Upserts accounts into the database. If any of the public keys already exist, they will be overwritten with the new
    * account. If any of the accounts don't exist, they will be added.
-   * @param {(EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[]} items - The accounts to
+   * @param {(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]} items - The accounts to
    * insert and/or update.
-   * @returns {Promise<(EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[]>} A promise that
+   * @returns {Promise<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>} A promise that
    * resolves to the inserted and/or updated accounts.
    * @public
    */
   public async upsert(
-    items: (EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[]
-  ): Promise<(EphemeralAccountStoreItemWithPasskey | EphemeralAccountStoreItemWithPassword)[]> {
-    const __logPrefix = `${EphemeralAccountStore.displayName}#upsert`;
-    const transaction = this._vault.transaction(IDB_EPHEMERAL_ACCOUNTS_STORE_NAME, 'readwrite');
+    items: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]
+  ): Promise<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]> {
+    const __logPrefix = `${AccountStore.displayName}#upsert`;
+    const transaction = this._vault.transaction(IDB_ACCOUNTS_STORE_NAME, 'readwrite');
     const keys = await transaction.store.getAllKeys();
     const itemsToAdd = items.filter(({ key }) => !keys.some((value) => value === key));
     const itemsToUpdate = items.filter(({ key }) => keys.some((value) => value === key));

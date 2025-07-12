@@ -1,5 +1,3 @@
-import { decode as decodeUtf8, encode as encodeUtf8 } from '@stablelib/utf8';
-import { sha512 } from '@noble/hashes/sha512';
 import { randomBytes } from '@noble/hashes/utils';
 import { secretbox } from 'tweetnacl';
 
@@ -16,7 +14,7 @@ import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/error
 import type { BaseAuthenticationStore, StoreParameters } from '@/types';
 
 // utilities
-import { createDerivationKey, hexToBytes } from '@/utilities';
+import { base64ToBytes, bytesToUTF8, createDerivationKey, utf8ToBytes } from '@/utilities';
 
 export default class PasswordStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
@@ -36,8 +34,9 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
    */
 
   /**
-   * Gets the hexadecimal encoded encrypted challenge.
-   * @returns {Promise<string | null>} A promise that resolves to the hexadecimal encoded encrypted challenge or null if no challenge exists.
+   * Gets the encrypted challenge encoded with base64.
+   * @returns {Promise<string | null>} A promise that resolves to the encrypted challenge with base64 encoding or null
+   * if no challenge exists.
    * @private
    */
   public async challenge(): Promise<string | null> {
@@ -86,7 +85,7 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     encryptionKey = await createDerivationKey({
       keyLength: secretbox.keyLength,
       salt,
-      secret: encodeUtf8(this._password),
+      secret: utf8ToBytes(this._password),
     });
     decryptedBytes = secretbox.open(encryptedBytes, nonce, encryptionKey);
 
@@ -125,7 +124,7 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     encryptionKey = await createDerivationKey({
       keyLength: secretbox.keyLength,
       salt,
-      secret: encodeUtf8(this._password),
+      secret: utf8ToBytes(this._password),
     });
     nonce = randomBytes(secretbox.nonceLength);
 
@@ -147,20 +146,6 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
   }
 
   /**
-   * Gets the hashed password.
-   * @returns {Uint8Array} The SHA-512 hash of the password.
-   * @throws {NotAuthenticatedError} If the password has not been set.
-   * @public
-   */
-  public hash(): Uint8Array {
-    if (!this._password) {
-      throw new NotAuthenticatedError('no password found');
-    }
-
-    return sha512(encodeUtf8(this._password));
-  }
-
-  /**
    * Retrieves the stored password.
    * @return {string | null} The current password if available, otherwise null.
    * @public
@@ -170,9 +155,9 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
   }
 
   /**
-   * Sets a hexadecimal encoded encrypted challenge.
-   * @param {string} value - A hexadecimal encoded encrypted challenge.
-   * @returns {string} The hexadecimal encoded encrypted challenge.
+   * Sets an encrypted challenge with base64 encoding.
+   * @param {string} value - An encrypted challenge with base64 encoding.
+   * @returns {string} The encrypted challenge with base64 encoding.
    * @public
    */
   public async setChallenge(value: string): Promise<string> {
@@ -226,9 +211,9 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     }
 
     try {
-      decryptedChallenge = await this.decryptBytes(hexToBytes(encryptedChallenge));
+      decryptedChallenge = await this.decryptBytes(base64ToBytes(encryptedChallenge));
 
-      return decodeUtf8(decryptedChallenge) === PasswordStore.challenge;
+      return bytesToUTF8(decryptedChallenge) === PasswordStore.challenge;
     } catch (_) {
       return false;
     }
