@@ -5,6 +5,7 @@ import { useCallback, useState } from 'preact/hooks';
 // components
 import Button from '@/ui/components/Button';
 import CircularLoaderWithIcon from '@/ui/components/CircularLoaderWithIcon';
+import ErrorMessage from '@/ui/components/ErrorMessage';
 import Footer from '@/ui/components/Footer';
 import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
@@ -15,10 +16,11 @@ import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // constants
+import { INVALID_PASSWORD_ERROR } from '@/constants';
 import { DEFAULT_PADDING } from '@/ui/constants';
 
 // decorators
-import { PasskeyStore } from '@/decorators';
+import { PasskeyStore, PasswordStore } from '@/decorators';
 
 // enums
 import { AuthenticationMethod } from '@/enums';
@@ -55,7 +57,7 @@ import type { UserInformation } from '@/types';
 import type { RootProps } from './types';
 
 // utilities
-import { authenticateWithPasskey } from '@/utilities';
+import { authenticateWithPasskey, authenticateWithPassword } from '@/utilities';
 
 const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
   // hooks
@@ -63,14 +65,15 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
   const colorMode = useColorMode();
   const defaultTextColor = useDefaultTextColor(colorMode);
   const {
-    validate: validatePassword,
-    reset: resetPassword,
+    validate: validatePasswordInput,
+    reset: resetPasswordInput,
+    setError: setPasswordInputError,
     ...passwordInputProps
   } = useInput({
     name: 'password',
     required: true,
   });
-  const { validate: validateUsername, ...usernameInputProps } = useInput({
+  const { validate: validateUsernameInput, ...usernameInputProps } = useInput({
     name: 'username',
     required: true,
   });
@@ -79,24 +82,25 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
   const translate = useTranslate();
   const vault = useVault();
   // states
-  const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [method, setMethod] = useState<AuthenticationMethod | null>(null);
+  const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
+  const [passwordError, setPasswordError] = useState<BaseError | null>(null);
   // callbacks
   const handleOnBackClick = useCallback(() => {
     if (method) {
-      resetPassword();
+      resetPasswordInput();
     }
 
     setMethod(null);
   }, [method, setMethod]);
   const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
   const handleOnContinueWithPasswordClick = useCallback(() => {
-    if (validateUsername()) {
+    if (validateUsernameInput()) {
       return;
     }
 
     setMethod(AuthenticationMethod.Password);
-  }, [setMethod, validateUsername]);
+  }, [setMethod, validateUsernameInput]);
   const handleOnSignInWithPasskeyClick = useCallback(async () => {
     const __logPrefix= `${Root.displayName}#handleOnSignInWithPasskeyClick`;
     let store: PasskeyStore;
@@ -108,7 +112,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       return;
     }
 
-    if (validateUsername()) {
+    if (validateUsernameInput()) {
       return;
     }
 
@@ -137,12 +141,51 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       logger.error(`${__logPrefix}:`, error);
       setPasskeyError(error);
     }
-  }, [clientInformation, setMethod, usernameInputProps.value, validateUsername]);
-  const handleOnSignInWithPasswordClick = useCallback(() => {
-    if (validatePassword()) {
+  }, [clientInformation, logger, setMethod, usernameInputProps.value, validateUsernameInput, vault]);
+  const handleOnSignInWithPasswordClick = useCallback(async () => {
+    const __logPrefix= `${Root.displayName}#handleOnSignInWithPasswordClick`;
+    let store: PasswordStore;
+    let user: UserInformation;
+
+    setPasswordError(null);
+
+    if (!logger || !vault) {
       return;
     }
-  }, [validatePassword]);
+
+    if (validatePasswordInput()) {
+      return;
+    }
+
+    try {
+      user = {
+        displayName: usernameInputProps.value,
+        username: usernameInputProps.value,
+      };
+      store = await authenticateWithPassword({
+        logger,
+        password: passwordInputProps.value,
+        user,
+        vault,
+      });
+
+      onSuccess({
+        authenticationStore: {
+          __type: AuthenticationMethod.Password,
+          store,
+        },
+        user,
+      });
+    } catch (error) {
+      logger.error(`${__logPrefix}:`, error);
+
+      if ((error as BaseError).isKatavaultError && (error as BaseError).type === INVALID_PASSWORD_ERROR) {
+        return setPasswordInputError(translate('errors.inputs.incorrectPassword'));
+      }
+
+      setPasswordError(error);
+    }
+  }, [logger, passwordInputProps.value, setPasswordInputError, setPasswordError, translate, validatePasswordInput, vault]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
@@ -210,7 +253,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
                   <>
                     <CircularLoaderWithIcon colorMode={colorMode} icon={<PasskeyIcon />} size="lg" />
 
-                    <Text colorMode={colorMode} textAlign="center">
+                    <Text colorMode={colorMode} fullWidth={true} textAlign="center">
                       {translate('captions.verifyPasskey')}
                     </Text>
                   </>
@@ -222,7 +265,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
 
                     <Input
                       {...passwordInputProps}
-                      autocomplete="current-password"
+                      autocomplete="current-password new-password"
                       colorMode={colorMode}
                       placeholder={translate('placeholders.password')}
                       type="password"
@@ -230,6 +273,17 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
 
                     <Spacer />
 
+                    {/*error message*/}
+                    {passwordError && (
+                      <ErrorMessage
+                        colorMode={colorMode}
+                        message={translate('errors.descriptions.type', {
+                          context: passwordError.type,
+                        })}
+                      />
+                    )}
+
+                    {/*cta buttons*/}
                     <VStack align="center" fullWidth={true} justify="center" spacing="sm">
                       <Button
                         colorMode={colorMode}
@@ -245,7 +299,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
               default:
                 return (
                   <>
-                    <Heading colorMode={colorMode}>{translate('headings.signIn')}</Heading>
+                    <Heading colorMode={colorMode}>{translate('headings.loginOrSignUp')}</Heading>
 
                     <Input
                       {...usernameInputProps}

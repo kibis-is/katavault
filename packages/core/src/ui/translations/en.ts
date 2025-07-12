@@ -20,12 +20,13 @@ export default {
       type_USER_CANCELED_PASSKEY_REQUEST_ERROR: 'The passkey request timed out or was canceled.',
     },
     inputs: {
-      required: 'This field required',
+      incorrectPassword: 'Incorrect password.',
+      required: 'This field required.',
     },
   },
   headings: {
     enterYourPassword: 'Enter your password',
-    signIn: 'Sign in',
+    loginOrSignUp: 'Login or sign up',
   },
   placeholders: {
     password: 'Password',

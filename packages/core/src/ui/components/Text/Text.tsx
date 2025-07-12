@@ -36,12 +36,12 @@ const Text: FunctionComponent<BaseComponentProps & TypographyProps> = ({
   const textAlignStyle = useMemo(() => {
     switch (textAlign) {
       case 'left':
-        return styles.headingLeft;
+        return styles.textLeft;
       case 'right':
-        return styles.headingRight;
+        return styles.textRight;
       case 'center':
       default:
-        return styles.headingCenter;
+        return styles.textCenter;
     }
   }, [textAlign]);
 

@@ -31,19 +31,21 @@
     text-align: right;
   }
 
-  &__xs {
+  &--xs {
     font-size: 0.625rem; // 10px
+    line-height: 1rem; // 16px
   }
 
-  &__sm {
+  &--sm {
     font-size: 0.75rem; // 12px
+    line-height: 1.25rem; // 20px
   }
 
-  &__lg {
+  &--lg {
     font-size: 1rem; // 16px
   }
 
-  &__xl {
+  &--xl {
     font-size: 1.125rem; // 18px
   }
 }
