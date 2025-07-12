@@ -4,4 +4,4 @@ export type { default as ImportAccountParameters } from './ImportAccountParamete
 export type { default as ImportAccountWithMnemonicParameters } from './ImportAccountWithMnemonicParameters';
 export type { default as ImportAccountWithPrivateKeyParameters } from './ImportAccountWithPrivateKeyParameters';
 export type { default as KatavaultParameters } from './KatavaultParameters';
-export type { default as SetAccountNameByAddressParameters } from './SetAccountNameByAddressParameters';
+export type { default as SetAccountNameByKeyParameters } from './SetAccountNameByKeyParameters';

@@ -5,17 +5,11 @@ import { createKatavault, Katavault } from '@kibisis/katavault-core';
 import config from './config';
 
 // handlers
-import {
-  onAuthenticateViaUIButtonClick,
-  onAuthenticateWithPasskeyButtonClick,
-  onCreateAccountButtonClick,
-  onResetButtonClick,
-} from './handlers';
+import { onAuthenticateViaUIButtonClick, onAuthenticateWithPasskeyButtonClick, onResetButtonClick } from './handlers';
 
 async function onDOMContentLoaded() {
   const authenticateViaUIButtonElement = document.getElementById('authenticateViaUIButton');
   const authenticateWithPasskeyButtonElement = document.getElementById('authenticateWithPasskeyButton');
-  const createAccountButtonElement = document.getElementById('createAccountButton');
   const resetButtonElement = document.getElementById('resetButton');
   const logger = createLogger('debug');
   let katavault: Katavault;
@@ -32,10 +26,6 @@ async function onDOMContentLoaded() {
         'click',
         onAuthenticateWithPasskeyButtonClick(katavault, logger)
       );
-    }
-
-    if (createAccountButtonElement) {
-      createAccountButtonElement.addEventListener('click', onCreateAccountButtonClick(katavault, logger));
     }
 
     if (resetButtonElement) {

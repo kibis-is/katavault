@@ -2,10 +2,10 @@
 import { PasskeyStore } from '@/decorators';
 
 // enums
-import { AuthenticationMethod } from '@/enums';
+import { AuthenticationMethodEnum } from '@/enums';
 
 interface AuthenticationStoreWithPasskey {
-  __type: AuthenticationMethod.Passkey;
+  __type: AuthenticationMethodEnum.Passkey;
   store: PasskeyStore;
 }
 

@@ -1,4 +1,6 @@
+export { default as base58ToBytes } from './base58ToBytes';
 export { default as base64ToBytes } from './base64ToBytes';
+export { default as bytesToBase58 } from './bytesToBase58';
 export { default as bytesToBase64 } from './bytesToBase64';
 export { default as bytesToHex } from './bytesToHex';
 export { default as bytesToUTF8 } from './bytesToUTF8';

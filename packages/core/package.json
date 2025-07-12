@@ -66,6 +66,7 @@
     "@stablelib/hex": "^2.0.1",
     "@stablelib/random": "^2.0.1",
     "@stablelib/utf8": "^2.0.1",
+    "bs58": "^6.0.0",
     "clsx": "^2.1.0",
     "i18next": "^25.3.2",
     "idb": "^8.0.2",

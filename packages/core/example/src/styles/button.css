@@ -19,6 +19,7 @@ button {
   padding-inline: 1rem;
   transition: background-color 300ms;
   white-space: nowrap;
+  width: 100%;
 }
 
 button:hover {
@@ -27,4 +28,13 @@ button:hover {
 
 button.button--sm {
   min-width: 5rem;
+}
+
+.button-container {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  justify-content: center;
+  width: 100%;
 }

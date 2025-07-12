@@ -23,7 +23,7 @@ import { DEFAULT_PADDING } from '@/ui/constants';
 import { PasskeyStore, PasswordStore } from '@/decorators';
 
 // enums
-import { AuthenticationMethod } from '@/enums';
+import { AuthenticationMethodEnum } from '@/enums';
 
 // errors
 import { BaseError } from '@/errors';
@@ -82,7 +82,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
   const translate = useTranslate();
   const vault = useVault();
   // states
-  const [method, setMethod] = useState<AuthenticationMethod | null>(null);
+  const [method, setMethod] = useState<AuthenticationMethodEnum | null>(null);
   const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [passwordError, setPasswordError] = useState<BaseError | null>(null);
   // callbacks
@@ -99,7 +99,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       return;
     }
 
-    setMethod(AuthenticationMethod.Password);
+    setMethod(AuthenticationMethodEnum.Password);
   }, [setMethod, validateUsernameInput]);
   const handleOnSignInWithPasskeyClick = useCallback(async () => {
     const __logPrefix= `${Root.displayName}#handleOnSignInWithPasskeyClick`;
@@ -116,7 +116,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       return;
     }
 
-    setMethod(AuthenticationMethod.Passkey);
+    setMethod(AuthenticationMethodEnum.Passkey);
 
     try {
       user = {
@@ -132,7 +132,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
 
       onSuccess({
         authenticationStore: {
-          __type: AuthenticationMethod.Passkey,
+          __type: AuthenticationMethodEnum.Passkey,
           store,
         },
         user,
@@ -171,7 +171,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
 
       onSuccess({
         authenticationStore: {
-          __type: AuthenticationMethod.Password,
+          __type: AuthenticationMethodEnum.Password,
           store,
         },
         user,
@@ -197,7 +197,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
       <div className={clsx(styles.modal)} data-color-mode={colorMode}>
         {/*header*/}
         <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
-          {(method === AuthenticationMethod.Password || (method === AuthenticationMethod.Passkey && passkeyError)) && (
+          {(method === AuthenticationMethodEnum.Password || (method === AuthenticationMethodEnum.Passkey && passkeyError)) && (
             <HStack align="center" justify="start" spacing="xs">
               {/*back button*/}
               <IconButton colorMode={colorMode} icon={<ArrowLeftIcon />} onClick={handleOnBackClick} />
@@ -223,7 +223,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
         <VStack align="center" fullWidth={true} grow={true} paddingX={DEFAULT_PADDING} spacing="md">
           {(() => {
             switch (method) {
-              case AuthenticationMethod.Passkey:
+              case AuthenticationMethodEnum.Passkey:
                 if (passkeyError) {
                   return (
                     <>
@@ -258,7 +258,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, onSuccess }) => {
                     </Text>
                   </>
                 );
-              case AuthenticationMethod.Password:
+              case AuthenticationMethodEnum.Password:
                 return (
                   <>
                     <Heading colorMode={colorMode}>{translate('headings.enterYourPassword')}</Heading>

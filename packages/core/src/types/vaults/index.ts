@@ -1,8 +1,8 @@
-export type { default as AccountStoreItemWithPasskey } from './AccountStoreItemWithPasskey';
-export type { default as AccountStoreItemWithPassword } from './AccountStoreItemWithPassword';
-export type { default as AccountStoreSchema } from './AccountStoreSchema';
-export type { default as BaseAccountStoreItem } from './BaseAccountStoreItem';
+export type { default as BaseEphemeralAccountStoreItem } from './BaseEphemeralAccountStoreItem';
 export type { default as ConfigStoreSchema } from './ConfigStoreSchema';
+export type { default as EphemeralAccountStoreItemWithPasskey } from './EphemeralAccountStoreItemWithPasskey';
+export type { default as EphemeralAccountStoreItemWithPassword } from './EphemeralAccountStoreItemWithPassword';
+export type { default as EphemeralAccountStoreSchema } from './EphemeralAccountStoreSchema';
 export type { default as PasskeyStoreSchema } from './PasskeyStoreSchema';
 export type { default as PasswordStoreSchema } from './PasswordStoreSchema';
 export type { default as StoreParameters } from './StoreParameters';

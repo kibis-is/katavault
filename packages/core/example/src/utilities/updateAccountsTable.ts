@@ -1,9 +1,10 @@
-import { type Account, Katavault, type Logger } from '@kibisis/katavault-core';
+import { type Account, AccountTypeEnum, Katavault } from '@kibisis/katavault-core';
+import type { ILogger } from '@kibisis/utilities';
 
 // handlers
-import { onRemoveButtonClick } from '../handlers';
+// import { onRemoveButtonClick } from '../handlers';
 
-export default async function updateAccountsTable(katavault: Katavault, logger: Logger) {
+export default async function updateAccountsTable(katavault: Katavault, logger: ILogger) {
   const __logPrefix = 'updateAccountsTable';
   const containerElement = document.getElementById('accountsTable');
   let accounts: Account[];
@@ -20,18 +21,22 @@ export default async function updateAccountsTable(katavault: Katavault, logger: 
 <table>
   <thead>
     <tr>
-      <th>Account</th>
+      <th>Type</th>
+      <th>Public key (base58)</th>
+      <th>Name</th>
       <th>Actions</th>
     </tr>
   </thead>
 
   <tbody>
     ${accounts.map(
-      ({ address }: Account) => `
+      ({ __type, key, name }: Account) => `
     <tr>
-      <td>${address}</td>
+      <td>${__type}</td>
+      <td>${key}</td>
+      <td>${name ? name : '-'}</td>
       <td>
-        <button class="remove-button button--sm">Remove</button>
+        ${__type === AccountTypeEnum.External ? '<button class="remove-button button--sm">Remove</button>' : '-'}
       </td>
     </tr>
     `
@@ -41,7 +46,7 @@ export default async function updateAccountsTable(katavault: Katavault, logger: 
   `;
 
   // add click listeners to the buttons
-  Array.from(document.getElementsByClassName('remove-button')).forEach((element, index) =>
-    element.addEventListener('click', onRemoveButtonClick(accounts[index].address, katavault, logger))
-  );
+  // Array.from(document.getElementsByClassName('remove-button')).forEach((element, index) =>
+  //   element.addEventListener('click', onRemoveButtonClick(accounts[index].address, katavault, logger))
+  // );
 }
