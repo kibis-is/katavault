@@ -9,6 +9,15 @@
   }
 }
 
+@keyframes slideFromLeft {
+  0% {
+    transform: translateX(350px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 @keyframes slideUpFadeIn {
   0% {
     opacity: 0;

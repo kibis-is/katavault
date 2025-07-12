@@ -4,9 +4,9 @@ export default {
   buttons: {
     continue: 'Continue',
     retry: 'Retry',
-    signInWithPasskey: 'Sign in with passkey',
+    signInWithPasskey: 'Sign in with a passkey',
     signupWithPasskey: 'Signup with a passkey',
-    signInWithPassword: 'Sign in with password',
+    signInWithPassword: 'Sign in with a password',
     signupWithPassword: 'Signup with a password',
   },
   captions: {
@@ -29,6 +29,8 @@ export default {
     },
   },
   headings: {
+    connectedAccounts: 'Connected accounts',
+    ephemeralAccounts: 'Ephemeral accounts',
     finishCreatingANewAccount: 'Finish creating a new account',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',

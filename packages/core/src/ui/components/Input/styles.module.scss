@@ -77,6 +77,10 @@
 
   &--error {
     border-color: map.get(palette.$red-palette, 500);
+
+    &[data-color-mode="dark"] {
+      border-color: map.get(palette.$red-palette, 400);
+    }
   }
 }
 
@@ -94,10 +98,8 @@
   &--asterisk {
     color: map.get(palette.$red-palette, 500);
     padding: 0;
-  }
 
-  &[data-color-mode="dark"] {
-    &--asterisk {
+    &[data-color-mode="dark"] {
       color: map.get(palette.$red-palette, 400);
     }
   }

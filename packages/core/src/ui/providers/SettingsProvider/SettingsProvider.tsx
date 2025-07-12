@@ -3,34 +3,28 @@ import type { PropsWithChildren } from 'preact/compat';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
 // contexts
-import { AppContext } from '@/ui/contexts';
+import { SettingsContext } from '@/ui/contexts';
+
+// decorators
+import type { SettingsStore } from '@/decorators';
 
 // types
-import type { AppContextState } from '@/ui/types';
 import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, clientInformation, i18n, logger }) => {
+const SettingsProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, settingsStore }) => {
   // states
   const [timestamp, setTimestamp] = useState<number>(0);
-  const [state, setState] = useState<AppContextState>({
-    clientInformation,
-    i18n,
-    logger,
-  });
+  const [state, setState] = useState<SettingsStore>(settingsStore);
   // callbacks
   const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
 
   useEffect(() => {
-    setState({
-      clientInformation,
-      i18n,
-      logger,
-    });
+    setState(settingsStore);
     onUpdate();
-  }, [clientInformation, i18n, logger]);
+  }, [settingsStore]);
 
   return (
-    <AppContext.Provider
+    <SettingsContext.Provider
       value={{
         onUpdate,
         state,
@@ -38,8 +32,8 @@ const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, cl
       }}
     >
       {children}
-    </AppContext.Provider>
+    </SettingsContext.Provider>
   );
 };
 
-export default AppProvider;
+export default SettingsProvider;

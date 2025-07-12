@@ -7,6 +7,7 @@ interface StackProps {
   align?: StackAlign;
   className?: string;
   direction?: 'horizontal' | 'vertical';
+  fullHeight?: boolean;
   fullWidth?: boolean;
   grow?: boolean;
   height?: number | string;

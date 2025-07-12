@@ -33,6 +33,7 @@ import type {
   EphemeralAccountStoreItem,
   KatavaultParameters,
   PasskeyStoreSchema,
+  RenderWalletAppParameters,
   SetAccountNameByKeyParameters,
   Vault,
 } from '@/types';
@@ -474,6 +475,33 @@ export default class Katavault {
    */
   public isAuthenticated(): boolean {
     return !!this._authenticationStore;
+  }
+
+  /**
+   * Opens the wallet application.
+   *
+   * **NOTE:** Requires authentication.
+   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   */
+  public openWallet(): void {
+    let params: RenderWalletAppParameters;
+
+    if (!this._authenticationStore || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    params = {
+      authenticationStore: this._authenticationStore,
+      vault: this._vault,
+    };
+
+    // open wallet app
+    (async () => {
+      await this._appManager.renderWalletApp({
+        ...params,
+        clientInformation: this._clientInformation,
+      });
+    })();
   }
 
   /**

@@ -1,3 +1,3 @@
 export { default as onAuthenticateViaUIButtonClick } from './onAuthenticateViaUIButtonClick';
-export { default as onAuthenticateWithPasskeyButtonClick } from './onAuthenticateWithPasskeyButtonClick';
-export { default as onResetButtonClick } from './onResetButtonClick';
+export { default as onClearButtonClick } from './onClearButtonClick';
+export { default as onOpenWalletButtonClick } from './onOpenWalletButtonClick';

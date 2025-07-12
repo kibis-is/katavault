@@ -13,6 +13,7 @@ const Stack: FunctionComponent<StackProps> = ({
   className,
   direction = 'horizontal',
   children,
+  fullHeight = false,
   fullWidth = false,
   grow = false,
   height,
@@ -86,6 +87,7 @@ const Stack: FunctionComponent<StackProps> = ({
         direction === 'vertical'
           ? styles.stackVertical
           : styles.stackHorizontal,
+        fullHeight && styles.stackFullHeight,
         fullWidth && styles.stackFullWidth,
         grow && styles.stackGrow
       )}
