@@ -4,11 +4,10 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import dts from 'vite-plugin-dts';
 
 // configs
-import commonConfig from './vite.common.config';
-import { resolve } from 'node:path';
+import defaultConfig from './vite.default.config';
 
 export default mergeConfig(
-  commonConfig,
+  defaultConfig,
   defineConfig({
     build: {
       lib: {
@@ -37,12 +36,5 @@ export default mergeConfig(
       }),
       preact(),
     ],
-    resolve: {
-      alias: {
-        // resolutions needed for sass, typescript resolutions handled by the vite-tsconfig-paths plugin
-        '@/ui/fonts': resolve(__dirname, 'src/ui/fonts'),
-        '@/ui/styles': resolve(__dirname, 'src/ui/styles'),
-      },
-    },
   })
 );

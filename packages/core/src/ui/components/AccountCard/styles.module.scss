@@ -1,0 +1,26 @@
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+$height: 9rem;
+
+.container {
+  align-items: center;
+  background-color: transparent;
+  border-color: palette.border-color("light");
+  border-radius: map.get(variables.$border-radius, "md");
+  border-style: solid;
+  border-width: 1px;
+  box-sizing: border-box;
+  display: flex;
+  height: $height;
+  justify-content: center;
+  max-height: $height;
+  min-width: 18.75rem; // 300px
+  padding: map.get(variables.$spacing, "sm");
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    border-color: palette.border-color("dark");
+  }
+}
