@@ -5,6 +5,7 @@ import type { IconProps } from '@/ui/types';
 
 const CheckIcon: FunctionComponent<IconProps> = ({
   color,
+  title,
   ...svgProps
 }) => (
   <svg
@@ -17,6 +18,7 @@ const CheckIcon: FunctionComponent<IconProps> = ({
     xmlns="http://www.w3.org/2000/svg"
     {...svgProps}
   >
+    {title && <title>{title}</title>}
     <path d="M20 6 9 17l-5-5"></path>
   </svg>
 );

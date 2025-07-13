@@ -5,6 +5,7 @@ import type { IconProps } from '@/ui/types';
 
 const ArrowLeftIcon: FunctionComponent<IconProps> = ({
   color,
+  title,
   ...svgProps
 }) => (
   <svg
@@ -17,6 +18,7 @@ const ArrowLeftIcon: FunctionComponent<IconProps> = ({
     xmlns="http://www.w3.org/2000/svg"
     {...svgProps}
   >
+    {title && <title>{title}</title>}
     <path
       d="m12 19-7-7 7-7"
     />

@@ -3,8 +3,9 @@ import type { FunctionComponent } from 'preact';
 // types
 import type { IconProps } from '@/ui/types';
 
-const CloseIcon: FunctionComponent<IconProps> = ({ color, ...svgProps }) => (
+const CloseIcon: FunctionComponent<IconProps> = ({ color, title, ...svgProps }) => (
   <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" {...svgProps}>
+    {title && <title>{title}</title>}
     <path
       d="M368 368L144 144M368 144L144 368"
       fill="none"
