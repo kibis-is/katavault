@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { cloneElement, type FunctionComponent, type JSX } from 'preact';
+import { cloneElement, type FunctionComponent } from 'preact';
 import { useMemo } from 'preact/hooks';
 
 // components
@@ -12,11 +12,11 @@ import useButtonTextColor from '@/ui/hooks/useButtonTextColor';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseComponentProps } from '@/ui/types';
 import type { Props } from './types';
 
-const Button: FunctionComponent<Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'children'> & BaseComponentProps & Props> = ({
+const Button: FunctionComponent<Props> = ({
   children,
+  className,
   colorMode,
   fullWidth = false,
   leftIcon,
@@ -31,7 +31,7 @@ const Button: FunctionComponent<Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'chi
   return (
     <button
       {...buttonProps}
-      className={clsx(styles.button, fullWidth && styles.buttonFullWidth)}
+      className={clsx(styles.button, fullWidth && styles.buttonFullWidth, className)}
       data-color-mode={colorMode}
     >
       {leftIcon || rightIcon ? (

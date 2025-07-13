@@ -1,5 +1,6 @@
 import clsx from 'clsx';
-import { cloneElement, type FunctionComponent, type JSX } from 'preact';
+import { cloneElement, type FunctionComponent } from 'preact';
+import { useMemo } from 'preact/hooks';
 
 // hooks
 import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
@@ -8,22 +9,38 @@ import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseComponentProps } from '@/ui/types';
 import type { Props } from './types';
 
-const IconButton: FunctionComponent<Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'icon'> & BaseComponentProps & Props> = ({
+const IconButton: FunctionComponent<Props> = ({
   colorMode,
   icon,
+  size = 'md',
   ...buttonProps
 }) => {
   // hooks
   const defaultTextColor = useDefaultTextColor(colorMode);
+  // memos
+  const [buttonSizeStyle, iconSizeStyle] = useMemo(() => {
+    switch (size) {
+      case 'xs':
+        return [styles.buttonXs, styles.iconXs];
+      case 'sm':
+        return [styles.buttonSm, styles.iconSm];
+      case 'lg':
+        return [styles.buttonLg, styles.iconLg];
+      case 'xl':
+        return [styles.buttonXl, styles.iconXl];
+      case 'md':
+      default:
+        return [styles.buttonMd, styles.iconMd];
+    }
+  }, [size]);
 
   return (
-    <button {...buttonProps} className={clsx(styles.iconButton)} data-color-mode={colorMode}>
+    <button {...buttonProps} className={clsx(styles.button, buttonSizeStyle)} data-color-mode={colorMode}>
       {cloneElement(icon, {
         ...icon.props,
-        className: clsx(styles.iconButtonIcon),
+        className: clsx(styles.icon, iconSizeStyle),
         color: defaultTextColor,
       })}
     </button>

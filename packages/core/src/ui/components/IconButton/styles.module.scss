@@ -5,7 +5,7 @@
 
 $icon-size: 1.25rem; // 20px
 
-.icon-button {
+.button {
   @include mixins.button-transition;
   align-items: center;
   background-color: transparent;
@@ -22,28 +22,59 @@ $icon-size: 1.25rem; // 20px
     border-style: solid;
     border-width: 1px;
     outline: none;
+
+    &[data-color-mode="dark"] {
+      border-color: palette.focus-border-color("dark");
+    }
   }
 
   &:hover {
     background-color: map.get(palette.$gray-palette, 100);
-  }
 
-  &__icon {
-    height: $icon-size;
-    width: $icon-size;
-  }
-}
-
-[data-color-mode="dark"] {
-  .icon-button {
-    &:focus {
-      border-color: palette.focus-border-color("dark");
-    }
-
-    &:hover {
+    &[data-color-mode="dark"] {
       background-color: map.get(palette.$white-alpha-palette, 100);
     }
   }
+
+  &--xs {
+    padding: 0.525rem; // 8.4px
+  }
+
+  &--sm {
+    padding: 0.575rem; // 9.2px
+  }
+
+  &--lg {
+    padding: 0.7rem; // 11.2px
+  }
+
+  &--xl {
+    padding: 0.75rem; // 12px
+  }
 }
 
+.icon {
+  height: 1.25rem; // 20px
+  width: 1.25rem; // 20px
 
+  &--xs {
+    height: 0.75rem; // 12px
+    width: 0.75rem; // 12px
+  }
+
+  &--sm {
+    height: 1rem; // 16px
+    width: 1rem; // 16px
+  }
+
+  &--lg {
+    height: 1.5rem; // 24px
+    width: 1.5rem; // 24px
+  }
+
+  &--xl {
+    height: 2rem; // 32px
+    width: 2rem; // 32px
+  }
+
+}

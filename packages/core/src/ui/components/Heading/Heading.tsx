@@ -6,16 +6,24 @@ import { useMemo } from 'preact/hooks';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseComponentProps, TypographyProps } from '@/ui/types';
+import type { Props } from './types';
 
-const Heading: FunctionComponent<BaseComponentProps & TypographyProps> = ({
+const Heading: FunctionComponent<Props> = ({
   bold = false,
   children,
+  className,
   color,
   colorMode,
   fullWidth = false,
+  height,
+  maxHeight,
+  maxWidth,
+  minHeight,
+  minWidth,
   size = 'md',
   textAlign = 'center',
+  truncate = false,
+  width,
 }) => {
   // memos
   const sizeStyle = useMemo(() => {
@@ -52,14 +60,37 @@ const Heading: FunctionComponent<BaseComponentProps & TypographyProps> = ({
         sizeStyle,
         textAlignStyle,
         bold && styles.headingBold,
-        fullWidth && styles.headingFullWidth
+        fullWidth && styles.headingFullWidth,
+        truncate && styles.headingTruncate,
+        className,
       )}
       data-color-mode={colorMode}
       style={{
         ...(color && {
           color,
         }),
+        ...(height && {
+          height: typeof height === 'number' ? `${height}px` : height,
+        }),
+        ...(maxHeight && {
+          maxHeight:
+            typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+        }),
+        ...(maxWidth && {
+          maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
+        }),
+        ...(minHeight && {
+          minHeight:
+            typeof minHeight === 'number' ? `${minHeight}px` : minHeight,
+        }),
+        ...(minWidth && {
+          minWidth: typeof minWidth === 'number' ? `${minWidth}px` : minWidth,
+        }),
+        ...(width && {
+          width: typeof height === 'number' ? `${width}px` : width,
+        }),
       }}
+      title={typeof children === 'string' ? children : undefined}
     >
       {children}
     </h1>

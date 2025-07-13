@@ -48,4 +48,10 @@
   &--xl {
     font-size: 1.125rem; // 18px
   }
+
+  &--truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
