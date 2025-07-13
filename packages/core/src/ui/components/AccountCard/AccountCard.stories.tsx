@@ -1,4 +1,5 @@
 import { ed25519 } from '@noble/curves/ed25519';
+import { randomBytes } from '@noble/hashes/utils';
 import type { Meta, StoryObj } from '@storybook/preact';
 
 // enums
@@ -11,16 +12,22 @@ import AccountCard from './AccountCard';
 import { Props } from './types';
 
 // utilities
-import { bytesToBase58 } from '@/utilities';
+import { bytesToBase64, bytesToBase58 } from '@/utilities';
 
 const meta: Meta<Props> = {
   args: {
-    account: {
-      __type: AccountTypeEnum.Ephemeral,
-      key: bytesToBase58(ed25519.getPublicKey(ed25519.utils.randomPrivateKey())),
-      name: 'Personal',
-      origin: EphemeralAccountOriginEnum.Credential,
-    },
+    account: (() => {
+      const privateKey = ed25519.utils.randomPrivateKey();
+
+      return {
+        __type: AccountTypeEnum.Ephemeral,
+        credentialID: bytesToBase64(randomBytes(64)),
+        key: bytesToBase58(ed25519.getPublicKey(privateKey)),
+        keyData: bytesToBase64(privateKey),
+        name: 'Personal',
+        origin: EphemeralAccountOriginEnum.Credential,
+      };
+    })(),
     colorMode: 'dark',
   },
   component: AccountCard,

@@ -13,9 +13,11 @@ $icon-size: 1.25rem; // 20px
   border-radius: map.get(variables.$border-radius, "sm");
   cursor: pointer;
   display: flex;
+  height: auto;
   justify-content: center;
   min-width: auto;
   padding: 0.625rem; // 10px
+  width: auto;
 
   &:focus {
     border-color: palette.focus-border-color("light");
@@ -27,10 +29,10 @@ $icon-size: 1.25rem; // 20px
   }
 
   &:hover {
-    background-color: map.get(palette.$gray-palette, 100);
+    background-color: palette.ghost-button-background-color("light");
 
     &[data-color-mode="dark"] {
-      background-color: map.get(palette.$white-alpha-palette, 100);
+      background-color: palette.ghost-button-background-color("dark");
     }
   }
 
@@ -74,5 +76,4 @@ $icon-size: 1.25rem; // 20px
     height: 2rem; // 32px
     width: 2rem; // 32px
   }
-
 }

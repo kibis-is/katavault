@@ -1,0 +1,25 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+
+.container {
+  @include mixins.base-account-card-styles;
+  border-style: dashed;
+
+  &--clickable {
+    @include mixins.button-transition;
+    cursor: pointer;
+
+    &:hover {
+      background-color: palette.ghost-button-background-color("light");
+
+      &[data-color-mode="dark"] {
+        background-color: palette.ghost-button-background-color("dark");
+      }
+    }
+  }
+}
+
+.icon {
+  height: 2rem; // 32px
+  width: 2rem; // 32px
+}

@@ -13,7 +13,7 @@ import {
 import { AccountStore } from '@/decorators';
 
 // enums
-import { AccountTypeEnum, AuthenticationMethodEnum } from '@/enums';
+import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
 import { AccountDoesNotExistError, FailedToFetchNetworkError, NotAuthenticatedError } from '@/errors';
@@ -190,6 +190,7 @@ export default class Katavault {
             __type: account.__type,
             key: account.key,
             name: account.name,
+            origin: account.origin,
           };
         }
 
@@ -200,6 +201,7 @@ export default class Katavault {
           key,
           keyData: bytesToBase58(encryptedKeyData),
           name: username,
+          origin: EphemeralAccountOriginEnum.Credential,
         };
 
         await this._accountsStore.upsert([account]);
@@ -212,6 +214,7 @@ export default class Katavault {
           __type: account.__type,
           key: account.key,
           name: account.name,
+          origin: account.origin,
         };
       case AuthenticationMethodEnum.Password:
         password = this._authenticationStore.store.password();
@@ -248,6 +251,7 @@ export default class Katavault {
             __type: account.__type,
             key: account.key,
             name: account.name,
+            origin: account.origin,
           };
         }
 
@@ -259,6 +263,7 @@ export default class Katavault {
           key,
           keyData: bytesToBase58(encryptedKeyData),
           name: username,
+          origin: EphemeralAccountOriginEnum.Credential,
         };
 
         await this._accountsStore.upsert([account]);
@@ -271,6 +276,7 @@ export default class Katavault {
           __type: account.__type,
           key: account.key,
           name: account.name,
+          origin: account.origin,
         };
       default:
         throw new NotAuthenticatedError('not authenticated');

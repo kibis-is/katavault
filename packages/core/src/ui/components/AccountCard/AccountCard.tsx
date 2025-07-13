@@ -9,19 +9,22 @@ import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
+// enums
+import { AccountTypeEnum, EphemeralAccountOriginEnum } from '@/enums';
+
 // hooks
 import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
 import useSubTextColor from '@/ui/hooks/useSubTextColor';
 import useTranslate from '@/ui/hooks/useTranslate';
 
 // icons
+import KeyIcon from '@/ui/icons/KeyIcon';
+
 // styles
 import styles from './styles.module.scss';
 
 // types
 import type { Props } from './types';
-import { AccountTypeEnum, EphemeralAccountOriginEnum } from '@/enums';
-import KeyIcon from '@/ui/icons/KeyIcon';
 
 const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
   // hooks
@@ -37,7 +40,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
         <VStack fullWidth={true} spacing="xs">
           <HStack align="center" fullWidth={true} minHeight={24} spacing="xs">
             {account.name && (
-              <Text bold={true} colorMode={colorMode} textAlign="left" truncate={true} width={textWidth}>
+              <Text bold={true} colorMode={colorMode} maxWidth={textWidth} textAlign="left" truncate={true}>
                 {account.name}
               </Text>
             )}
@@ -53,10 +56,10 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
             <Text
               colorMode={colorMode}
               color={subTextColor}
+              maxWidth={textWidth}
               size="sm"
               textAlign="left"
               truncate={true}
-              width={textWidth}
             >
               {account.key}
             </Text>

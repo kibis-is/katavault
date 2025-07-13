@@ -10,6 +10,7 @@ export default {
     signupWithPassword: 'Signup with a password',
   },
   captions: {
+    connectAnAccount: 'Connect an account',
     copyAccountID: 'Copy account ID',
     or: 'Or',
     poweredBy: 'Powered by',

@@ -4,9 +4,10 @@ import type { FunctionComponent } from 'preact';
 import Root from './Root';
 
 // decorators
-import { SettingsStore } from '@/decorators';
+import { AccountStore, SettingsStore } from '@/decorators';
 
 // providers
+import AccountsProvider from '@/ui/providers/AccountsProvider';
 import AppProvider from '@/ui/providers/AppProvider';
 import SettingsProvider from '@/ui/providers/SettingsProvider';
 
@@ -27,7 +28,12 @@ const App: FunctionComponent<BaseAppProps & AppProps> = ({ clientInformation, i1
           vault: rootProps.vault,
         })}
       >
-        <Root {...rootProps} />
+        <AccountsProvider accountsStore={new AccountStore({
+          logger,
+          vault: rootProps.vault,
+        })}>
+          <Root {...rootProps} />
+        </AccountsProvider>
       </SettingsProvider>
     </AppProvider>
   );

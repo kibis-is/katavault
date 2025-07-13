@@ -82,6 +82,9 @@ $white-color: #FFFFFF;
 @function button-hover-background-color($theme: "light") {
   @return functions.get-color-value($theme, map.get($primary-light-palette, 600), map.get($primary-dark-palette, 600));
 }
+@function ghost-button-background-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($gray-palette, 100), map.get($white-alpha-palette, 100));
+}
 
 /* border colors */
 

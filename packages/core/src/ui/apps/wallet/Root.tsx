@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'preact/hooks';
 
 // components
 import AccountCard from '@/ui/components/AccountCard';
+import EmptyAccountCard from '@/ui/components/EmptyAccountCard';
 import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
@@ -14,14 +15,18 @@ import VStack from '@/ui/components/VStack';
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
 
+// enums
+import { AccountTypeEnum } from '@/enums';
+
 // hooks
-import useSubTextColor from '@/ui/hooks/useSubTextColor';
+import useAccounts from '@/ui/hooks/useAccounts';
 import useSettingsColorMode from '@/ui/hooks/useSettingsColorMode';
 import useSettingsToggleColorMode from '@/ui/hooks/useSettingsToggleColorMode';
 import useTranslate from '@/ui/hooks/useTranslate';
 
 // icons
 import MoonIcon from '@/ui/icons/MoonIcon';
+import PlusIcon from '@/ui/icons/PlusIcon';
 import SunnyIcon from '@/ui/icons/SunnyIcon';
 import CloseIcon from '@/ui/icons/CloseIcon';
 
@@ -37,14 +42,23 @@ import { usernameFromVault } from '@/utilities';
 
 const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onClose, vault }) => {
   // hooks
+  const accounts = useAccounts();
   const colorMode = useSettingsColorMode();
-  const subTextColor = useSubTextColor(colorMode);
   const translate = useTranslate();
   const toggleColorMode = useSettingsToggleColorMode();
   // memos
+  const connectedAccounts = useMemo(
+    () => accounts.filter((account) => account.__type === AccountTypeEnum.Connected),
+    [accounts]
+  );
+  const ephemeralAccounts = useMemo(
+    () => accounts.filter((account) => account.__type === AccountTypeEnum.Ephemeral),
+    [accounts]
+  );
   const username = useMemo(() => usernameFromVault(vault), [vault]);
   // callbacks
   const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
+  const handleOnConnectAccountClick = useCallback(() => console.log('connect an account!!'), []);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
@@ -55,7 +69,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onC
       {/*modal*/}
       <div className={clsx(styles.modal)} data-color-mode={colorMode}>
         {/*header*/}
-        <HStack align="center" fullWidth={true} paddingBottom={DEFAULT_PADDING} paddingX={DEFAULT_PADDING} spacing="xs">
+        <HStack align="center" fullWidth={true} paddingX={DEFAULT_PADDING} paddingTop={DEFAULT_PADDING} spacing="xs">
           <VStack fullHeight={true} justify="evenly" spacing="xs">
             {/*username*/}
             <Text bold={true} colorMode={colorMode} textAlign="left">
@@ -78,19 +92,48 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onC
           </HStack>
         </HStack>
 
-        <VStack fullWidth={true} grow={true} padding={DEFAULT_PADDING} spacing="sm">
+        <VStack fullWidth={true} grow={true} padding={DEFAULT_PADDING} spacing="md">
           {/*ephemeral accounts*/}
-          <VStack fullWidth={true} justify="center" spacing="xs">
+          <VStack fullWidth={true} justify="center" spacing="sm">
             <Heading colorMode={colorMode} size="sm" textAlign="left">
               {translate('headings.ephemeralAccounts')}
             </Heading>
+
+            {/*accounts*/}
+            <VStack fullWidth={true} spacing="xs">
+              {ephemeralAccounts.map((account) => (
+                <AccountCard
+                  account={account}
+                  colorMode={colorMode}
+                  key={account.key}
+                />
+              ))}
+            </VStack>
           </VStack>
 
           {/*connected accounts*/}
-          <VStack fullWidth={true} justify="center" spacing="xs">
+          <VStack fullWidth={true} justify="center" spacing="sm">
             <Heading colorMode={colorMode} size="sm" textAlign="left">
               {translate('headings.connectedAccounts')}
             </Heading>
+
+            {/*accounts*/}
+            <VStack fullWidth={true} spacing="xs">
+              {connectedAccounts.length > 0 ? connectedAccounts.map((account) => (
+                <AccountCard
+                  account={account}
+                  colorMode={colorMode}
+                  key={account.key}
+                />
+              )) : (
+                <EmptyAccountCard
+                  colorMode={colorMode}
+                  icon={<PlusIcon />}
+                  onClick={handleOnConnectAccountClick}
+                  text={translate('captions.connectAnAccount')}
+                />
+              )}
+            </VStack>
           </VStack>
         </VStack>
       </div>
