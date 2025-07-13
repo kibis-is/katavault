@@ -14,6 +14,7 @@ import type { Props } from './types';
 const IconButton: FunctionComponent<Props> = ({
   colorMode,
   icon,
+  iconColor,
   size = 'md',
   ...buttonProps
 }) => {
@@ -41,7 +42,7 @@ const IconButton: FunctionComponent<Props> = ({
       {cloneElement(icon, {
         ...icon.props,
         className: clsx(styles.icon, iconSizeStyle),
-        color: defaultTextColor,
+        color: iconColor ?? defaultTextColor,
       })}
     </button>
   );

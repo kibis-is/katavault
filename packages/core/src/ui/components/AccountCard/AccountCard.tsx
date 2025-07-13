@@ -3,17 +3,14 @@ import { type FunctionComponent } from 'preact';
 import { useMemo } from 'preact/hooks';
 
 // components
+import CopyIconButton from '@/ui/components/CopyIconButton';
 import HStack from '@/ui/components/HStack';
-import IconButton from '@/ui/components/IconButton';
 import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // hooks
 import useSubTextColor from '@/ui/hooks/useSubTextColor';
-
-// icons
-import CopyIcon from '@/ui/icons/CopyIcon';
 
 // styles
 import styles from './styles.module.scss';
@@ -43,7 +40,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
 
               <Spacer />
 
-              <IconButton colorMode={colorMode} icon={<CopyIcon />} size="sm" />
+              <CopyIconButton colorMode={colorMode} size="xs" text={account.key} />
             </HStack>
           )}
         </VStack>

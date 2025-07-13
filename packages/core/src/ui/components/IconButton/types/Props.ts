@@ -4,6 +4,7 @@ import type { JSX, VNode } from 'preact';
 import type { BaseComponentProps, IconProps, Sizes } from '@/ui/types';
 
 interface ComponentProps {
+  iconColor?: string;
   icon: VNode<IconProps>;
   size?: Sizes;
 }

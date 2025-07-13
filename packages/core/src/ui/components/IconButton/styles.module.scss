@@ -9,8 +9,8 @@ $icon-size: 1.25rem; // 20px
   @include mixins.button-transition;
   align-items: center;
   background-color: transparent;
-  border: none;
-  border-radius: map.get(variables.$border-radius, sm);
+  border: 1px solid transparent;
+  border-radius: map.get(variables.$border-radius, "sm");
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -19,8 +19,6 @@ $icon-size: 1.25rem; // 20px
 
   &:focus {
     border-color: palette.focus-border-color("light");
-    border-style: solid;
-    border-width: 1px;
     outline: none;
 
     &[data-color-mode="dark"] {
