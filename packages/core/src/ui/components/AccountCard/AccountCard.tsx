@@ -12,6 +12,7 @@ import VStack from '@/ui/components/VStack';
 // hooks
 import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
 import useSubTextColor from '@/ui/hooks/useSubTextColor';
+import useTranslate from '@/ui/hooks/useTranslate';
 
 // icons
 // styles
@@ -26,6 +27,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
   // hooks
   const defaultTextColor = useDefaultTextColor(colorMode);
   const subTextColor = useSubTextColor(colorMode);
+  const translate = useTranslate();
   // memos
   const textWidth = useMemo(() => '12.5rem', []);
 
@@ -33,7 +35,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
     <div className={clsx(styles.container)} data-color-mode={colorMode}>
       <VStack fullHeight={true} fullWidth={true} spacing="xs">
         <VStack fullWidth={true} spacing="xs">
-          <HStack align="center" fullWidth={true} spacing="xs">
+          <HStack align="center" fullWidth={true} minHeight={24} spacing="xs">
             {account.name && (
               <Text bold={true} colorMode={colorMode} textAlign="left" truncate={true} width={textWidth}>
                 {account.name}
@@ -43,7 +45,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
             <Spacer />
 
             {account.__type === AccountTypeEnum.Ephemeral && account.origin === EphemeralAccountOriginEnum.Credential && (
-              <KeyIcon className={clsx(styles.originIcon)} color={defaultTextColor} title="Credential account" />
+              <KeyIcon className={clsx(styles.originIcon)} color={defaultTextColor} title={translate('labels.credentialAccount')} />
             )}
           </HStack>
 
@@ -61,7 +63,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
 
             <Spacer />
 
-            <CopyIconButton colorMode={colorMode} size="xs" text={account.key} />
+            <CopyIconButton colorMode={colorMode} size="xs" text={account.key} title={translate('captions.copyAccountID')} />
           </HStack>
         </VStack>
 

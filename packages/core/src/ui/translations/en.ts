@@ -10,7 +10,7 @@ export default {
     signupWithPassword: 'Signup with a password',
   },
   captions: {
-    enterAPassword: 'Enter a password',
+    copyAccountID: 'Copy account ID',
     or: 'Or',
     poweredBy: 'Powered by',
     verifyPasskey: 'Please follow the instructions to verify your passkey.',
@@ -34,6 +34,9 @@ export default {
     finishCreatingANewAccount: 'Finish creating a new account',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',
+  },
+  labels: {
+    credentialAccount: 'Credential account',
   },
   placeholders: {
     password: 'Password',

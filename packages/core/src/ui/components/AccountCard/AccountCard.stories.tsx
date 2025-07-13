@@ -41,4 +41,17 @@ export const WithLightColorMode: StoryObj<Props> = {
   render: (props, { globals }) => <AccountCard {...props} colorMode={globals.theme} />,
 };
 
+export const AccountWithNoName: StoryObj<Props> = {
+  render: (props, { globals }) => (
+    <AccountCard
+      {...props}
+      account={{
+        ...props.account,
+        name: undefined,
+      }}
+      colorMode={globals.theme}
+    />
+  ),
+};
+
 export default meta;

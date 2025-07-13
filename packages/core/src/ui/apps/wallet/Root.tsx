@@ -3,6 +3,7 @@ import type { FunctionComponent } from 'preact';
 import { useCallback, useMemo } from 'preact/hooks';
 
 // components
+import AccountCard from '@/ui/components/AccountCard';
 import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
