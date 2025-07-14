@@ -20,6 +20,7 @@ import { AccountTypeEnum } from '@/enums';
 
 // hooks
 import useAccounts from '@/ui/hooks/useAccounts';
+import useChains from '@/ui/hooks/useChains';
 import useSettingsColorMode from '@/ui/hooks/useSettingsColorMode';
 import useSettingsToggleColorMode from '@/ui/hooks/useSettingsToggleColorMode';
 import useTranslate from '@/ui/hooks/useTranslate';
@@ -34,15 +35,15 @@ import CloseIcon from '@/ui/icons/CloseIcon';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseAppProps } from '@/ui/types';
-import type { AppProps } from './types';
+import type { RootProps } from './types';
 
 // utilities
 import { usernameFromVault } from '@/utilities';
 
-const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onClose, vault }) => {
+const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   // hooks
   const accounts = useAccounts();
+  const chains = useChains();
   const colorMode = useSettingsColorMode();
   const translate = useTranslate();
   const toggleColorMode = useSettingsToggleColorMode();
@@ -104,6 +105,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onC
               {ephemeralAccounts.map((account) => (
                 <AccountCard
                   account={account}
+                  chains={chains}
                   colorMode={colorMode}
                   key={account.key}
                 />
@@ -122,6 +124,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps> = ({ onC
               {connectedAccounts.length > 0 ? connectedAccounts.map((account) => (
                 <AccountCard
                   account={account}
+                  chains={chains}
                   colorMode={colorMode}
                   key={account.key}
                 />

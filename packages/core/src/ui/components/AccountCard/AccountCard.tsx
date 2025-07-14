@@ -4,7 +4,9 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
 import Accordion from '@/ui/components/Accordion';
+import ConnectedAccountCardContent from './ConnectedAccountCardContent';
 import CopyIconButton from '@/ui/components/CopyIconButton';
+import EphemeralAccountCardContent from './EphemeralAccountCardContent';
 import HStack from '@/ui/components/HStack';
 import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
@@ -14,7 +16,6 @@ import VStack from '@/ui/components/VStack';
 import { AccountTypeEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
 import useSubTextColor from '@/ui/hooks/useSubTextColor';
 import useTranslate from '@/ui/hooks/useTranslate';
 
@@ -27,9 +28,8 @@ import styles from './styles.module.scss';
 // types
 import type { Props } from './types';
 
-const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
+const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) => {
   // hooks
-  const defaultTextColor = useDefaultTextColor(colorMode);
   const subTextColor = useSubTextColor(colorMode);
   const translate = useTranslate();
   // states
@@ -46,7 +46,14 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
         <VStack className={clsx(styles.header)} fullWidth={true} spacing="xs">
           <HStack align="center" fullWidth={true} spacing="xs">
             {account.name && (
-              <Text bold={true} colorMode={colorMode} maxWidth={textWidth} textAlign="left" truncate={true}>
+              <Text
+                bold={true}
+                colorMode={colorMode}
+                maxWidth={textWidth}
+                textAlign="left"
+                title={translate('labels.name')}
+                truncate={true}
+              >
                 {account.name}
               </Text>
             )}
@@ -54,7 +61,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
             <Spacer />
 
             {account.__type === AccountTypeEnum.Ephemeral && account.origin === EphemeralAccountOriginEnum.Credential && (
-              <KeyIcon className={clsx(styles.originIcon)} color={defaultTextColor} title={translate('labels.credentialAccount')} />
+              <KeyIcon className={clsx(styles.originIcon)} color={subTextColor} title={translate('labels.credentialAccount')} />
             )}
           </HStack>
 
@@ -65,6 +72,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
               maxWidth={textWidth}
               size="sm"
               textAlign="left"
+              title={`${translate('labels.accountID')}: ${account.key}`}
               truncate={true}
             >
               {account.key}
@@ -81,18 +89,22 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
           buttonClassName={clsx(styles.footerButton, !isFooterOpen && styles.footerButtonClosed)}
           colorMode={colorMode}
           containerClassName={clsx(styles.footer)}
-          content={(
-            <div style={{ height: '100px' }}>
-              <Text colorMode={colorMode} fullWidth={true} textAlign="left">
-                {translate('headings.networks')}
-              </Text>
-            </div>
+          content={account.__type === AccountTypeEnum.Ephemeral ? (
+            <EphemeralAccountCardContent
+              account={account}
+              chains={chains}
+              colorMode={colorMode}
+            />
+          ) : (
+            <ConnectedAccountCardContent account={account} colorMode={colorMode} />
           )}
           onClick={handleOnFooterClick}
           open={isFooterOpen}
           title={(
             <Text colorMode={colorMode} fullWidth={true} textAlign="left">
-              {translate('headings.networks')}
+              {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.networks') : translate('headings.connections', {
+                count: 0,
+              })}
             </Text>
           )}
         />

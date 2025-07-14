@@ -3,6 +3,7 @@
 @use "sass:map";
 
 $footer-height: 3.125rem; // 50px
+$default-padding: map.get(variables.$spacing, "sm");
 
 .container {
   @include mixins.base-account-card-container-styles;
@@ -16,20 +17,30 @@ $footer-height: 3.125rem; // 50px
 .footer {
   &__button {
     height: $footer-height;
-    padding: 0 map.get(variables.$spacing, "sm");
+    padding: 0 $default-padding;
 
     &--closed {
       border-bottom-left-radius: map.get(variables.$border-radius, "md");
       border-bottom-right-radius: map.get(variables.$border-radius, "md");
     }
   }
+
+  &__content {
+    padding: $default-padding;
+  }
 }
 
 .header {
   min-height: calc(#{variables.$account-card-min-height} - #{$footer-height});
-  padding-left: map.get(variables.$spacing, "sm");
-  padding-right: map.get(variables.$spacing, "sm");
-  padding-top: map.get(variables.$spacing, "sm");
+  padding-left: $default-padding;
+  padding-right: $default-padding;
+  padding-top: $default-padding;
+}
+
+.chain-icon {
+  border-radius: map.get(variables.$border-radius, "full");
+  height: 1.5rem; // 32px
+  width: 1.5rem; // 32px
 }
 
 .origin-icon {

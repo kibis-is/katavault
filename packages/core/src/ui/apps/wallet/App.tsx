@@ -9,13 +9,14 @@ import { AccountStore, SettingsStore } from '@/decorators';
 // providers
 import AccountsProvider from '@/ui/providers/AccountsProvider';
 import AppProvider from '@/ui/providers/AppProvider';
+import ChainsProvider from '@/ui/providers/ChainsProvider';
 import SettingsProvider from '@/ui/providers/SettingsProvider';
 
 // types
 import type { BaseAppProps } from '@/ui/types';
 import type { AppProps } from './types';
 
-const App: FunctionComponent<BaseAppProps & AppProps> = ({ clientInformation, i18n, logger, ...rootProps }) => {
+const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInformation, i18n, logger, ...rootProps }) => {
   return (
     <AppProvider
       clientInformation={clientInformation}
@@ -32,7 +33,9 @@ const App: FunctionComponent<BaseAppProps & AppProps> = ({ clientInformation, i1
           logger,
           vault: rootProps.vault,
         })}>
-          <Root {...rootProps} />
+          <ChainsProvider chains={chains}>
+            <Root {...rootProps} />
+          </ChainsProvider>
         </AccountsProvider>
       </SettingsProvider>
     </AppProvider>

@@ -31,6 +31,7 @@ export default {
   },
   headings: {
     connectedAccounts: 'Connected accounts',
+    connections: 'Connections ({{count}})',
     ephemeralAccounts: 'Ephemeral accounts',
     finishCreatingANewAccount: 'Finish creating a new account',
     networks: 'Networks',
@@ -38,7 +39,10 @@ export default {
     welcomeBack: 'Welcome back!',
   },
   labels: {
+    avm: 'AVM',
+    accountID: 'Account ID',
     credentialAccount: 'Credential account',
+    name: 'Name',
   },
   placeholders: {
     password: 'Password',

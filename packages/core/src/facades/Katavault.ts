@@ -1,4 +1,4 @@
-import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
+import { type Chain, chainID as generateChainID } from '@kibisis/chains';
 import type { ILogger } from '@kibisis/utilities';
 
 // constants
@@ -16,7 +16,7 @@ import { AccountStore } from '@/decorators';
 import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError, FailedToFetchNetworkError, NotAuthenticatedError } from '@/errors';
+import { AccountDoesNotExistError, NotAuthenticatedError } from '@/errors';
 
 // facades
 import AppManager from './AppManager';
@@ -57,7 +57,7 @@ export default class Katavault {
   private _accountsStore: AccountStore | null = null;
   private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
-  private _chains: ChainWithNetworkParameters[];
+  private _chains: Chain[];
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: ILogger;
   private _vault: Vault | null = null;
@@ -313,39 +313,24 @@ export default class Katavault {
 
   /**
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
-   * chain by the genesis hash.
+   * chain by the chain ID.
    * @param {Chain} chain - The chain to be added.
-   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.
    * @public
    */
-  public async addChain(chain: Chain): Promise<ChainWithNetworkParameters> {
-    const __logPrefix = `${Katavault.displayName}#addChain`;
-    let index: number;
-    let _chain: ChainWithNetworkParameters;
-    let _error: string;
+  public async addChain(chain: Chain): Promise<void> {
+    const index = this._chains.findIndex((_chain) => generateChainID(_chain) === generateChainID(chain));
 
-    try {
-      _chain = await networkParametersFromChain(chain);
-      index = this._chains.findIndex(({ genesisHash }) => genesisHash === _chain.genesisHash);
+    // if the chain already exists, update the chain
+    if (index >= 0) {
+      this._chains[index] = chain;
 
-      // if the chain already exists, update the chain
-      if (index >= 0) {
-        this._chains[index] = _chain;
-
-        return _chain;
-      }
-
-      // otherwise, add the chain
-      this._chains.push(_chain);
-
-      return _chain;
-    } catch (error) {
-      _error = `failed to add chain "${chain.displayName}"`;
-
-      this._logger.error(`${__logPrefix}: ${_error} - `, error);
-
-      throw new FailedToFetchNetworkError(_error);
+      return;
     }
+
+    // otherwise, add the chain
+    this._chains.push(chain);
+
+    return;
   }
 
   /**
@@ -418,12 +403,10 @@ export default class Katavault {
    * @public
    */
   public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
     const vault = await initializeVault({
       logger: this._logger,
       username: user.username,
     });
-    let accounts: Account[];
 
     this._authenticationStore = {
       __type: AuthenticationMethodEnum.Password,
@@ -445,10 +428,10 @@ export default class Katavault {
 
   /**
    * Gets the supported chains.
-   * @returns {ChainWithNetworkParameters[]} The supported chains.
+   * @returns {Chain[]} The supported chains.
    * @public
    */
-  public chains(): ChainWithNetworkParameters[] {
+  public chains(): Chain[] {
     return this._chains;
   }
 
@@ -498,6 +481,7 @@ export default class Katavault {
 
     params = {
       authenticationStore: this._authenticationStore,
+      chains: this._chains,
       vault: this._vault,
     };
 
@@ -539,11 +523,13 @@ export default class Katavault {
 
   /**
    * Removes a chain from the list of supported chains based on the provided genesis hash.
-   * @param {string} genesisHash - The base64 encoded genesis hash of the chain to be removed.
+   * @param {string} chainID - The chain ID - the concatenation of the namespace and the reference:
+   * `<namespace>:<reference>`.
+   * @see {@link }
    * @public
    */
-  public removeChainByGenesisHash(genesisHash: string): void {
-    this._chains = this._chains.filter(({ genesisHash: _genesisHash }) => _genesisHash !== genesisHash);
+  public removeChainByChainID(chainID: string): void {
+    this._chains = this._chains.filter((chain) => generateChainID(chain) !== chainID);
   }
 
   /**

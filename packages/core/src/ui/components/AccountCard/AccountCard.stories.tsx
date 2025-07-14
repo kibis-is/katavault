@@ -1,3 +1,4 @@
+import { algorandTestnet, voiTestnet } from '@kibisis/chains';
 import { ed25519 } from '@noble/curves/ed25519';
 import { randomBytes } from '@noble/hashes/utils';
 import type { Meta, StoryObj } from '@storybook/preact';
@@ -12,7 +13,7 @@ import AccountCard from './AccountCard';
 import { Props } from './types';
 
 // utilities
-import { bytesToBase64, bytesToBase58 } from '@/utilities';
+import { bytesToBase58, bytesToBase64 } from '@/utilities';
 
 const meta: Meta<Props> = {
   args: {
@@ -28,6 +29,7 @@ const meta: Meta<Props> = {
         origin: EphemeralAccountOriginEnum.Credential,
       };
     })(),
+    chains: [algorandTestnet, voiTestnet],
     colorMode: 'dark',
   },
   component: AccountCard,
@@ -55,6 +57,20 @@ export const AccountWithNoName: StoryObj<Props> = {
       account={{
         ...props.account,
         name: undefined,
+      }}
+      colorMode={globals.theme}
+    />
+  ),
+};
+
+export const WithConnectedAccount: StoryObj<Props> = {
+  render: (props, { globals }) => (
+    <AccountCard
+      {...props}
+      account={{
+        __type: AccountTypeEnum.Connected,
+        key: props.account.key,
+        name: props.account.name,
       }}
       colorMode={globals.theme}
     />

@@ -22,6 +22,7 @@ const Text: FunctionComponent<Props> = ({
   minWidth,
   size = 'md',
   textAlign = 'center',
+  title,
   truncate = false,
   width,
 }) => {
@@ -90,7 +91,7 @@ const Text: FunctionComponent<Props> = ({
           width: typeof height === 'number' ? `${width}px` : width,
         }),
       }}
-      title={typeof children === 'string' ? children : undefined}
+      title={title ? title : typeof children === 'string' ? children : undefined}
     >
       {children}
     </p>

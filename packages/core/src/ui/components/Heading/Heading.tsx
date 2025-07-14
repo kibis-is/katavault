@@ -21,6 +21,7 @@ const Heading: FunctionComponent<Props> = ({
   minHeight,
   minWidth,
   size = 'md',
+  title,
   textAlign = 'center',
   truncate = false,
   width,
@@ -90,7 +91,7 @@ const Heading: FunctionComponent<Props> = ({
           width: typeof height === 'number' ? `${width}px` : width,
         }),
       }}
-      title={typeof children === 'string' ? children : undefined}
+      title={title ? title : typeof children === 'string' ? children : undefined}
     >
       {children}
     </h1>

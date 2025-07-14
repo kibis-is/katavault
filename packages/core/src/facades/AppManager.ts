@@ -123,6 +123,7 @@ export default class AppManager {
   public async renderWalletApp({
     authenticationStore,
     clientInformation,
+    chains,
     vault,
   }: RenderAppParameters & RenderWalletAppParameters): Promise<void> {
     const i18n = await this._getOrInitializeI18n();
@@ -132,6 +133,7 @@ export default class AppManager {
         h(WalletApp, {
           authenticationStore,
           clientInformation,
+          chains,
           i18n,
           logger: this._logger,
           onClose: () => {

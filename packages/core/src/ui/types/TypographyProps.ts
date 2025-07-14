@@ -18,6 +18,7 @@ interface TypographyProps {
   padding?: number | string;
   size?: Sizes;
   textAlign?: 'left' | 'center' | 'right';
+  title?: string;
   truncate?: boolean;
   width?: number | string;
 }
