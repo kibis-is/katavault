@@ -1,6 +1,10 @@
 @use "palette";
 @use "sass:map";
 
+/* account card */
+$account-card-min-height: 9rem; // 144px
+$account-card-min-width: 18.75rem; // 300px
+
 /* borders */
 $border-radius: (
   xs: 6px,

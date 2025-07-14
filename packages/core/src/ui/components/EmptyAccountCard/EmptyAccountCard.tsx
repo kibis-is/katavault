@@ -20,7 +20,7 @@ const EmptyAccountCard: FunctionComponent<Props> = ({ colorMode, icon, onClick, 
 
   return (
     <div className={clsx(styles.container, onClick && styles.containerClickable)} data-color-mode={colorMode} onClick={onClick}>
-      <VStack align="center" fullHeight={true} fullWidth={true} justify="center" spacing="sm">
+      <VStack align="center" className={clsx(styles.content)} justify="center" spacing="sm">
         {icon && cloneElement(icon, {
           ...icon.props,
           className: clsx(styles.icon),

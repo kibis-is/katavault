@@ -33,6 +33,7 @@ export default {
     connectedAccounts: 'Connected accounts',
     ephemeralAccounts: 'Ephemeral accounts',
     finishCreatingANewAccount: 'Finish creating a new account',
+    networks: 'Networks',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',
   },

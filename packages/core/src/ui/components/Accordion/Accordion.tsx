@@ -15,17 +15,12 @@ import styles from './styles.module.scss';
 import type { Props } from './types';
 
 const Accordion: FunctionComponent<Props> = ({
+  buttonClassName,
+  containerClassName,
   content,
   colorMode,
   onClick,
   open,
-  padding,
-  paddingBottom,
-  paddingLeft,
-  paddingRight,
-  paddingTop,
-  paddingX,
-  paddingY,
   title,
 }) => {
   // refs
@@ -34,51 +29,12 @@ const Accordion: FunctionComponent<Props> = ({
   const defaultTextColor = useDefaultTextColor(colorMode);
 
   return (
-    <div className={clsx(styles.container)}>
+    <div className={clsx(styles.container, containerClassName)}>
       {/*header*/}
       <button
-        className={clsx(styles.header)}
+        className={clsx(styles.header, buttonClassName)}
         data-color-mode={colorMode}
         onClick={onClick}
-        style={{
-          ...(padding && {
-            padding:
-              typeof padding === 'number'
-                ? `${padding}px ${padding}px ${padding}px ${padding}px`
-                : `${padding} ${padding} ${padding} ${padding}`,
-          }),
-          ...(paddingBottom && {
-            paddingBottom:
-              typeof paddingBottom === 'number'
-                ? `${paddingBottom}px`
-                : paddingBottom,
-          }),
-          ...(paddingLeft && {
-            paddingLeft:
-              typeof paddingLeft === 'number' ? `${paddingLeft}px` : paddingLeft,
-          }),
-          ...(paddingRight && {
-            paddingRight:
-              typeof paddingRight === 'number'
-                ? `${paddingRight}px`
-                : paddingRight,
-          }),
-          ...(paddingTop && {
-            paddingTop:
-              typeof paddingTop === 'number' ? `${paddingTop}px` : paddingTop,
-          }),
-          ...(paddingX && {
-            paddingLeft:
-              typeof paddingX === 'number' ? `${paddingX}px` : paddingX,
-            paddingRight:
-              typeof paddingX === 'number' ? `${paddingX}px` : paddingX,
-          }),
-          ...(paddingY && {
-            paddingBottom:
-              typeof paddingY === 'number' ? `${paddingY}px` : paddingY,
-            paddingTop: typeof paddingY === 'number' ? `${paddingY}px` : paddingY,
-          }),
-        }}
       >
         {/*title*/}
         {title}

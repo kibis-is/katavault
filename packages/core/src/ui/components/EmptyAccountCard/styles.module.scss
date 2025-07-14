@@ -1,9 +1,12 @@
 @use "@/ui/styles/mixins";
 @use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
 
 .container {
-  @include mixins.base-account-card-styles;
+  @include mixins.base-account-card-container-styles;
   border-style: dashed;
+  padding: map.get(variables.$spacing, "sm");
 
   &--clickable {
     @include mixins.button-transition;
@@ -17,6 +20,11 @@
       }
     }
   }
+}
+
+.content {
+  min-height: variables.$account-card-min-height;
+  min-width: variables.$account-card-min-width;
 }
 
 .icon {

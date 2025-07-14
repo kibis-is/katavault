@@ -1,8 +1,9 @@
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
-import { useMemo } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
+import Accordion from '@/ui/components/Accordion';
 import CopyIconButton from '@/ui/components/CopyIconButton';
 import HStack from '@/ui/components/HStack';
 import Spacer from '@/ui/components/Spacer';
@@ -31,14 +32,19 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
   const defaultTextColor = useDefaultTextColor(colorMode);
   const subTextColor = useSubTextColor(colorMode);
   const translate = useTranslate();
+  // states
+  const [isFooterOpen, setIsFooterOpen] = useState(false);
   // memos
   const textWidth = useMemo(() => '12.5rem', []);
+  // callbacks
+  const handleOnFooterClick = useCallback(() => setIsFooterOpen(!isFooterOpen), [isFooterOpen, setIsFooterOpen]);
 
   return (
     <div className={clsx(styles.container)} data-color-mode={colorMode}>
-      <VStack fullHeight={true} fullWidth={true} spacing="xs">
-        <VStack fullWidth={true} spacing="xs">
-          <HStack align="center" fullWidth={true} minHeight={24} spacing="xs">
+      <VStack className={clsx(styles.content)} fullWidth={true}>
+        {/*header*/}
+        <VStack className={clsx(styles.header)} fullWidth={true} spacing="xs">
+          <HStack align="center" fullWidth={true} spacing="xs">
             {account.name && (
               <Text bold={true} colorMode={colorMode} maxWidth={textWidth} textAlign="left" truncate={true}>
                 {account.name}
@@ -70,7 +76,26 @@ const AccountCard: FunctionComponent<Props> = ({ account, colorMode }) => {
           </HStack>
         </VStack>
 
-        <Spacer />
+        {/*footer*/}
+        <Accordion
+          buttonClassName={clsx(styles.footerButton, !isFooterOpen && styles.footerButtonClosed)}
+          colorMode={colorMode}
+          containerClassName={clsx(styles.footer)}
+          content={(
+            <div style={{ height: '100px' }}>
+              <Text colorMode={colorMode} fullWidth={true} textAlign="left">
+                {translate('headings.networks')}
+              </Text>
+            </div>
+          )}
+          onClick={handleOnFooterClick}
+          open={isFooterOpen}
+          title={(
+            <Text colorMode={colorMode} fullWidth={true} textAlign="left">
+              {translate('headings.networks')}
+            </Text>
+          )}
+        />
       </VStack>
     </div>
   );
