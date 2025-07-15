@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { type FunctionComponent } from 'preact';
-import { type KeyboardEvent } from 'preact/compat';
+import type { FunctionComponent } from 'preact';
+import type { KeyboardEvent } from 'preact/compat';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
 // components

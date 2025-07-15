@@ -31,6 +31,9 @@ import PlusIcon from '@/ui/icons/PlusIcon';
 import SunnyIcon from '@/ui/icons/SunnyIcon';
 import CloseIcon from '@/ui/icons/CloseIcon';
 
+// modals
+import ConnectAccountModal from '@/ui/modals/ConnectAccountModal';
+
 // styles
 import styles from './styles.module.scss';
 
@@ -49,6 +52,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   const toggleColorMode = useSettingsToggleColorMode();
   // states
   const [closing, setClosing] = useState<boolean>(false);
+  const [connectAccountModalOpen, setConnectAccountModalOpen] = useState<boolean>(false);
   // memos
   const connectedAccounts = useMemo(
     () => accounts.filter((account) => account.__type === AccountTypeEnum.Connected),
@@ -60,92 +64,100 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   );
   const username = useMemo(() => usernameFromVault(vault), [vault]);
   // callbacks
-  const handleOnCloseClick = useCallback(() => {
+  const handleClose = useCallback(() => {
     setClosing(true);
     setTimeout(() => onClose(), 300); // allow animation to finish
   }, [closing, onClose, setClosing]);
-  const handleOnConnectAccountClick = useCallback(() => console.log('connect an account!!'), []);
+  const handleOnConnectAccountClick = useCallback(() => setConnectAccountModalOpen(true), [setConnectAccountModalOpen]);
+  const handleOnConnectAccountModalClose = useCallback(() => setConnectAccountModalOpen(false), [setConnectAccountModalOpen]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
-    <div className={clsx(styles.container)}>
-      {/*overlay*/}
-      <div className={clsx(styles.overlay)} onClick={handleOnCloseClick} />
+    <>
+      <ConnectAccountModal
+        onClose={handleOnConnectAccountModalClose}
+        open={connectAccountModalOpen}
+      />
 
-      {/*modal*/}
-      <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
-        {/*header*/}
-        <HStack align="center" fullWidth={true} paddingX={DEFAULT_PADDING} paddingTop={DEFAULT_PADDING} spacing="xs">
-          <VStack fullHeight={true} justify="evenly" spacing="xs">
-            {/*username*/}
-            <Text bold={true} colorMode={colorMode} textAlign="left">
-              {username}
-            </Text>
-          </VStack>
+      <div className={clsx(styles.container)}>
+        {/*overlay*/}
+        <div className={clsx(styles.overlay)} onClick={handleClose} />
 
-          <Spacer />
+        {/*modal*/}
+        <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
+          {/*header*/}
+          <HStack align="center" fullWidth={true} paddingX={DEFAULT_PADDING} paddingTop={DEFAULT_PADDING} spacing="xs">
+            <VStack fullHeight={true} justify="evenly" spacing="xs">
+              {/*username*/}
+              <Text bold={true} colorMode={colorMode} textAlign="left">
+                {username}
+              </Text>
+            </VStack>
 
-          <HStack align="center" justify="end" spacing="xs">
-            {/*toggle color mode button*/}
-            <IconButton
-              colorMode={colorMode}
-              icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />}
-              onClick={handleOnToggleColorModeClick}
-            />
+            <Spacer />
 
-            {/*close button*/}
-            <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleOnCloseClick} />
+            <HStack align="center" justify="end" spacing="xs">
+              {/*toggle color mode button*/}
+              <IconButton
+                colorMode={colorMode}
+                icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />}
+                onClick={handleOnToggleColorModeClick}
+              />
+
+              {/*close button*/}
+              <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleClose} />
+            </HStack>
           </HStack>
-        </HStack>
 
-        <VStack fullWidth={true} grow={true} padding={DEFAULT_PADDING} spacing="md">
-          {/*ephemeral accounts*/}
-          <VStack fullWidth={true} justify="center" spacing="sm">
-            <Heading colorMode={colorMode} size="sm" textAlign="left">
-              {translate('headings.holdingAccounts')}
-            </Heading>
+          <VStack fullWidth={true} grow={true} padding={DEFAULT_PADDING} spacing="md">
+            {/*ephemeral accounts*/}
+            <VStack fullWidth={true} justify="center" spacing="sm">
+              <Heading colorMode={colorMode} size="sm" textAlign="left">
+                {translate('headings.holdingAccounts')}
+              </Heading>
 
-            {/*accounts*/}
-            <VStack fullWidth={true} spacing="xs">
-              {ephemeralAccounts.map((account) => (
-                <AccountCard
-                  account={account}
-                  chains={chains}
-                  colorMode={colorMode}
-                  key={account.key}
-                />
-              ))}
+              {/*accounts*/}
+              <VStack fullWidth={true} spacing="xs">
+                {ephemeralAccounts.map((account) => (
+                  <AccountCard
+                    account={account}
+                    chains={chains}
+                    colorMode={colorMode}
+                    key={account.key}
+                  />
+                ))}
+              </VStack>
+            </VStack>
+
+            {/*connected accounts*/}
+            <VStack fullWidth={true} justify="center" spacing="sm">
+              <Heading colorMode={colorMode} size="sm" textAlign="left">
+                {translate('headings.connectedAccounts')}
+              </Heading>
+
+              {/*accounts*/}
+              <VStack fullWidth={true} spacing="xs">
+                {connectedAccounts.length > 0 ? connectedAccounts.map((account) => (
+                  <AccountCard
+                    account={account}
+                    chains={chains}
+                    colorMode={colorMode}
+                    key={account.key}
+                  />
+                )) : (
+                  <EmptyAccountCard
+                    colorMode={colorMode}
+                    icon={<PlusIcon />}
+                    onClick={handleOnConnectAccountClick}
+                    text={translate('captions.connectAnAccount')}
+                  />
+                )}
+              </VStack>
             </VStack>
           </VStack>
-
-          {/*connected accounts*/}
-          <VStack fullWidth={true} justify="center" spacing="sm">
-            <Heading colorMode={colorMode} size="sm" textAlign="left">
-              {translate('headings.connectedAccounts')}
-            </Heading>
-
-            {/*accounts*/}
-            <VStack fullWidth={true} spacing="xs">
-              {connectedAccounts.length > 0 ? connectedAccounts.map((account) => (
-                <AccountCard
-                  account={account}
-                  chains={chains}
-                  colorMode={colorMode}
-                  key={account.key}
-                />
-              )) : (
-                <EmptyAccountCard
-                  colorMode={colorMode}
-                  icon={<PlusIcon />}
-                  onClick={handleOnConnectAccountClick}
-                  text={translate('captions.connectAnAccount')}
-                />
-              )}
-            </VStack>
-          </VStack>
-        </VStack>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

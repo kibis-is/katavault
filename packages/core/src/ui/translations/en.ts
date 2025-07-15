@@ -2,6 +2,7 @@ import type { ResourceLanguage } from 'i18next';
 
 export default {
   buttons: {
+    cancel: 'Cancel',
     continue: 'Continue',
     retry: 'Retry',
     signInWithPasskey: 'Sign in with a passkey',
@@ -35,6 +36,7 @@ export default {
     finishCreatingANewAccount: 'Finish creating a new account',
     holdingAccounts: 'Holding accounts',
     networks: 'Networks',
+    selectAWallet: 'Select a wallet',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',
   },
