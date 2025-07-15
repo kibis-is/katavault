@@ -16,7 +16,6 @@ const config: StorybookConfig = {
     name: '@storybook/preact-vite',
     options: {},
   },
-  staticDirs: ['../src/ui/fonts'],
   stories: ['../src/**/*.stories.@(ts|tsx)'],
   viteFinal: (config) => mergeConfig(defaultConfig, config),
 };

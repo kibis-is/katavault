@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
 /* animations */
 
 @keyframes rotation {
@@ -65,27 +67,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* fonts */
-
-@font-face {
-  font-family: "Nunito";
-  font-style: normal;
-  font-weight: 600 700;
-  font-display: swap;
-  src: url("@/ui/fonts/Nunito/Nunito-Bold.woff2") format("woff2"),
-  url("@/ui/fonts/Nunito/Nunito-Bold.woff") format("woff"),
-  url("@/ui/fonts/Nunito/Nunito-Bold.ttf") format("truetype"),
-  url("@/ui/fonts/Nunito/Nunito-Bold.svg#Nunito-Bold") format("svg");
-}
-@font-face {
-  font-family: "Nunito";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("@/ui/fonts/Nunito/Nunito-Regular.woff2") format("woff2"),
-  url("@/ui/fonts/Nunito/Nunito-Regular.woff") format("woff"),
-  url("@/ui/fonts/Nunito/Nunito-Regular.ttf") format("truetype"),
-  url("@/ui/fonts/Nunito/Nunito-Regular.svg#Nunito-Regular") format("svg");
 }
