@@ -21,35 +21,31 @@
 
 .modal {
   align-items: center;
-  animation: slideUpFadeIn 300ms ease forwards;
+  animation: slideUp 300ms ease forwards;
   background-color: palette.background-color("light");
   border-radius: map.get(variables.$border-radius, md) map.get(variables.$border-radius, md) 0 0;
   display: flex;
   flex-direction: column;
-  height: auto;
-  min-height: 500px;
+  height: 100vh;
   width: 100%;
   z-index: 0;
 
   @include media.tablet-and-up {
     animation-name: slideFromLeft;
     border-radius: map.get(variables.$border-radius, md) 0 0 map.get(variables.$border-radius, md);
-    height: 100vh;
     max-width: 350px;
-    min-height: 100vh;
   }
 
   &[data-color-mode="dark"] {
     background-color: palette.background-color("dark");
   }
 
-  &__closing {
-    animation-name: slideDownFadeOut;
+  &--close {
+    animation-name: slideDown;
 
     @include media.tablet-and-up {
       animation-name: slideToRight;
     }
-
   }
 }
 

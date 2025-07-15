@@ -12,7 +12,7 @@ import type { Parameters } from './types';
  * @param {string} params.dataURI - The data URI.
  * @returns {VNode | null} The parsed `image/svg+xml` data URI or null if it failed to parse the data URI.
  */
-export default function dataURIToImageElement({ className, dataURI }: Parameters): VNode<SVGAttributes> | null {
+export default function dataURIToImageElement({ className, dataURI, title }: Parameters): VNode<SVGAttributes> | null {
   let data: string | undefined;
   let document: Document;
   let element: SVGElement | null;
@@ -65,7 +65,7 @@ export default function dataURIToImageElement({ className, dataURI }: Parameters
     ),
     className,
     dangerouslySetInnerHTML: {
-      __html: element.innerHTML,
+      __html: title ? `<title>${title}</title>${element.innerHTML}` : element.innerHTML,
     },
   });
 }

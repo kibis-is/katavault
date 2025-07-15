@@ -78,6 +78,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   const logger = useLogger();
   const translate = useTranslate();
   // states
+  const [closing, setClosing] = useState<boolean>(false);
   const [hasPasskeyInVault, setHasPasskeyInVault] = useState<boolean>(false);
   const [hasPasswordInVault, setHasPasswordInVault] = useState<boolean>(false);
   const [isUsingPasskey, setIsUsingPasskey] = useState<boolean>(false);
@@ -85,6 +86,10 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   const [passwordError, setPasswordError] = useState<BaseError | null>(null);
   const [vault, setVault] = useState<Vault | null>(null);
   // callbacks
+  const handleClose = useCallback(() => {
+    setClosing(true);
+    setTimeout(() => onClose(), 300); // allow animation to run
+  }, [closing, onClose, setClosing]);
   const handleOnAuthenticateWithPasskeyClick = useCallback(async () => {
     const __logPrefix= `${Root.displayName}#handleOnAuthenticateWithPasskeyClick`;
     let store: PasskeyStore;
@@ -122,6 +127,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
         },
         vault,
       });
+      handleClose();
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
       setPasskeyError(error);
@@ -129,6 +135,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   }, [
     clientInformation,
     colorMode,
+    handleClose,
     logger,
     onSuccess,
     setIsUsingPasskey,
@@ -175,6 +182,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
         },
         vault,
       });
+      handleClose();
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
 
@@ -186,6 +194,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
     }
   }, [
     colorMode,
+    handleClose,
     logger,
     onSuccess,
     passwordInputProps.value,
@@ -211,7 +220,6 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
     setHasPasswordInVault(false);
     setVault(null);
   }, [isUsingPasskey, setIsUsingPasskey, resetPasswordInput, setVault, vault]);
-  const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
   const handleOnContinueClick = useCallback(async () => {
     let _hasPasskeyInVault: boolean;
     let _hasPasswordInVault: boolean;
@@ -267,7 +275,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       <div className={clsx(styles.overlay)}></div>
 
       {/*modal*/}
-      <div className={clsx(styles.modal)} data-color-mode={colorMode}>
+      <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
         {/*header*/}
         <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
           {vault && (
@@ -288,7 +296,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
             />
 
             {/*close button*/}
-            <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleOnCloseClick} />
+            <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleClose} />
           </HStack>
         </HStack>
 

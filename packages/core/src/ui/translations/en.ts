@@ -32,8 +32,8 @@ export default {
   headings: {
     connectedAccounts: 'Connected accounts',
     connections: 'Connections ({{count}})',
-    ephemeralAccounts: 'Ephemeral accounts',
     finishCreatingANewAccount: 'Finish creating a new account',
+    holdingAccounts: 'Holding accounts',
     networks: 'Networks',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',

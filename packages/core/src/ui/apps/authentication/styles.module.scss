@@ -49,6 +49,10 @@
   &[data-color-mode="dark"] {
     background-color: palette.background-color("dark");
   }
+
+  &--close {
+    animation-name: slideDownFadeOut;
+  }
 }
 
 .overlay {

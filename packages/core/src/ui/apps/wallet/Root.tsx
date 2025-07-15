@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
-import { useCallback, useMemo } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
 import AccountCard from '@/ui/components/AccountCard';
@@ -47,6 +47,8 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   const colorMode = useSettingsColorMode();
   const translate = useTranslate();
   const toggleColorMode = useSettingsToggleColorMode();
+  // states
+  const [closing, setClosing] = useState<boolean>(false);
   // memos
   const connectedAccounts = useMemo(
     () => accounts.filter((account) => account.__type === AccountTypeEnum.Connected),
@@ -58,17 +60,20 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   );
   const username = useMemo(() => usernameFromVault(vault), [vault]);
   // callbacks
-  const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
+  const handleOnCloseClick = useCallback(() => {
+    setClosing(true);
+    setTimeout(() => onClose(), 300); // allow animation to finish
+  }, [closing, onClose, setClosing]);
   const handleOnConnectAccountClick = useCallback(() => console.log('connect an account!!'), []);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
     <div className={clsx(styles.container)}>
       {/*overlay*/}
-      <div className={clsx(styles.overlay)}></div>
+      <div className={clsx(styles.overlay)} onClick={handleOnCloseClick} />
 
       {/*modal*/}
-      <div className={clsx(styles.modal)} data-color-mode={colorMode}>
+      <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
         {/*header*/}
         <HStack align="center" fullWidth={true} paddingX={DEFAULT_PADDING} paddingTop={DEFAULT_PADDING} spacing="xs">
           <VStack fullHeight={true} justify="evenly" spacing="xs">
@@ -97,7 +102,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
           {/*ephemeral accounts*/}
           <VStack fullWidth={true} justify="center" spacing="sm">
             <Heading colorMode={colorMode} size="sm" textAlign="left">
-              {translate('headings.ephemeralAccounts')}
+              {translate('headings.holdingAccounts')}
             </Heading>
 
             {/*accounts*/}

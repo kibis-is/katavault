@@ -13,14 +13,11 @@ import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // enums
-import { AccountTypeEnum, EphemeralAccountOriginEnum } from '@/enums';
+import { AccountTypeEnum } from '@/enums';
 
 // hooks
 import useSubTextColor from '@/ui/hooks/useSubTextColor';
 import useTranslate from '@/ui/hooks/useTranslate';
-
-// icons
-import KeyIcon from '@/ui/icons/KeyIcon';
 
 // styles
 import styles from './styles.module.scss';
@@ -56,12 +53,6 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
               >
                 {account.name}
               </Text>
-            )}
-
-            <Spacer />
-
-            {account.__type === AccountTypeEnum.Ephemeral && account.origin === EphemeralAccountOriginEnum.Credential && (
-              <KeyIcon className={clsx(styles.originIcon)} color={subTextColor} title={translate('labels.credentialAccount')} />
             )}
           </HStack>
 

@@ -4,9 +4,6 @@ import { BaseError, Katavault, USER_CANCELED_UI_REQUEST_ERROR } from '@kibisis/k
 // handlers
 import onOpenWalletButtonClick from './onOpenWalletButtonClick';
 
-// utilities
-import { updateAccountsTable } from '../utilities';
-
 export default function onAuthenticateViaUIButtonClick(katavault: Katavault, logger: ILogger) {
   return async () => {
     const __logPrefix = 'onAuthenticateViaUIButtonClick';
@@ -21,8 +18,6 @@ export default function onAuthenticateViaUIButtonClick(katavault: Katavault, log
         activateButtonElement.onclick = onOpenWalletButtonClick(katavault, logger);
         activateButtonElement.replaceChildren('Open Wallet');
       }
-
-      await updateAccountsTable(katavault, logger);
     } catch (error) {
       if ((error as BaseError).isKatavaultError) {
         switch ((error as BaseError).type) {

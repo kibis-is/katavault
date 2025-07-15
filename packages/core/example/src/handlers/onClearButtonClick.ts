@@ -4,9 +4,6 @@ import { Katavault } from '@kibisis/katavault-core';
 // handlers
 import onAuthenticateViaUIButtonClick from './onAuthenticateViaUIButtonClick';
 
-// utilities
-import { updateAccountsTable } from '../utilities';
-
 export default function onClearButtonClick(katavault: Katavault, logger: ILogger) {
   const __logPrefix = 'onClearButtonClick';
   let activateButtonElement: HTMLElement | null;
@@ -21,8 +18,6 @@ export default function onClearButtonClick(katavault: Katavault, logger: ILogger
         activateButtonElement.onclick = onAuthenticateViaUIButtonClick(katavault, logger);
         activateButtonElement.replaceChildren('Authenticate');
       }
-
-      await updateAccountsTable(katavault, logger);
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
     }

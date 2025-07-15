@@ -1,3 +1,4 @@
+import { chainID } from '@kibisis/chains';
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
 
@@ -31,10 +32,12 @@ const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContent
 
         {/*chains*/}
         <HStack spacing="xs">
-          {chains.map(({ iconURI }) => {
+          {chains.map((chain) => {
             const element = dataURIToImageElement({
               className: clsx(styles.chainIcon),
-              dataURI: iconURI,
+              dataURI: chain.iconURI,
+              key: chainID(chain),
+              title: chain.displayName,
             });
 
             if (!element) {

@@ -10,7 +10,7 @@ import WalletApp from '@/ui/apps/wallet';
 import { AppTypeEnum } from '@/enums';
 
 // errors
-import { FailedToRenderUIError, UserCanceledUIRequestError } from '@/errors';
+import { FailedToRenderUIError } from '@/errors';
 
 // translations
 import { en } from '@/ui/translations';
@@ -102,18 +102,9 @@ export default class AppManager {
           clientInformation,
           i18n,
           logger: this._logger,
-          onClose: () => {
-            this._closeApp(AppTypeEnum.Authentication);
-            reject(new UserCanceledUIRequestError('user canceled authentication request'));
-          },
-          onError: (error) => {
-            this._closeApp(AppTypeEnum.Authentication);
-            reject(error);
-          },
-          onSuccess: (result) => {
-            this._closeApp(AppTypeEnum.Authentication);
-            resolve(result);
-          },
+          onClose: () => this._closeApp(AppTypeEnum.Authentication),
+          onError: reject,
+          onSuccess: resolve,
         }),
         this._rootElement(AppTypeEnum.Authentication)
       );
