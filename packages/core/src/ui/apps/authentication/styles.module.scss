@@ -1,23 +1,4 @@
-@use "@/ui/styles/media";
 @use "@/ui/styles/palette";
-@use "@/ui/styles/variables";
-@use "sass:map";
-
-.container {
-  align-items: flex-end;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: 9999;
-
-  @include media.tablet-and-up {
-    align-items: center;
-  }
-}
 
 .divider {
   background-color: palette.border-color("light");
@@ -27,46 +8,6 @@
   &[data-color-mode="dark"] {
     background-color: palette.border-color("dark");
   }
-}
-
-.modal {
-  align-items: center;
-  animation: slideUpFadeIn 300ms ease forwards;
-  background-color: palette.background-color("light");
-  border-radius: map.get(variables.$border-radius, md) map.get(variables.$border-radius, md) 0 0;
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  min-height: 500px;
-  width: 100%;
-  z-index: 0;
-
-  @include media.tablet-and-up {
-    border-radius: map.get(variables.$border-radius, md);
-    max-width: 500px;
-  }
-
-  &[data-color-mode="dark"] {
-    background-color: palette.background-color("dark");
-  }
-
-  &--close {
-    animation-name: slideDownFadeOut;
-  }
-}
-
-.overlay {
-  align-items: center;
-  background-color: palette.$black-color;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  left: 0;
-  opacity: 0.4;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: -1;
 }
 
 .passkey-icon {

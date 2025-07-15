@@ -12,6 +12,7 @@ import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
 import IconButton from '@/ui/components/IconButton';
 import Input from '@/ui/components/Input';
+import Modal from '@/ui/components/Modal';
 import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
@@ -78,18 +79,15 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   const logger = useLogger();
   const translate = useTranslate();
   // states
-  const [closing, setClosing] = useState<boolean>(false);
   const [hasPasskeyInVault, setHasPasskeyInVault] = useState<boolean>(false);
   const [hasPasswordInVault, setHasPasswordInVault] = useState<boolean>(false);
   const [isUsingPasskey, setIsUsingPasskey] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(true);
   const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [passwordError, setPasswordError] = useState<BaseError | null>(null);
   const [vault, setVault] = useState<Vault | null>(null);
   // callbacks
-  const handleClose = useCallback(() => {
-    setClosing(true);
-    setTimeout(() => onClose(), 300); // allow animation to run
-  }, [closing, onClose, setClosing]);
+  const handleClose = useCallback(() => setOpen(false), [setOpen]);
   const handleOnAuthenticateWithPasskeyClick = useCallback(async () => {
     const __logPrefix= `${Root.displayName}#handleOnAuthenticateWithPasskeyClick`;
     let store: PasskeyStore;
@@ -270,38 +268,12 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   const handleOnUsernameKeyUp = useCallback(async (event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && await handleOnContinueClick(), [handleOnContinueClick]);
 
   return (
-    <div className={clsx(styles.container)}>
-      {/*overlay*/}
-      <div className={clsx(styles.overlay)}></div>
-
-      {/*modal*/}
-      <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
-        {/*header*/}
-        <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
-          {vault && (
-            <HStack align="center" justify="start" spacing="xs">
-              {/*back button*/}
-              <IconButton colorMode={colorMode} icon={<ArrowLeftIcon />} onClick={handleOnBackClick} />
-            </HStack>
-          )}
-
-          <Spacer />
-
-          <HStack align="center" justify="end" spacing="xs">
-            {/*toggle color mode button*/}
-            <IconButton
-              colorMode={colorMode}
-              icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />}
-              onClick={handleOnToggleColorModeClick}
-            />
-
-            {/*close button*/}
-            <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleClose} />
-          </HStack>
-        </HStack>
-
-        {/*content*/}
-        <VStack align="center" fullWidth={true} grow={true} paddingX={DEFAULT_PADDING} spacing="md">
+    <Modal
+      closeOnEscape={true}
+      closeOnInteractOutside={true}
+      colorMode={colorMode}
+      body={(
+        <VStack align="center" fullWidth={true} grow={true} minHeight={250} paddingX={DEFAULT_PADDING} spacing="md">
           {(() => {
             // if the vault has been initialized, it is time to login or signup
             if (vault) {
@@ -500,11 +472,38 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
             );
           })()}
         </VStack>
-
-        {/*footer*/}
+      )}
+      footer={(
         <Footer colorMode={colorMode} />
-      </div>
-    </div>
+      )}
+      header={(
+        <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
+          {vault && (
+            <HStack align="center" justify="start" spacing="xs">
+              {/*back button*/}
+              <IconButton colorMode={colorMode} icon={<ArrowLeftIcon />} onClick={handleOnBackClick} />
+            </HStack>
+          )}
+
+          <Spacer />
+
+          <HStack align="center" justify="end" spacing="xs">
+            {/*toggle color mode button*/}
+            <IconButton
+              colorMode={colorMode}
+              icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />}
+              onClick={handleOnToggleColorModeClick}
+            />
+
+            {/*close button*/}
+            <IconButton colorMode={colorMode} icon={<CloseIcon />} onClick={handleClose} />
+          </HStack>
+        </HStack>
+      )}
+      onClose={handleClose}
+      onCloseAnimationEnd={onClose}
+      open={open}
+    />
   );
 };
 

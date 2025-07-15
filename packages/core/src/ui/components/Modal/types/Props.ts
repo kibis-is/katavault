@@ -5,12 +5,12 @@ import type { BaseComponentProps } from '@/ui/types';
 
 export interface ComponentProps {
   body: VNode;
-  closeButton?: boolean;
   closeOnEscape?: boolean;
   closeOnInteractOutside?: boolean;
   footer?: VNode;
   header?: VNode;
   onClose: () => void;
+  onCloseAnimationEnd?: () => void;
   open: boolean;
 }
 

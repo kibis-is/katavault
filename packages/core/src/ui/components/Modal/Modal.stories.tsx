@@ -4,12 +4,18 @@ import { useCallback, useState } from 'preact/hooks';
 // components
 import Button from '@/ui/components/Button';
 import Heading from '@/ui/components/Heading';
+import HStack from '@/ui/components/HStack';
+import IconButton from '@/ui/components/IconButton';
 import Modal from './Modal';
+import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
+
+// icons
+import CloseIcon from '@/ui/icons/CloseIcon';
 
 // types
 import { Props } from './types';
@@ -72,10 +78,6 @@ export const WithLightColorMode: StoryObj<Props> = {
   render: (props, { globals }) => <Modal {...props} colorMode={globals.theme} />,
 };
 
-export const WithCloseButton: StoryObj<Props> = {
-  render: (props) => <Modal {...props} closeButton={true} />,
-};
-
 export const CloseOnClickOutside: StoryObj<Props> = {
   render: (props) => <Modal {...props} closeOnInteractOutside={true} />,
 };
@@ -83,11 +85,17 @@ export const CloseOnClickOutside: StoryObj<Props> = {
 export const WithHeader: StoryObj<Props> = {
   render: (props, { globals }) => <Modal
     {...props}
-    closeButton={true}
     header={(
-      <Heading colorMode={globals.theme} fullWidth={true} textAlign="left">
-        A very boring modal header
-      </Heading>
+      <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
+        <Heading colorMode={globals.theme} fullWidth={true} textAlign="left">
+          A very boring modal header
+        </Heading>
+
+        <Spacer />
+
+        {/*close button*/}
+        <IconButton colorMode={globals.theme} icon={<CloseIcon />} onClick={() => props.onClose()} />
+      </HStack>
     )}
   />,
 };

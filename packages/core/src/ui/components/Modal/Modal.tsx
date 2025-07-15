@@ -1,17 +1,10 @@
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
+import { type KeyboardEvent } from 'preact/compat';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
 // components
-import HStack from '@/ui/components/HStack';
-import IconButton from '@/ui/components/IconButton';
 import VStack from '@/ui/components/VStack';
-
-// constants
-import { DEFAULT_PADDING } from '@/ui/constants';
-
-// icons
-import CloseIcon from '@/ui/icons/CloseIcon';
 
 // styles
 import styles from './styles.module.scss';
@@ -19,20 +12,32 @@ import styles from './styles.module.scss';
 // types
 import type { Props } from './types';
 
-const Modal: FunctionComponent<Props> = ({ body, closeButton, closeOnEscape, closeOnInteractOutside, colorMode, footer, header, onClose, open }) => {
+const Modal: FunctionComponent<Props> = ({ body, closeOnEscape, closeOnInteractOutside, colorMode, footer, header, onClose, onCloseAnimationEnd, open }) => {
   // states
   const [_open, setOpen] = useState<boolean>(open);
   const [closing, setClosing] = useState<boolean>(false);
   // memos
   // callbacks
   const handleOnCloseClick = useCallback(() => onClose(), [onClose]);
+  const handleOnKeyUp = useCallback(({ key }: KeyboardEvent<Document>) => {
+    if (closeOnEscape && key === 'Escape') {
 
+      return onClose();
+    }
+  }, [closeOnEscape, onClose]);
+
+  useEffect(() => {
+    document.addEventListener('keyup', handleOnKeyUp);
+
+    return () => document.removeEventListener('keyup', handleOnKeyUp);
+  }, []);
   useEffect(() => {
     if (!open && _open) {
       setClosing(true);
       setTimeout(() => {
         setClosing(false);
         setOpen(false);
+        onCloseAnimationEnd?.();
       }, 300); // allow animation to run
 
       return;
@@ -56,22 +61,7 @@ const Modal: FunctionComponent<Props> = ({ body, closeButton, closeOnEscape, clo
 
       <div className={clsx(styles.modal, closing && styles.modalClose)} data-color-mode={colorMode}>
         {/*header*/}
-        {(closeButton || header) && (
-          <HStack align="center" fullWidth={true} padding={DEFAULT_PADDING} spacing="xs">
-            {header}
-
-            {/*close button*/}
-            {closeButton && (
-              <HStack align="center" fullWidth={true} justify="end">
-                <IconButton
-                  colorMode={colorMode}
-                  icon={<CloseIcon />}
-                  onClick={handleOnCloseClick}
-                />
-              </HStack>
-            )}
-          </HStack>
-        )}
+        {header}
 
         {/*body*/}
         <VStack fullWidth={true} grow={true}>
