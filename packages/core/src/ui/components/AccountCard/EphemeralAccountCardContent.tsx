@@ -8,7 +8,7 @@ import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // hooks
-import useTranslate from '@/ui/hooks/useTranslate';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // styles
 import styles from './styles.module.scss';

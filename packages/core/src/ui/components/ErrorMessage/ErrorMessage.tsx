@@ -6,7 +6,7 @@ import HStack from '@/ui/components/HStack';
 import Text from '@/ui/components/Text';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
 
 // icons
 import CircleXIcon from '@/ui/icons/CircleXIcon';

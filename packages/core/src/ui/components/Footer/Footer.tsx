@@ -10,8 +10,8 @@ import VStack from '@/ui/components/VStack';
 import { DEFAULT_PADDING, KATAVAULT_URL } from '@/ui/constants';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
-import useTranslate from '@/ui/hooks/useTranslate';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
 import BannerIcon from '@/ui/icons/BannerIcon';

@@ -6,7 +6,7 @@ import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
 
 // styles
 import styles from './styles.module.scss';

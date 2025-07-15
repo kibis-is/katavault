@@ -30,11 +30,11 @@ import { AuthenticationMethodEnum } from '@/enums';
 import { BaseError } from '@/errors';
 
 // hooks
-import useClientInformation from '@/ui/hooks/useClientInformation';
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
-import useLogger from '@/ui/hooks/useLogger';
-import useInput from '@/ui/hooks/useInput';
-import useTranslate from '@/ui/hooks/useTranslate';
+import useClientInformation from '@/ui/hooks/client/useClientInformation';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
+import useLogger from '@/ui/hooks/logging/useLogger';
+import useInput from '@/ui/hooks/forms/useInput';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
 import ArrowLeftIcon from '@/ui/icons/ArrowLeftIcon';

@@ -16,8 +16,8 @@ import VStack from '@/ui/components/VStack';
 import { AccountTypeEnum } from '@/enums';
 
 // hooks
-import useSubTextColor from '@/ui/hooks/useSubTextColor';
-import useTranslate from '@/ui/hooks/useTranslate';
+import useSubTextColor from '@/ui/hooks/colors/useSubTextColor';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // styles
 import styles from './styles.module.scss';

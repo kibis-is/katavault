@@ -3,7 +3,7 @@ import type { FunctionComponent } from 'preact';
 import { useRef } from 'preact/hooks';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
 
 // icons
 import ChevronDownIcon from '@/ui/icons/ChevronDownIcon';

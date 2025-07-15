@@ -6,7 +6,7 @@ import { useMemo } from 'preact/hooks';
 import HStack from '@/ui/components/HStack';
 
 // hooks
-import useButtonTextColor from '@/ui/hooks/useButtonTextColor';
+import useButtonTextColor from '@/ui/hooks/colors/useButtonTextColor';
 
 // styles
 import styles from './styles.module.scss';

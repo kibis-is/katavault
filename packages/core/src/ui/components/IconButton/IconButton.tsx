@@ -3,7 +3,7 @@ import { cloneElement, type FunctionComponent } from 'preact';
 import { useMemo } from 'preact/hooks';
 
 // hooks
-import useDefaultTextColor from '@/ui/hooks/useDefaultTextColor';
+import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
 
 // styles
 import styles from './styles.module.scss';

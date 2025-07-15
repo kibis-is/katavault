@@ -19,11 +19,11 @@ import { DEFAULT_PADDING } from '@/ui/constants';
 import { AccountTypeEnum } from '@/enums';
 
 // hooks
-import useAccounts from '@/ui/hooks/useAccounts';
-import useChains from '@/ui/hooks/useChains';
-import useSettingsColorMode from '@/ui/hooks/useSettingsColorMode';
-import useSettingsToggleColorMode from '@/ui/hooks/useSettingsToggleColorMode';
-import useTranslate from '@/ui/hooks/useTranslate';
+import useAccounts from '@/ui/hooks/accounts/useAccounts';
+import useChains from '@/ui/hooks/chains/useChains';
+import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
+import useSettingsToggleColorMode from '@/ui/hooks/settings/useSettingsToggleColorMode';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
 import MoonIcon from '@/ui/icons/MoonIcon';

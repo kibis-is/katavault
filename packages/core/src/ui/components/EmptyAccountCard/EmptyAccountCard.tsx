@@ -6,7 +6,7 @@ import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
 // hooks
-import useSubTextColor from '@/ui/hooks/useSubTextColor';
+import useSubTextColor from '@/ui/hooks/colors/useSubTextColor';
 
 // styles
 import styles from './styles.module.scss';

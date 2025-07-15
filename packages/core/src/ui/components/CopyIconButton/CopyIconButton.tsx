@@ -4,7 +4,7 @@ import { type FunctionComponent } from 'preact';
 import IconButton from '@/ui/components/IconButton';
 
 // hooks
-import useClipboard from '@/ui/hooks/useClipboard';
+import useClipboard from '@/ui/hooks/forms/useClipboard';
 
 // icons
 import CheckIcon from '@/ui/icons/CheckIcon';
