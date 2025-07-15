@@ -2,7 +2,7 @@ import type { ChangeEvent, FocusEvent } from 'preact/compat';
 import { useCallback, useState } from 'preact/hooks';
 
 // hooks
-import useTranslate from '@/ui/hooks/useTranslate';
+import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // types
 import type { Parameters, State } from './types';
