@@ -1,13 +1,20 @@
-import { chainID } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain, chainID } from '@kibisis/chains';
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
+import { useCallback, useMemo } from 'preact/hooks';
 
 // components
+import CopyIconButton from '@/ui/components/CopyIconButton';
 import HStack from '@/ui/components/HStack';
+import Spacer from '@/ui/components/Spacer';
 import Text from '@/ui/components/Text';
 import VStack from '@/ui/components/VStack';
 
+// decorators
+import AVMAddress from '@/decorators/avm/AVMAddress';
+
 // hooks
+import useSubTextColor from '@/ui/hooks/colors/useSubTextColor';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // styles
@@ -17,37 +24,65 @@ import styles from './styles.module.scss';
 import type { EphemeralAccountCardContentProps } from './types';
 
 // utilities
+import base58ToBytes from '@/utilities/encoding/base58ToBytes';
 import dataURIToImageElement from '@/ui/utilities/dataURIToImageElement';
+import truncateText from '@/ui/utilities/truncateText';
 
-const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContentProps> = ({ chains, colorMode }) => {
+const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContentProps> = ({ account, chains, colorMode }) => {
   // hooks
+  const subTextColor = useSubTextColor(colorMode);
   const translate = useTranslate();
+  // memos
+  const avmAddress = useMemo(() => AVMAddress.fromPublicKey(base58ToBytes(account.key)), [account]);
+  const avmChains = useMemo(() => chains.filter(({ namespace }) => namespace === CAIP002Namespace.Algorand || namespace === CAIP002Namespace.AVM), [chains]);
+  // callbacks
+  const chainElements = useCallback((_chains: Chain[]) => (
+    <HStack spacing="xs">
+      {_chains.map((chain) => {
+        const element = dataURIToImageElement({
+          className: clsx(styles.chainIcon),
+          dataURI: chain.iconURI,
+          key: chainID(chain),
+          title: chain.displayName,
+        });
+
+        if (!element) {
+          return null;
+        }
+
+        return element;
+      })}
+    </HStack>
+  ), []);
 
   return (
     <VStack className={clsx(styles.footerContent)} spacing="sm">
-      <HStack align="center" spacing="sm">
-        <Text colorMode={colorMode} size="sm">
-          {`${translate('labels.avm')}:`}
-        </Text>
+      {/*avm chains*/}
+      {avmChains.length > 0 && (
+        <VStack fullWidth={true} spacing="sm">
+          <HStack align="center" fullWidth={true} spacing="xs">
+            <VStack>
+              <Text colorMode={colorMode} size="sm">
+                {translate('labels.avm')}
+              </Text>
 
-        {/*chains*/}
-        <HStack spacing="xs">
-          {chains.map((chain) => {
-            const element = dataURIToImageElement({
-              className: clsx(styles.chainIcon),
-              dataURI: chain.iconURI,
-              key: chainID(chain),
-              title: chain.displayName,
-            });
+              <Text colorMode={colorMode} color={subTextColor} size="xs">
+                {truncateText(avmAddress.address(), {
+                  end: 15,
+                  start: 15,
+                })}
+              </Text>
+            </VStack>
 
-            if (!element) {
-              return null;
-            }
+            <Spacer />
 
-            return element;
-          })}
-        </HStack>
-      </HStack>
+            <CopyIconButton colorMode={colorMode} size="xs" text={avmAddress.address()} title={translate('captions.copyAVMAddress')} />
+          </HStack>
+
+          {/*chains*/}
+          {chainElements(avmChains)}
+        </VStack>
+      )}
     </VStack>
   );
 };

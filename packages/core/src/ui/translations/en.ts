@@ -15,6 +15,7 @@ export default {
     connectAnAccount: 'Connect an account',
     connectingWallet: 'Please follow the instructions on {{name}} to connect.',
     copyAccountID: 'Copy account ID',
+    copyAVMAddress: 'Copy AVM address',
     or: 'Or',
     poweredBy: 'Powered by',
     verifyPasskey: 'Please follow the instructions to verify your passkey.',

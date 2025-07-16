@@ -55,6 +55,15 @@ export default class AVMAddress {
   }
 
   /**
+   * Initializes the AVMAddress instance from a public key.
+   * @param {Uint8Array} publicKey - A public key.
+   * @returns {AVMAddress} An initialized AVMAddress instance.
+   */
+  public static fromPublicKey(publicKey: Uint8Array): AVMAddress {
+    return new AVMAddress(publicKey);
+  }
+
+  /**
    * Validates whether a given AVM address is valid.
    * @param {string} address - The address to validate.
    * @returns {boolean} Returns true if the address is valid, otherwise false.

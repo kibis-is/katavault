@@ -18,6 +18,12 @@ import VStack from '@/ui/components/VStack';
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
 
+// decorators
+import AVMAddress from '@/decorators/avm/AVMAddress';
+
+// enums
+import { AccountTypeEnum } from '@/enums';
+
 // hooks
 import useAddAccounts from '@/ui/hooks/accounts/useAddAccount';
 import useAVMWebProviderConnect from '@/ui/hooks/connections/useAVMWebProviderConnect';
@@ -33,9 +39,9 @@ import WalletIcon from '@/ui/icons/WalletIcon';
 // types
 import type { StackProps } from '@/ui/types';
 import type { Props } from './types';
-import { AccountTypeEnum } from '@/enums';
-import AVMAddress from '@/decorators/avm/AVMAddress';
-import bs58 from 'bs58';
+
+// utilities
+import bytesToBase58 from '@/utilities/encoding/bytesToBase58'
 
 const ConnectAccountModal: FunctionComponent<Props> = ({
   onClose,
@@ -76,7 +82,7 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
             name: _connector.name,
             host: _connector.host,
           }],
-          key: bs58.encode(AVMAddress.fromAddress(address).publicKey()),
+          key: bytesToBase58(AVMAddress.fromAddress(address).publicKey()),
           name,
         })));
         onClose();

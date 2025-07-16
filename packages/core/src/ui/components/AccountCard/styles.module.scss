@@ -43,6 +43,12 @@ $default-padding: map.get(variables.$spacing, "sm");
   width: 1.5rem; // 32px
 }
 
+.connector-icon {
+  border-radius: map.get(variables.$border-radius, "full");
+  height: 1.5rem; // 32px
+  width: 1.5rem; // 32px
+}
+
 .origin-icon {
   height: 0.75rem; // 12px
   width: 0.75rem; // 12px

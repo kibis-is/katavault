@@ -30,14 +30,14 @@ const ConnectorButton: FunctionComponent<Props> = ({ colorMode, connector, onCli
   const tabletAndUp = useTabletAndUp();
   // memos
   const icon = useMemo(() => {
-    const defaultIcon = (<WalletIcon className={styles.icon} />);
+    const defaultIcon = (<WalletIcon className={clsx(styles.icon)} />);
 
     if (!connector.icon) {
       return defaultIcon;
     }
 
     return dataURIToImageElement({
-      className: styles.icon,
+      className: clsx(styles.icon),
       dataURI: connector.icon,
       title: connector.name,
     }) ?? defaultIcon;
