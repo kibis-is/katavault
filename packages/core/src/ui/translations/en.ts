@@ -13,6 +13,7 @@ export default {
   captions: {
     chooseConnectionMethod: 'Choose how you would like to connect a new account:',
     connectAnAccount: 'Connect an account',
+    connectingWallet: 'Please follow the instructions on {{name}} to connect.',
     copyAccountID: 'Copy account ID',
     or: 'Or',
     poweredBy: 'Powered by',

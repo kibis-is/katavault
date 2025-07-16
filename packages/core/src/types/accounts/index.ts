@@ -1,4 +1,5 @@
 export type { default as Account } from './Account';
+export type { default as AccountConnector } from './AccountConnector';
 export type { default as AccountStoreSchema } from './AccountStoreSchema';
 export type { default as ConnectedAccount } from './ConnectedAccount';
 export type { default as ConnectedAccountStoreItem } from './ConnectedAccountStoreItem';
