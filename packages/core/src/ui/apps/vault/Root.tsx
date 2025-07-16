@@ -38,6 +38,7 @@ import ConnectAccountModal from '@/ui/modals/ConnectAccountModal';
 import styles from './styles.module.scss';
 
 // types
+import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/types';
 import type { RootProps } from './types';
 
 // utilities
@@ -71,6 +72,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   const handleOnConnectAccountClick = useCallback(() => setConnectAccountModalOpen(true), [setConnectAccountModalOpen]);
   const handleOnConnectAccountModalClose = useCallback(() => setConnectAccountModalOpen(false), [setConnectAccountModalOpen]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
+  const handleOnTransferFundsClick = useCallback((account:  ConnectedAccountStoreItem | EphemeralAccountStoreItem) => () => console.log(account) , [] );
 
   return (
     <>
@@ -124,6 +126,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
                     chains={chains}
                     colorMode={colorMode}
                     key={account.key}
+                    onTransferFundsClick={handleOnTransferFundsClick(account)}
                   />
                 ))}
               </VStack>
@@ -131,9 +134,23 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
 
             {/*connected accounts*/}
             <VStack fullWidth={true} justify="center" spacing="sm">
-              <Heading colorMode={colorMode} size="sm" textAlign="left">
-                {translate('headings.connectedAccounts')}
-              </Heading>
+              <HStack align="center" fullWidth={true} spacing="xs">
+                <Heading colorMode={colorMode} size="sm" textAlign="left">
+                  {translate('headings.connectedAccounts')}
+                </Heading>
+
+                <Spacer />
+
+                {connectedAccounts.length > 0 && (
+                  <IconButton
+                    colorMode={colorMode}
+                    icon={<PlusIcon />}
+                    onClick={handleOnConnectAccountClick}
+                    size="xs"
+                    title={translate('captions.connectAnAccount')}
+                  />
+                )}
+              </HStack>
 
               {/*accounts*/}
               <VStack fullWidth={true} spacing="xs">
@@ -143,6 +160,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
                     chains={chains}
                     colorMode={colorMode}
                     key={account.key}
+                    onTransferFundsClick={handleOnTransferFundsClick(account)}
                   />
                 )) : (
                   <EmptyAccountCard

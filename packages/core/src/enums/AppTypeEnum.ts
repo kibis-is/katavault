@@ -1,6 +1,6 @@
 enum AppTypeEnum {
   Authentication = 'authentication',
-  Wallet = 'wallet',
+  Vault = 'vault',
 }
 
 export default AppTypeEnum;

@@ -4,7 +4,7 @@ import { h, render } from 'preact';
 
 // containers
 import AuthenticationApp from '@/ui/apps/authentication';
-import WalletApp from '@/ui/apps/wallet';
+import VaultApp from '@/ui/apps/vault';
 
 // enums
 import { AppTypeEnum } from '@/enums';
@@ -16,7 +16,7 @@ import { FailedToRenderUIError } from '@/errors';
 import { en } from '@/ui/translations';
 
 // types
-import type { AuthenticateAppResult, CommonParameters, RenderAppParameters, RenderWalletAppParameters } from '@/types';
+import type { AuthenticateAppResult, CommonParameters, RenderAppParameters, RenderVaultAppParameters } from '@/types';
 
 export default class AppManager {
   // public static variables
@@ -115,18 +115,18 @@ export default class AppManager {
     });
   }
 
-  public async renderWalletApp({
+  public async renderVaultApp({
     authenticationStore,
     clientInformation,
     chains,
     debug,
     vault,
-  }: RenderAppParameters & RenderWalletAppParameters): Promise<void> {
+  }: RenderAppParameters & RenderVaultAppParameters): Promise<void> {
     const i18n = await this._getOrInitializeI18n();
 
     return new Promise<void>((resolve) => {
       render(
-        h(WalletApp, {
+        h(VaultApp, {
           authenticationStore,
           clientInformation,
           chains,
@@ -134,12 +134,12 @@ export default class AppManager {
           i18n,
           logger: this._logger,
           onClose: () => {
-            this._closeApp(AppTypeEnum.Wallet);
+            this._closeApp(AppTypeEnum.Vault);
             resolve();
           },
           vault,
         }),
-        this._rootElement(AppTypeEnum.Wallet)
+        this._rootElement(AppTypeEnum.Vault)
       );
     });
   }

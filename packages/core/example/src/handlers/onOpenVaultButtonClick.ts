@@ -1,12 +1,12 @@
 import type { ILogger } from '@kibisis/utilities';
 import { Katavault } from '@kibisis/katavault-core';
 
-export default function onOpenWalletButtonClick(katavault: Katavault, logger: ILogger) {
+export default function onOpenVaultButtonClick(katavault: Katavault, logger: ILogger) {
   return async () => {
-    const __logPrefix = 'onOpenWalletButtonClick';
+    const __logPrefix = 'onOpenVaultButtonClick';
 
     try {
-      katavault.openWallet();
+      katavault.openVault();
     } catch (error) {
       logger.error(`${__logPrefix}:`, error);
     }

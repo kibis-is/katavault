@@ -4,13 +4,13 @@ import type { FunctionComponent } from 'preact';
 import type { IconProps } from '@/ui/types';
 
 const ArrowDownIcon: FunctionComponent<IconProps> = ({
-  color,
+  color = '#000000',
   title,
   ...svgProps
 }) => (
   <svg
     fill="none"
-    stroke={color || '#000000'}
+    stroke={color}
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-width="2"
