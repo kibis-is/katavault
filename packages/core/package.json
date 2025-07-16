@@ -76,6 +76,7 @@
     "@kibisis/utilities": "catalog:",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
+    "@oslojs/encoding": "^1.1.0",
     "@stablelib/base64": "^2.0.1",
     "@stablelib/hex": "^2.0.1",
     "@stablelib/random": "^2.0.1",
