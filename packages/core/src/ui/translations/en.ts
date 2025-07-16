@@ -9,6 +9,8 @@ export default {
     signupWithPasskey: 'Signup with a passkey',
     signInWithPassword: 'Sign in with a password',
     signupWithPassword: 'Signup with a password',
+    transfer: 'Transfer',
+    transferFunds: 'Transfer funds',
   },
   captions: {
     chooseConnectionMethod: 'Choose how you would like to connect a new account:',
@@ -41,6 +43,7 @@ export default {
     holdingAccounts: 'Holding accounts',
     networks: 'Networks',
     signInOrCreateANewAccount: 'Sign in or create a new account',
+    transferFunds: 'Transfer funds',
     welcomeBack: 'Welcome back!',
   },
   labels: {

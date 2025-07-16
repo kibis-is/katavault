@@ -8,3 +8,4 @@ export type { default as StackAlign } from './StackAlign';
 export type { default as StackJustify } from './StackJustify';
 export type { default as StackProps } from './StackProps';
 export type { default as TypographyProps } from './TypographyProps';
+export type { default as Variants } from './Variants';

@@ -129,7 +129,7 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
       )}
       footer={(
         <HStack align="center" fullWidth={true} justify="center" padding={DEFAULT_PADDING} spacing="xs">
-          <Button colorMode={colorMode} fullWidth={true} onClick={onClose}>
+          <Button colorMode={colorMode} fullWidth={true} onClick={onClose} variant="secondary">
             {translate('buttons.cancel')}
           </Button>
         </HStack>

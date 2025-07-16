@@ -71,6 +71,14 @@ export const WithRightIcon: StoryObj<Props> = {
   ),
 };
 
+export const Disabled: StoryObj<Props> = {
+  render: (props, { globals }) => (
+    <Button {...props} colorMode={globals.theme} disabled={true}>
+      Disabled
+    </Button>
+  ),
+};
+
 export const Sizes: StoryObj<Props> = {
   render: (props, { globals }) => (
     <VStack align="center" justify="center" spacing="sm">

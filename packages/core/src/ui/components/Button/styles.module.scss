@@ -3,6 +3,14 @@
 @use "@/ui/styles/variables";
 @use "sass:map";
 
+@mixin disabled-button-styles {
+  background-color: map.get(palette.$gray-palette, 300);
+  border-color: map.get(palette.$gray-palette, 300);
+  color: map.get(palette.$gray-palette, 600);
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
 .button {
   @include mixins.button-transition;
   align-items: center;
@@ -47,6 +55,22 @@
     width: 100%;
   }
 
+  &--disabled {
+    @include disabled-button-styles;
+
+    &[data-color-mode="dark"] {
+      @include disabled-button-styles;
+    }
+
+    &:hover {
+      @include disabled-button-styles;
+
+      &[data-color-mode="dark"] {
+        @include disabled-button-styles;
+      }
+    }
+  }
+
   &--secondary {
     background-color: transparent;
     color: palette.button-background-color("light");
@@ -57,12 +81,14 @@
     }
 
     &:hover {
-      background-color: palette.button-hover-background-color("light");
-      color: palette.button-font-color("light");
+      background-color: palette.ghost-button-background-color("light");
+      border-color: palette.button-background-color("light");
+      color: palette.button-background-color("light");
 
       &[data-color-mode="dark"] {
-        background-color: palette.button-hover-background-color("dark");
-        color: palette.button-font-color("dark");
+        background-color: palette.ghost-button-background-color("dark");
+        border-color: palette.button-background-color("dark");
+        color: palette.button-background-color("dark");
       }
     }
   }

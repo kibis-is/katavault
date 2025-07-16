@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
 import AccountCard from '@/ui/components/AccountCard';
+import Button from '@/ui/components/Button';
 import EmptyAccountCard from '@/ui/components/EmptyAccountCard';
 import Heading from '@/ui/components/Heading';
 import HStack from '@/ui/components/HStack';
@@ -26,6 +27,7 @@ import useSettingsToggleColorMode from '@/ui/hooks/settings/useSettingsToggleCol
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
+import ArrowLeftRightIcon from '@/ui/icons/ArrowLeftRightIcon';
 import MoonIcon from '@/ui/icons/MoonIcon';
 import PlusIcon from '@/ui/icons/PlusIcon';
 import SunnyIcon from '@/ui/icons/SunnyIcon';
@@ -33,12 +35,12 @@ import CloseIcon from '@/ui/icons/CloseIcon';
 
 // modals
 import ConnectAccountModal from '@/ui/modals/ConnectAccountModal';
+import TransferFundsModal from '@/ui/modals/TransferFundsModal';
 
 // styles
 import styles from './styles.module.scss';
 
 // types
-import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/types';
 import type { RootProps } from './types';
 
 // utilities
@@ -54,6 +56,7 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   // states
   const [closing, setClosing] = useState<boolean>(false);
   const [connectAccountModalOpen, setConnectAccountModalOpen] = useState<boolean>(false);
+  const [transferFundsModalOpen, setTransferFundsModalOpen] = useState<boolean>(false);
   // memos
   const connectedAccounts = useMemo(
     () => accounts.filter((account) => account.__type === AccountTypeEnum.Connected),
@@ -72,13 +75,18 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
   const handleOnConnectAccountClick = useCallback(() => setConnectAccountModalOpen(true), [setConnectAccountModalOpen]);
   const handleOnConnectAccountModalClose = useCallback(() => setConnectAccountModalOpen(false), [setConnectAccountModalOpen]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
-  const handleOnTransferFundsClick = useCallback((account:  ConnectedAccountStoreItem | EphemeralAccountStoreItem) => () => console.log(account) , [] );
+  const handleOnTransferFundsClick = useCallback(() => setTransferFundsModalOpen(true), [setTransferFundsModalOpen]);
+  const handleOnTransferFundsModalClose = useCallback(() => setTransferFundsModalOpen(false), [setTransferFundsModalOpen]);
 
   return (
     <>
       <ConnectAccountModal
         onClose={handleOnConnectAccountModalClose}
         open={connectAccountModalOpen}
+      />
+      <TransferFundsModal
+        onClose={handleOnTransferFundsModalClose}
+        open={transferFundsModalOpen}
       />
 
       <div className={clsx(styles.container)}>
@@ -111,6 +119,20 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
             </HStack>
           </HStack>
 
+          {/*actions*/}
+          <VStack align="center" fullWidth={true} justify="center" paddingX={DEFAULT_PADDING} paddingTop={DEFAULT_PADDING} spacing="xs">
+            <Button
+              colorMode={colorMode}
+              fullWidth={true}
+              onClick={handleOnTransferFundsClick}
+              rightIcon={<ArrowLeftRightIcon />}
+              size="sm"
+              variant="secondary"
+            >
+              {translate('buttons.transferFunds')}
+            </Button>
+          </VStack>
+
           <VStack fullWidth={true} grow={true} padding={DEFAULT_PADDING} spacing="md">
             {/*ephemeral accounts*/}
             <VStack fullWidth={true} justify="center" spacing="sm">
@@ -126,7 +148,6 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
                     chains={chains}
                     colorMode={colorMode}
                     key={account.key}
-                    onTransferFundsClick={handleOnTransferFundsClick(account)}
                   />
                 ))}
               </VStack>
@@ -160,7 +181,6 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
                     chains={chains}
                     colorMode={colorMode}
                     key={account.key}
-                    onTransferFundsClick={handleOnTransferFundsClick(account)}
                   />
                 )) : (
                   <EmptyAccountCard

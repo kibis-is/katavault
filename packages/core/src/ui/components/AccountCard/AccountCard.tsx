@@ -41,6 +41,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
       <VStack className={clsx(styles.content)} fullWidth={true}>
         {/*header*/}
         <VStack className={clsx(styles.header)} fullWidth={true} spacing="xs">
+          {/*account name*/}
           <HStack align="center" fullWidth={true} spacing="xs">
             {account.name && (
               <Text
@@ -56,6 +57,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
             )}
           </HStack>
 
+          {/*account id*/}
           <HStack align="center" fullWidth={true} spacing="xs">
             <Text
               colorMode={colorMode}
@@ -71,6 +73,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
 
             <Spacer />
 
+            {/*copy account id button*/}
             <CopyIconButton colorMode={colorMode} size="xs" text={account.key} title={translate('captions.copyAccountID')} />
           </HStack>
         </VStack>

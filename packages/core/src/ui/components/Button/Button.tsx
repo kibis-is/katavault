@@ -19,6 +19,7 @@ const Button: FunctionComponent<Props> = ({
   children,
   className,
   colorMode,
+  disabled = false,
   fullWidth = false,
   leftIcon,
   rightIcon,
@@ -36,7 +37,7 @@ const Button: FunctionComponent<Props> = ({
     }
 
     return [styles.buttonPrimary, buttonTextColor];
-  }, [variant]);
+  }, [buttonTextColor, primaryColor, variant]);
   const [buttonSizeStyle, iconSizeStyle] = useMemo(() => {
     switch (size) {
       case 'xs':
@@ -56,7 +57,7 @@ const Button: FunctionComponent<Props> = ({
   return (
     <button
       {...buttonProps}
-      className={clsx(styles.button, buttonSizeStyle, buttonVariantStyle, fullWidth && styles.buttonFullWidth, className)}
+      className={clsx(styles.button, buttonSizeStyle, buttonVariantStyle, disabled && styles.buttonDisabled, fullWidth && styles.buttonFullWidth, className)}
       data-color-mode={colorMode}
     >
       {leftIcon || rightIcon ? (

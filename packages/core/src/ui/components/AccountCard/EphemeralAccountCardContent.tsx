@@ -66,7 +66,7 @@ const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContent
                 {translate('labels.avm')}
               </Text>
 
-              <Text colorMode={colorMode} color={subTextColor} size="xs">
+              <Text colorMode={colorMode} color={subTextColor} size="xs" title={avmAddress.address()}>
                 {truncateText(avmAddress.address(), {
                   end: 15,
                   start: 15,
