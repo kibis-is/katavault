@@ -7,6 +7,7 @@ import HStack from '@/ui/components/HStack';
 
 // hooks
 import useButtonTextColor from '@/ui/hooks/colors/useButtonTextColor';
+import usePrimaryColor from '@/ui/hooks/colors/usePrimaryColor';
 
 // styles
 import styles from './styles.module.scss';
@@ -21,35 +22,57 @@ const Button: FunctionComponent<Props> = ({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  size = 'md',
+  variant = 'primary',
   ...buttonProps
 }) => {
   // hooks
   const buttonTextColor = useButtonTextColor(colorMode);
+  const primaryColor = usePrimaryColor(colorMode);
   // memos
-  const iconSize = useMemo(() => '1.5rem', []);
+  const [buttonVariantStyle, iconColor] = useMemo(() => {
+    if (variant === 'secondary') {
+      return [styles.buttonSecondary, primaryColor];
+    }
+
+    return [styles.buttonPrimary, buttonTextColor];
+  }, [variant]);
+  const [buttonSizeStyle, iconSizeStyle] = useMemo(() => {
+    switch (size) {
+      case 'xs':
+        return [styles.buttonXs, styles.iconXs];
+      case 'sm':
+        return [styles.buttonSm, styles.iconXs];
+      case 'lg':
+        return [styles.buttonLg, styles.iconLg];
+      case 'xl':
+        return [styles.buttonXl, styles.iconXl];
+      case 'md':
+      default:
+        return [styles.buttonMd, styles.iconMd];
+    }
+  }, [size]);
 
   return (
     <button
       {...buttonProps}
-      className={clsx(styles.button, fullWidth && styles.buttonFullWidth, className)}
+      className={clsx(styles.button, buttonSizeStyle, buttonVariantStyle, fullWidth && styles.buttonFullWidth, className)}
       data-color-mode={colorMode}
     >
       {leftIcon || rightIcon ? (
         <HStack align="center" fullWidth={true} justify="center" spacing="xs">
           {leftIcon &&
             cloneElement(leftIcon, {
-              color: buttonTextColor,
-              height: iconSize,
-              width: iconSize,
+              className: clsx(styles.icon, iconSizeStyle),
+              color: iconColor,
             })}
 
           {children}
 
           {rightIcon &&
             cloneElement(rightIcon, {
-              color: buttonTextColor,
-              height: iconSize,
-              width: iconSize,
+              className: clsx(styles.icon, iconSizeStyle),
+              color: iconColor,
             })}
         </HStack>
       ) : (

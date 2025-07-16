@@ -1,7 +1,7 @@
 import type { JSX, VNode } from 'preact';
 
 // types
-import type { BaseComponentProps, IconProps } from '@/ui/types';
+import type { BaseComponentProps, IconProps, Sizes, Variants } from '@/ui/types';
 
 interface ComponentProps {
   children: string;
@@ -9,6 +9,8 @@ interface ComponentProps {
   fullWidth?: boolean;
   leftIcon?: VNode<IconProps>;
   rightIcon?: VNode<IconProps>;
+  size?: Sizes;
+  variant?: Variants;
 }
 
 type Props = Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'children'> & BaseComponentProps & ComponentProps;
