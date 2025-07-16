@@ -20,7 +20,7 @@
   height: 3rem;
   justify-content: center;
   line-height: 1.2;
-  min-width: 3rem; // 48px
+  min-width: variables.$button-min-width;
   padding-inline-end: 1.5rem; // 24px
   padding-inline-start: 1.5rem; // 24px
   text-align: center;

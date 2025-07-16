@@ -6,6 +6,7 @@ import type { ClientInformation } from '@/types';
 
 interface BaseAppProps {
   clientInformation: ClientInformation;
+  debug?: boolean;
   i18n: I18n;
   logger: ILogger;
   onClose: () => void;

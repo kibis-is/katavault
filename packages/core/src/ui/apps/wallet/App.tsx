@@ -1,3 +1,4 @@
+import { AVMWebClient } from '@agoralabs-sh/avm-web-provider';
 import type { FunctionComponent } from 'preact';
 
 // containers
@@ -9,6 +10,7 @@ import { AccountStore, SettingsStore } from '@/decorators';
 // providers
 import AccountsProvider from '@/ui/providers/AccountsProvider';
 import AppProvider from '@/ui/providers/AppProvider';
+import AVMWebClientProvider from '@/ui/providers/AVMWebClientProvider';
 import ChainsProvider from '@/ui/providers/ChainsProvider';
 import SettingsProvider from '@/ui/providers/SettingsProvider';
 
@@ -16,7 +18,7 @@ import SettingsProvider from '@/ui/providers/SettingsProvider';
 import type { BaseAppProps } from '@/ui/types';
 import type { AppProps } from './types';
 
-const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInformation, i18n, logger, ...rootProps }) => {
+const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInformation, debug, i18n, logger, ...rootProps }) => {
   return (
     <AppProvider
       clientInformation={clientInformation}
@@ -34,7 +36,9 @@ const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInforma
           vault: rootProps.vault,
         })}>
           <ChainsProvider chains={chains}>
-            <Root {...rootProps} />
+            <AVMWebClientProvider avmWebClient={AVMWebClient.init({ debug })}>
+              <Root {...rootProps} />
+            </AVMWebClientProvider>
           </ChainsProvider>
         </AccountsProvider>
       </SettingsProvider>

@@ -5,6 +5,7 @@ import type { ClientInformation, CommonParameters } from '@/types';
 
 interface KatavaultParameters extends CommonParameters {
   chains: Chain[];
+  debug?: boolean;
   clientInformation: ClientInformation;
 }
 

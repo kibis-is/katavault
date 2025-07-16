@@ -69,6 +69,7 @@
     "algosdk": "^3.x"
   },
   "dependencies": {
+    "@agoralabs-sh/avm-web-provider": "^1.7.0",
     "@agoralabs-sh/bytes": "^1.0.0",
     "@agoralabs-sh/uuid": "^1.1.0",
     "@kibisis/chains": "catalog:",

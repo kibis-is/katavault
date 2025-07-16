@@ -28,6 +28,7 @@ export default async function createKatavault({
       icon: client?.icon || faviconURL() || undefined,
       name: client?.name ?? documentTitle(),
     },
+    debug,
     logger,
   });
 }

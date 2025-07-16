@@ -110,6 +110,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@agoralabs-sh/avm-web-provider':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@agoralabs-sh/bytes':
         specifier: ^1.0.0
         version: 1.0.0
@@ -400,6 +403,10 @@ importers:
         version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(jiti@2.4.2)(sass@1.86.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.0)
 
 packages:
+
+  '@agoralabs-sh/avm-web-provider@1.7.0':
+    resolution: {integrity: sha512-AfMdBdFS3EW1RunzHVEwNFucS6UIALs661d+zL6AHFDdxOTvUgahRC4l163VoGWA0UEpnayT1jGObci8nitZeA==}
+    engines: {node: '>=18.20.3'}
 
   '@agoralabs-sh/bytes@1.0.0':
     resolution: {integrity: sha512-NifTB5dPWOQSjCdxRThs3OpIz18rzHYVm2QIv1qT81atfdDMN9IVySJ2YBaa26ZaAFJV20zDt5l/K7UqP8uGHw==}
@@ -7566,6 +7573,10 @@ packages:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
 
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
@@ -7909,6 +7920,10 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@agoralabs-sh/avm-web-provider@1.7.0':
+    dependencies:
+      uuid: 9.0.1
 
   '@agoralabs-sh/bytes@1.0.0':
     dependencies:
@@ -16631,6 +16646,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   uuid@8.3.2: {}
+
+  uuid@9.0.1: {}
 
   validate-npm-package-license@3.0.4:
     dependencies:

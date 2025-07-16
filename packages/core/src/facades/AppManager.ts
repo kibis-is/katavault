@@ -93,13 +93,17 @@ export default class AppManager {
    * public methods
    */
 
-  public async renderAuthenticationApp({ clientInformation }: RenderAppParameters): Promise<AuthenticateAppResult> {
+  public async renderAuthenticationApp({
+    clientInformation,
+    debug,
+  }: RenderAppParameters): Promise<AuthenticateAppResult> {
     const i18n = await this._getOrInitializeI18n();
 
     return new Promise<AuthenticateAppResult>((resolve, reject) => {
       render(
         h(AuthenticationApp, {
           clientInformation,
+          debug,
           i18n,
           logger: this._logger,
           onClose: () => this._closeApp(AppTypeEnum.Authentication),
@@ -115,6 +119,7 @@ export default class AppManager {
     authenticationStore,
     clientInformation,
     chains,
+    debug,
     vault,
   }: RenderAppParameters & RenderWalletAppParameters): Promise<void> {
     const i18n = await this._getOrInitializeI18n();
@@ -125,6 +130,7 @@ export default class AppManager {
           authenticationStore,
           clientInformation,
           chains,
+          debug,
           i18n,
           logger: this._logger,
           onClose: () => {

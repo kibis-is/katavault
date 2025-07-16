@@ -58,13 +58,15 @@ export default class Katavault {
   private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
   private _chains: Chain[];
+  private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
   private readonly _logger: ILogger;
   private _vault: Vault | null = null;
 
-  public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
+  public constructor({ chains, clientInformation, debug = false, logger }: KatavaultParameters) {
     this._chains = chains;
     this._clientInformation = clientInformation;
+    this._debug = debug;
     this._logger = logger;
     this._appManager = new AppManager({ logger });
   }
@@ -347,6 +349,7 @@ export default class Katavault {
   public async authenticate(): Promise<void> {
     const { authenticationStore, vault } = await this._appManager.renderAuthenticationApp({
       clientInformation: this._clientInformation,
+      debug: this._debug,
     });
 
     this._accountsStore = new AccountStore({
@@ -490,6 +493,7 @@ export default class Katavault {
       await this._appManager.renderWalletApp({
         ...params,
         clientInformation: this._clientInformation,
+        debug: this._debug,
       });
     })();
   }

@@ -11,6 +11,7 @@ export default {
     signupWithPassword: 'Signup with a password',
   },
   captions: {
+    chooseConnectionMethod: 'Choose how you would like to connect a new account:',
     connectAnAccount: 'Connect an account',
     copyAccountID: 'Copy account ID',
     or: 'Or',
@@ -31,12 +32,12 @@ export default {
     },
   },
   headings: {
+    connectAnAccount: 'Connect an account ',
     connectedAccounts: 'Connected accounts',
     connections: 'Connections ({{count}})',
     finishCreatingANewAccount: 'Finish creating a new account',
     holdingAccounts: 'Holding accounts',
     networks: 'Networks',
-    selectAWallet: 'Select a wallet',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     welcomeBack: 'Welcome back!',
   },
