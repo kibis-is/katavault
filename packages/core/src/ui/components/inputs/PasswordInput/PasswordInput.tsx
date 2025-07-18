@@ -27,6 +27,7 @@ const PasswordInput: FunctionComponent<Props> = (props) => {
           colorMode={props.colorMode}
           icon={masked ? <EyeOffIcon /> : <EyeIcon />}
           onClick={handleOnMaskedClick}
+          type="button"
         />
       )}
       type={masked ? 'password' : 'text'}

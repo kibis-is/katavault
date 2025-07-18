@@ -13,6 +13,7 @@ import HStack from '@/ui/components/layouts/HStack';
 import IconButton from '@/ui/components/buttons/IconButton';
 import Input from '@/ui/components/inputs/Input';
 import Modal from '@/ui/components/layouts/Modal';
+import NewPasswordInput from '@/ui/components/inputs/NewPasswordInput';
 import PasswordInput from '@/ui/components/inputs/PasswordInput';
 import Spacer from '@/ui/components/layouts/Spacer';
 import Text from '@/ui/components/typography/Text';
@@ -348,6 +349,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                           fullWidth={true}
                           onClick={handleOnAuthenticateWithPasswordClick}
                           rightIcon={<SignInIcon />}
+                          type="submit"
                         >
                           {translate('buttons.signInWithPassword')}
                         </Button>
@@ -385,13 +387,11 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                 <>
                   <Heading colorMode={colorMode}>{translate('headings.finishCreatingANewAccount')}</Heading>
 
-                  <Input
+                  <NewPasswordInput
                     {...passwordInputProps}
-                    autocomplete="new-password"
                     colorMode={colorMode}
                     onKeyUp={handleOnPasswordKeyUp}
                     placeholder={translate('placeholders.password')}
-                    type="password"
                   />
 
                   <Spacer />
@@ -411,6 +411,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
                     fullWidth={true}
                     onClick={handleOnAuthenticateWithPasswordClick}
                     rightIcon={<SignInIcon />}
+                    type="submit"
                   >
                     {translate('buttons.signupWithPassword')}
                   </Button>

@@ -12,6 +12,6 @@ interface ComponentProps {
   size?: Sizes;
 }
 
-type Props = Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'icon'> & BaseComponentProps & ComponentProps;
+type Props = Omit<JSX.ButtonHTMLAttributes, 'icon'> & BaseComponentProps & ComponentProps;
 
 export default Props;

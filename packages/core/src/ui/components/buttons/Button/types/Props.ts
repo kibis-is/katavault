@@ -14,6 +14,6 @@ interface ComponentProps {
   variant?: Variants;
 }
 
-type Props = Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'children'> & BaseComponentProps & ComponentProps;
+type Props = Omit<JSX.ButtonHTMLAttributes, 'children'> & BaseComponentProps & ComponentProps;
 
 export default Props;
