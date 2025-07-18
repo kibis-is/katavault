@@ -13,6 +13,7 @@ import HStack from '@/ui/components/layouts/HStack';
 import IconButton from '@/ui/components/buttons/IconButton';
 import Input from '@/ui/components/inputs/Input';
 import Modal from '@/ui/components/layouts/Modal';
+import PasswordInput from '@/ui/components/inputs/PasswordInput';
 import Spacer from '@/ui/components/layouts/Spacer';
 import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
@@ -323,13 +324,11 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
 
                     {hasPasswordInVault && (
                       <>
-                        <Input
+                        <PasswordInput
                           {...passwordInputProps}
-                          autocomplete="current-password"
                           colorMode={colorMode}
                           onKeyUp={handleOnPasswordKeyUp}
                           placeholder={translate('placeholders.password')}
-                          type="password"
                         />
 
                         <Spacer />

@@ -3,7 +3,7 @@ import { useCallback, useState } from 'preact/hooks';
 
 // components
 import Accordion from './Accordion';
-import AccordionTitle from '@/ui/components/AccordionTitle';
+import AccordionTitle from '@/ui/components/containers/AccordionTitle';
 import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
 

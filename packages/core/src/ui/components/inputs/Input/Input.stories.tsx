@@ -26,7 +26,7 @@ const meta: Meta<Props> = {
   decorators: [
     (Story, { args }) => {
       const inputProps = useInput({
-        name: 'Username',
+        name: 'username',
       });
 
       return (

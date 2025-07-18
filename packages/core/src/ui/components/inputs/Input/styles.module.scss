@@ -27,7 +27,6 @@ $height: 3rem;
   border-width: 1px;
   display: flex;
   flex-direction: row;
-  gap: map.get(variables.$spacing, "xs");
   width: 100%;
 
   &[data-color-mode="dark"] {
@@ -73,6 +72,7 @@ $height: 3rem;
   appearance: none;
   background: transparent;
   border: none;
+  border-radius: map.get(variables.$border-radius, "md") 0 0 map.get(variables.$border-radius, "md");
   box-sizing: border-box;
   color: palette.default-font-color("light");
   font-family: variables.$font-family;
