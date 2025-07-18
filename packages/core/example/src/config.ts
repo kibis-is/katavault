@@ -1,8 +1,8 @@
-import { algorandTestnet, voiTestnet } from '@kibisis/chains';
+import { AlgorandTestnet, VoiTestnet } from '@kibisis/chains';
 import type { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
 const config: CreateKatavaultParameters = {
-  chains: [voiTestnet, algorandTestnet],
+  chains: [VoiTestnet, AlgorandTestnet],
   debug: true,
 };
 

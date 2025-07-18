@@ -1,5 +1,5 @@
 import { concat } from '@agoralabs-sh/bytes';
-import { encode as encodeUTF8 } from '@stablelib/utf8';
+import { utf8 } from '@kibisis/encoding';
 
 // constants
 import { ED25519_PRIVATE_KEY_BYTE_LENGTH } from '@/constants';
@@ -30,7 +30,7 @@ export default async function privateKeyFromPasswordCredentials({
 }: PrivateKeyFromPasswordCredentialsParameters): Promise<Uint8Array> {
   return await createDerivationKey({
     keyLength: ED25519_PRIVATE_KEY_BYTE_LENGTH,
-    salt: concat(encodeUTF8(hostname), encodeUTF8(username)),
-    secret: concat(encodeUTF8(username), encodeUTF8(password)),
+    salt: concat(utf8.decode(hostname), utf8.decode(username)),
+    secret: concat(utf8.decode(username), utf8.decode(password)),
   });
 }

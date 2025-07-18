@@ -1,11 +1,10 @@
+import { hex, utf8 } from '@kibisis/encoding';
+
 // constants
 import { IDB_DB_NAME_PREFIX } from '@/constants';
 
 // types
 import type { Vault } from '@/types';
-
-// utilities
-import { bytesToUTF8, hexToBytes } from '@/utilities';
 
 /**
  * Extracts and decodes a username from the given vault object.
@@ -13,5 +12,5 @@ import { bytesToUTF8, hexToBytes } from '@/utilities';
  * @return {string} The decoded username.
  */
 export default function usernameFromVault(vault: Vault): string {
-  return bytesToUTF8(hexToBytes(vault.name.replace(`${IDB_DB_NAME_PREFIX}_`, '')));
+  return utf8.encode(hex.decode(vault.name.replace(`${IDB_DB_NAME_PREFIX}_`, '')));
 }

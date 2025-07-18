@@ -1,3 +1,4 @@
+import { base64, utf8 } from '@kibisis/encoding';
 import { sha512 } from '@noble/hashes/sha512';
 
 // constants
@@ -12,9 +13,6 @@ import { AuthenticationMethodNotSupportedError } from '@/errors';
 // types
 import type { CredentialIDParameters } from '@/types';
 
-// utilities
-import { base64ToBytes, bytesToBase64, utf8ToBytes } from '@/utilities';
-
 /**
  * Generates a credential ID based on the authentication method.
  * * Passkeys: `passkey:base64(<SHA-512 of the credential ID>)`
@@ -26,9 +24,9 @@ import { base64ToBytes, bytesToBase64, utf8ToBytes } from '@/utilities';
 export default function credentialID(params: CredentialIDParameters): string {
   switch (params.method) {
     case AuthenticationMethodEnum.Passkey:
-      return `${ACCOUNT_PASSKEY_CREDENTIAL_ID_PREFIX}:${bytesToBase64(sha512(base64ToBytes(params.passkeyCredentialID)))}`;
+      return `${ACCOUNT_PASSKEY_CREDENTIAL_ID_PREFIX}:${base64.encode(sha512(base64.decode(params.passkeyCredentialID)))}`;
     case AuthenticationMethodEnum.Password:
-      return `${ACCOUNT_PASSWORD_CREDENTIAL_ID_PREFIX}:${bytesToBase64(sha512(utf8ToBytes(params.password)))}`;
+      return `${ACCOUNT_PASSWORD_CREDENTIAL_ID_PREFIX}:${base64.encode(sha512(utf8.decode(params.password)))}`;
     default:
       throw new AuthenticationMethodNotSupportedError(`invalid authentication method`);
   }

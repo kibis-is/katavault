@@ -1,4 +1,5 @@
 import type { IDiscoverResult } from '@agoralabs-sh/avm-web-provider';
+import { base58 } from '@kibisis/encoding';
 import type { FunctionComponent } from 'preact';
 import { useCallback, useMemo } from 'preact/hooks';
 
@@ -40,9 +41,6 @@ import WalletIcon from '@/ui/icons/WalletIcon';
 import type { StackProps } from '@/ui/types';
 import type { Props } from './types';
 
-// utilities
-import bytesToBase58 from '@/utilities/encoding/bytesToBase58'
-
 const ConnectAccountModal: FunctionComponent<Props> = ({
   onClose,
   open,
@@ -82,7 +80,7 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
             name: _connector.name,
             host: _connector.host,
           }],
-          key: bytesToBase58(AVMAddress.fromAddress(address).publicKey()),
+          key: base58.encode(AVMAddress.fromAddress(address).publicKey()),
           name,
         })));
         onClose();

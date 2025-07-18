@@ -1,6 +1,6 @@
 import { concat } from '@agoralabs-sh/bytes';
+import { base32 } from '@kibisis/encoding';
 import { sha512_256 } from '@noble/hashes/sha512';
-import { encodeBase32UpperCaseNoPadding, decodeBase32IgnorePadding } from '@oslojs/encoding';
 
 // errors
 import { InvalidAVMAddressError } from '@/errors';
@@ -40,7 +40,9 @@ export default class AVMAddress {
     let decodedAddress: Uint8Array;
 
     try {
-      decodedAddress = decodeBase32IgnorePadding(address);
+      decodedAddress = base32.decode(address, {
+        ignorePadding: true,
+      });
     } catch (error) {
       throw new InvalidAVMAddressError(`invalid address: ${error.message}`);
     }
@@ -72,7 +74,9 @@ export default class AVMAddress {
    */
   public static isValid(address: string): boolean {
     try {
-      const decodedAddress = decodeBase32IgnorePadding(address);
+      const decodedAddress = base32.decode(address, {
+        ignorePadding: true,
+      });
 
       return decodedAddress.length === AVMAddress.addressByteLength;
     } catch (_) {
@@ -87,7 +91,10 @@ export default class AVMAddress {
    * @static
    */
   public static zeroAddress(): string {
-    return encodeBase32UpperCaseNoPadding(new Uint8Array(AVMAddress.addressByteLength + AVMAddress.checksumByteLength));
+    return base32.encode(new Uint8Array(AVMAddress.addressByteLength + AVMAddress.checksumByteLength), {
+      noPadding: true,
+      uppercase: true,
+    });
   }
 
   /**
@@ -100,7 +107,10 @@ export default class AVMAddress {
    * @public
    */
   public address(): string {
-    return encodeBase32UpperCaseNoPadding(concat(this._publicKey, this.checksum()));
+    return base32.encode(concat(this._publicKey, this.checksum()), {
+      noPadding: true,
+      uppercase: true,
+    });
   }
 
   /**

@@ -1,4 +1,4 @@
-import { encode as encodeUtf8 } from '@stablelib/utf8';
+import { base64, utf8 } from '@kibisis/encoding';
 
 // errors
 import { InvalidPasswordError } from '@/errors';
@@ -8,9 +8,6 @@ import { PasswordStore } from '@/decorators';
 
 // types
 import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } from '@/types';
-
-// utilities
-import { bytesToBase64 } from '@/utilities';
 
 /**
  * Authenticates with the supplied password.
@@ -57,7 +54,7 @@ export default async function authenticateWithPassword({
 
   logger.debug(`${__logPrefix}: initializing new password store`);
 
-  encryptedChallenge = bytesToBase64(await store.encryptBytes(encodeUtf8(PasswordStore.challenge)));
+  encryptedChallenge = base64.encode(await store.encryptBytes(utf8.decode(PasswordStore.challenge)));
 
   await store.setChallenge(encryptedChallenge);
   await store.setLastUsedAt();

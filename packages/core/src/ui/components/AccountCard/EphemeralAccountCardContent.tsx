@@ -1,4 +1,5 @@
-import { CAIP002Namespace, type Chain, chainID } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain } from '@kibisis/chains';
+import { base58 } from '@kibisis/encoding';
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
 import { useCallback, useMemo } from 'preact/hooks';
@@ -24,7 +25,6 @@ import styles from './styles.module.scss';
 import type { EphemeralAccountCardContentProps } from './types';
 
 // utilities
-import base58ToBytes from '@/utilities/encoding/base58ToBytes';
 import dataURIToImageElement from '@/ui/utilities/dataURIToImageElement';
 import truncateText from '@/ui/utilities/truncateText';
 
@@ -33,17 +33,17 @@ const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContent
   const subTextColor = useSubTextColor(colorMode);
   const translate = useTranslate();
   // memos
-  const avmAddress = useMemo(() => AVMAddress.fromPublicKey(base58ToBytes(account.key)), [account]);
-  const avmChains = useMemo(() => chains.filter(({ namespace }) => namespace === CAIP002Namespace.Algorand || namespace === CAIP002Namespace.AVM), [chains]);
+  const avmAddress = useMemo(() => AVMAddress.fromPublicKey(base58.decode(account.key)), [account]);
+  const avmChains = useMemo(() => chains.filter((avmChain) => avmChain.namespace() === CAIP002Namespace.Algorand || avmChain.namespace() === CAIP002Namespace.AVM), [chains]);
   // callbacks
   const chainElements = useCallback((_chains: Chain[]) => (
     <HStack spacing="xs">
       {_chains.map((chain) => {
         const element = dataURIToImageElement({
           className: clsx(styles.chainIcon),
-          dataURI: chain.iconURI,
-          key: chainID(chain),
-          title: chain.displayName,
+          dataURI: chain.iconURI(),
+          key: chain.chainID(),
+          title: chain.displayName(),
         });
 
         if (!element) {

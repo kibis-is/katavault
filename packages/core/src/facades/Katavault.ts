@@ -1,4 +1,5 @@
-import { type Chain, chainID as generateChainID } from '@kibisis/chains';
+import { Chain } from '@kibisis/chains';
+import { base58 } from '@kibisis/encoding';
 import type { ILogger } from '@kibisis/utilities';
 
 // constants
@@ -42,7 +43,6 @@ import type {
 import {
   authenticateWithPasskey,
   authenticateWithPassword,
-  bytesToBase58,
   credentialID,
   initializeVault,
   privateKeyFromPasswordCredentials,
@@ -174,7 +174,7 @@ export default class Katavault {
           method: AuthenticationMethodEnum.Passkey,
           passkeyCredentialID: passkey.credentialID,
         });
-        key = bytesToBase58(publicKeyFromPrivateKey(keyMaterial));
+        key = base58.encode(publicKeyFromPrivateKey(keyMaterial));
 
         // check if the credential account exists
         account =
@@ -201,7 +201,7 @@ export default class Katavault {
           __type: AccountTypeEnum.Ephemeral,
           credentialID: _credentialID,
           key,
-          keyData: bytesToBase58(encryptedKeyData),
+          keyData: base58.encode(encryptedKeyData),
           name: username,
           origin: EphemeralAccountOriginEnum.Credential,
         };
@@ -234,7 +234,7 @@ export default class Katavault {
           password,
           username,
         });
-        key = bytesToBase58(publicKeyFromPrivateKey(privateKey));
+        key = base58.encode(publicKeyFromPrivateKey(privateKey));
 
         // check if the credential account exists
         account =
@@ -263,7 +263,7 @@ export default class Katavault {
           __type: AccountTypeEnum.Ephemeral,
           credentialID: _credentialID,
           key,
-          keyData: bytesToBase58(encryptedKeyData),
+          keyData: base58.encode(encryptedKeyData),
           name: username,
           origin: EphemeralAccountOriginEnum.Credential,
         };
@@ -320,7 +320,7 @@ export default class Katavault {
    * @public
    */
   public async addChain(chain: Chain): Promise<void> {
-    const index = this._chains.findIndex((_chain) => generateChainID(_chain) === generateChainID(chain));
+    const index = this._chains.findIndex((_chain) => _chain.chainID() === chain.chainID());
 
     // if the chain already exists, update the chain
     if (index >= 0) {
@@ -533,7 +533,7 @@ export default class Katavault {
    * @public
    */
   public removeChainByChainID(chainID: string): void {
-    this._chains = this._chains.filter((chain) => generateChainID(chain) !== chainID);
+    this._chains = this._chains.filter((chain) => chain.chainID() !== chainID);
   }
 
   /**

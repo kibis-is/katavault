@@ -1,3 +1,4 @@
+import { base64, utf8 } from '@kibisis/encoding';
 import { randomBytes } from '@noble/hashes/utils';
 import { secretbox } from 'tweetnacl';
 
@@ -14,7 +15,7 @@ import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/error
 import type { BaseAuthenticationStore, StoreParameters } from '@/types';
 
 // utilities
-import { base64ToBytes, bytesToUTF8, createDerivationKey, utf8ToBytes } from '@/utilities';
+import { createDerivationKey } from '@/utilities';
 
 export default class PasswordStore extends BaseStore implements BaseAuthenticationStore {
   // private static variables
@@ -85,7 +86,7 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     encryptionKey = await createDerivationKey({
       keyLength: secretbox.keyLength,
       salt,
-      secret: utf8ToBytes(this._password),
+      secret: utf8.decode(this._password),
     });
     decryptedBytes = secretbox.open(encryptedBytes, nonce, encryptionKey);
 
@@ -124,7 +125,7 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     encryptionKey = await createDerivationKey({
       keyLength: secretbox.keyLength,
       salt,
-      secret: utf8ToBytes(this._password),
+      secret: utf8.decode(this._password),
     });
     nonce = randomBytes(secretbox.nonceLength);
 
@@ -211,9 +212,9 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
     }
 
     try {
-      decryptedChallenge = await this.decryptBytes(base64ToBytes(encryptedChallenge));
+      decryptedChallenge = await this.decryptBytes(base64.decode(encryptedChallenge));
 
-      return bytesToUTF8(decryptedChallenge) === PasswordStore.challenge;
+      return utf8.encode(decryptedChallenge) === PasswordStore.challenge;
     } catch (_) {
       return false;
     }
