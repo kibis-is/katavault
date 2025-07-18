@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import type { FunctionComponent, JSX } from 'preact';
+import { cloneElement, FunctionComponent } from 'preact';
 
 // components
 import VStack from '@/ui/components/layouts/VStack';
@@ -8,14 +8,14 @@ import VStack from '@/ui/components/layouts/VStack';
 import styles from './styles.module.scss';
 
 // types
-import type { BaseComponentProps } from '@/ui/types';
 import type { Props } from './types';
 
-const Input: FunctionComponent<JSX.InputHTMLAttributes & BaseComponentProps & Props> = ({
+const Input: FunctionComponent<Props> = ({
   colorMode,
   error,
   hint,
   label,
+  rightButton,
   ...inputProps
 }) => {
   return (
@@ -26,11 +26,17 @@ const Input: FunctionComponent<JSX.InputHTMLAttributes & BaseComponentProps & Pr
         </span>
       )}
 
-      <input
-        {...inputProps}
-        className={clsx(styles.input, error && styles.inputError)}
-        data-color-mode={colorMode}
-      />
+      <div className={clsx(styles.container, error && styles.containerError)} data-color-mode={colorMode}>
+        <input
+          {...inputProps}
+          className={clsx(styles.input)}
+          data-color-mode={colorMode}
+        />
+
+        {rightButton && (cloneElement(rightButton, {
+          className: clsx(styles.button),
+        }))}
+      </div>
 
       {hint && (
         <span className={clsx(styles.hintText)} data-color-mode={colorMode}>

@@ -12,6 +12,7 @@ import styles from './styles.module.scss';
 import type { Props } from './types';
 
 const IconButton: FunctionComponent<Props> = ({
+  className,
   colorMode,
   icon,
   iconColor,
@@ -38,7 +39,7 @@ const IconButton: FunctionComponent<Props> = ({
   }, [size]);
 
   return (
-    <button {...buttonProps} className={clsx(styles.button, buttonSizeStyle)} data-color-mode={colorMode}>
+    <button {...buttonProps} className={clsx(styles.button, buttonSizeStyle, className)} data-color-mode={colorMode}>
       {cloneElement(icon, {
         ...icon.props,
         className: clsx(styles.icon, iconSizeStyle),

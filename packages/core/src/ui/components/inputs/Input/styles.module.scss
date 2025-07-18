@@ -2,11 +2,53 @@
 @use "@/ui/styles/variables";
 @use "sass:map";
 
+$height: 3rem;
+
 @mixin sub-text-styles {
   box-sizing: border-box;
+  font-family: variables.$font-family;
   font-size: 0.625rem; // 10px
   padding-inline: 0.75rem;
   width: 100%;
+}
+
+.button {
+  border-radius: 0 map.get(variables.$border-radius, "md") map.get(variables.$border-radius, "md") 0;
+  height: $height;
+  width: $height;
+}
+
+.container {
+  align-items: center;
+  background: transparent;
+  border-color: palette.border-color("light");
+  border-radius: map.get(variables.$border-radius, md);
+  border-style: solid;
+  border-width: 1px;
+  display: flex;
+  flex-direction: row;
+  gap: map.get(variables.$spacing, "xs");
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    border-color: palette.border-color("dark");
+  }
+
+  &:focus-within {
+    border-color: palette.focus-border-color("light");
+
+    &[data-color-mode="dark"] {
+      border-color: palette.focus-border-color("dark");
+    }
+  }
+
+  &--error {
+    border-color: map.get(palette.$red-palette, 500);
+
+    &[data-color-mode="dark"] {
+      border-color: map.get(palette.$red-palette, 400);
+    }
+  }
 }
 
 .error-text {
@@ -30,56 +72,36 @@
 .input {
   appearance: none;
   background: transparent;
-  border-color: palette.border-color("light");
-  border-radius: map.get(variables.$border-radius, md);
-  border-style: solid;
-  border-width: 1px;
+  border: none;
   box-sizing: border-box;
   color: palette.default-font-color("light");
   font-family: variables.$font-family;
   font-size: variables.$font-size;
   font-style: normal;
   line-height: 1.5rem; // 24px
-  min-height: 3rem;
+  height: $height;
   outline: 0;
   padding-inline: 1rem;
   text-align: start;
   width: 100%;
 
   &[data-color-mode="dark"] {
-    border-color: palette.border-color("dark");
     color: palette.default-font-color("dark");
   }
 
-  &:focus {
-    border-color: palette.focus-border-color("light");
-
-    &[data-color-mode="dark"] {
-      border-color: palette.focus-border-color("dark");
-    }
-  }
-
   &::placeholder {
-    border-color: palette.border-color("light");
+    color: palette.sub-font-color("light");
 
     &[data-color-mode="dark"] {
-      border-color: palette.border-color("dark");
+      color: palette.sub-font-color("dark");
     }
   }
 
   &::-ms-input-placeholder {
-    border-color: palette.border-color("light");
+    color: palette.sub-font-color("light");
 
     &[data-color-mode="dark"] {
-      border-color: palette.border-color("dark");
-    }
-  }
-
-  &--error {
-    border-color: map.get(palette.$red-palette, 500);
-
-    &[data-color-mode="dark"] {
-      border-color: map.get(palette.$red-palette, 400);
+      color: palette.sub-font-color("dark");
     }
   }
 }
@@ -87,6 +109,7 @@
 .label {
   box-sizing: border-box;
   color: palette.sub-font-color("light");
+  font-family: variables.$font-family;
   font-size: 0.825rem; // 14px
   padding-left: 0.75rem;
   width: 100%;
