@@ -4,18 +4,18 @@ import type { KeyboardEvent } from 'preact/compat';
 import { useCallback, useState } from 'preact/hooks';
 
 // components
-import Button from '@/ui/components/Button';
-import CircularLoaderWithIcon from '@/ui/components/CircularLoaderWithIcon';
-import ErrorMessage from '@/ui/components/ErrorMessage';
-import Footer from '@/ui/components/Footer';
-import Heading from '@/ui/components/Heading';
-import HStack from '@/ui/components/HStack';
-import IconButton from '@/ui/components/IconButton';
-import Input from '@/ui/components/Input';
-import Modal from '@/ui/components/Modal';
-import Spacer from '@/ui/components/Spacer';
-import Text from '@/ui/components/Text';
-import VStack from '@/ui/components/VStack';
+import Button from '@/ui/components/buttons/Button';
+import CircularLoaderWithIcon from '@/ui/components/loaders/CircularLoaderWithIcon';
+import ErrorMessage from '@/ui/components/notices/ErrorMessage';
+import Footer from '@/ui/components/containers/Footer';
+import Heading from '@/ui/components/typography/Heading';
+import HStack from '@/ui/components/layouts/HStack';
+import IconButton from '@/ui/components/buttons/IconButton';
+import Input from '@/ui/components/inputs/Input';
+import Modal from '@/ui/components/layouts/Modal';
+import Spacer from '@/ui/components/layouts/Spacer';
+import Text from '@/ui/components/typography/Text';
+import VStack from '@/ui/components/layouts/VStack';
 
 // constants
 import { INVALID_PASSWORD_ERROR } from '@/constants';

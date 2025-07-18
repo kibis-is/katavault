@@ -2,15 +2,15 @@ import type { FunctionComponent } from 'preact';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
-import Button from '@/ui/components/Button';
-import CircularLoaderWithIcon from '@/ui/components/CircularLoaderWithIcon';
-import Heading from '@/ui/components/Heading';
-import HStack from '@/ui/components/HStack';
-import IconButton from '@/ui/components/IconButton';
-import Modal from '@/ui/components/Modal';
-import Spacer from '@/ui/components/Spacer';
-import Text from '@/ui/components/Text';
-import VStack from '@/ui/components/VStack';
+import Button from '@/ui/components/buttons/Button';
+import CircularLoaderWithIcon from '@/ui/components/loaders/CircularLoaderWithIcon';
+import Heading from '@/ui/components/typography/Heading';
+import HStack from '@/ui/components/layouts/HStack';
+import IconButton from '@/ui/components/buttons/IconButton';
+import Modal from '@/ui/components/layouts/Modal';
+import Spacer from '@/ui/components/layouts/Spacer';
+import Text from '@/ui/components/typography/Text';
+import VStack from '@/ui/components/layouts/VStack';
 
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
