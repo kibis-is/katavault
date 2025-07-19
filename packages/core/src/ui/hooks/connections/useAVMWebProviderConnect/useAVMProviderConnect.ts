@@ -13,10 +13,10 @@ export default function useAVMProviderConnect(): State {
   const avmWebClient = useAVMWebClient();
   const logger = useLogger();
   // states
-  const [connector, setConnector] = useState<IDiscoverResult | null>(null);
+  const [connection, setConnection] = useState<IDiscoverResult | null>(null);
   // callbacks
   const connect = useCallback(
-    ({ connector, onError, onSuccess }: ConnectParameters) => {
+    ({ connection: _connection, onError, onSuccess }: ConnectParameters) => {
       const __logPrefix = 'useAVMProviderConnect#connect';
       let listenerID: string;
 
@@ -26,7 +26,7 @@ export default function useAVMProviderConnect(): State {
         return;
       }
 
-      setConnector(connector);
+      setConnection(_connection);
 
       listenerID = avmWebClient.onEnable(({ error, result }) => {
         if (error) {
@@ -37,19 +37,19 @@ export default function useAVMProviderConnect(): State {
           onSuccess(result);
         }
 
-        setConnector(null);
+        setConnection(null);
         avmWebClient.removeListener(listenerID);
       });
 
       avmWebClient.enable({
-        providerId: connector.providerId,
+        providerId: _connection.providerId,
       });
     },
-    [avmWebClient, setConnector]
+    [avmWebClient, setConnection]
   );
 
   return {
     connect,
-    connector,
+    connection,
   };
 }

@@ -40,6 +40,7 @@ import WalletIcon from '@/ui/icons/WalletIcon';
 // types
 import type { StackProps } from '@/ui/types';
 import type { Props } from './types';
+import { AVMWebProviderConnector } from '@/decorators/connectors';
 
 const ConnectAccountModal: FunctionComponent<Props> = ({
   onClose,
@@ -48,7 +49,7 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
   // hooks
   const addAccounts = useAddAccounts();
   const {
-    connector,
+    connection,
     connect,
   } = useAVMWebProviderConnect();
   const { connectors } = useAVMProviderDiscovery();
@@ -74,7 +75,12 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
       onSuccess: ({ accounts }) => {
         addAccounts(accounts.map(({ address, name }) => ({
           __type: AccountTypeEnum.Connected,
-          connectors: [{
+          connectors: [new AVMWebProviderConnector({
+            connections: [{
+
+            }],
+          }){
+
             icon: _connector.icon,
             id: _connector.providerId,
             name: _connector.name,

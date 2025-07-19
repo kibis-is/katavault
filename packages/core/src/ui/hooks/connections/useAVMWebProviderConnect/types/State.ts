@@ -5,7 +5,7 @@ import type ConnectParameters from './ConnectParameters';
 
 interface State {
   connect: (params: ConnectParameters) => void;
-  connector: IDiscoverResult | null;
+  connection: IDiscoverResult | null;
 }
 
 export default State;

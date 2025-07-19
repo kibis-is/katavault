@@ -2,6 +2,7 @@ export * from './accounts';
 export * from './authentication';
 export * from './common';
 export * from './client';
+export * from './connectors';
 export * from './cryptography';
 export * from './encoding';
 export * from './katavault';
