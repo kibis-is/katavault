@@ -1,10 +1,10 @@
 // types
-import type { AvailableWalletConnection } from '@/types';
+import type { WalletConnection } from '@/types';
 
 // configs
 import chain from './chain';
 
-const connection: AvailableWalletConnection = {
+const connection: WalletConnection = {
   chainIDs: [chain.chainID()],
   host: 'kibis.is',
   iconURI:

@@ -24,7 +24,7 @@ import type { Props } from './types';
 // utilities
 import dataURIToImageElement from '@/ui/utilities/dataURIToImageElement';
 
-const ConnectorButton: FunctionComponent<Props> = ({ colorMode, connector, onClick }) => {
+const ConnectionButton: FunctionComponent<Props> = ({ colorMode, connection, onClick }) => {
   // hooks
   const subTextColor = useSubTextColor(colorMode);
   const tabletAndUp = useTabletAndUp();
@@ -32,16 +32,16 @@ const ConnectorButton: FunctionComponent<Props> = ({ colorMode, connector, onCli
   const icon = useMemo(() => {
     const defaultIcon = (<WalletIcon className={clsx(styles.icon)} />);
 
-    if (!connector.icon) {
+    if (!connection.iconURI) {
       return defaultIcon;
     }
 
     return dataURIToImageElement({
       className: clsx(styles.icon),
-      dataURI: connector.icon,
-      title: connector.name,
+      dataURI: connection.iconURI,
+      title: connection.name,
     }) ?? defaultIcon;
-  }, [connector.icon, connector.name]);
+  }, [connection.iconURI, connection.name]);
   // callbacks
   const handleOnClick = useCallback(() => onClick(), [onClick]);
 
@@ -67,12 +67,12 @@ const ConnectorButton: FunctionComponent<Props> = ({ colorMode, connector, onCli
           justify="evenly"
         >
           <Heading colorMode={colorMode} fullWidth={true} size="sm" textAlign={tabletAndUp ? 'center' : 'left'}>
-            {connector.name}
+            {connection.name}
           </Heading>
 
-          {connector.host && (
+          {connection.host && (
             <Text className={clsx(styles.host)} colorMode={colorMode} fullWidth={true} color={subTextColor} size="xs" truncate={true} textAlign={tabletAndUp ? 'center' : 'left'}>
-              {connector.host}
+              {connection.host}
             </Text>
           )}
         </VStack>
@@ -81,4 +81,4 @@ const ConnectorButton: FunctionComponent<Props> = ({ colorMode, connector, onCli
   );
 };
 
-export default ConnectorButton;
+export default ConnectionButton;

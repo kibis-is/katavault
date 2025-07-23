@@ -1,10 +1,9 @@
-import type { IDiscoverResult } from '@agoralabs-sh/avm-web-provider';
-
 // types
+import type { WalletConnection } from '@/types';
 import type { BaseComponentProps } from '@/ui/types';
 
 interface ComponentProps {
-  connector: IDiscoverResult;
+  connection: WalletConnection;
   onClick: () => void;
 }
 

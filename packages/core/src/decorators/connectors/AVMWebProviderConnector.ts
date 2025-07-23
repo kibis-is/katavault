@@ -10,7 +10,7 @@ import AVMAddress from '@/decorators/avm/AVMAddress';
 import { AccountTypeEnum, ConnectorIDEnum } from '@/enums';
 
 // types
-import type { AvailableWalletConnection, ConnectedAccount, ConnectorParameters } from '@/types';
+import type { ConnectedAccount, ConnectorParameters, WalletConnection } from '@/types';
 
 export default class AVMWebProviderConnector extends AbstractConnector {
   /**
@@ -42,7 +42,7 @@ export default class AVMWebProviderConnector extends AbstractConnector {
     name,
     networks,
     providerId,
-  }: IDiscoverResult): AvailableWalletConnection {
+  }: IDiscoverResult): WalletConnection {
     return {
       chainIDs: this._supportedChains.reduce((acc, currentValue) => {
         const network =
@@ -77,11 +77,11 @@ export default class AVMWebProviderConnector extends AbstractConnector {
    * public methods
    */
 
-  public async availableConnections(): Promise<AvailableWalletConnection[]> {
+  public async availableConnections(): Promise<WalletConnection[]> {
     const __logPrefix = `${AVMWebProviderConnector.displayName}#availableConnections`;
 
     return new Promise((resolve) => {
-      let connections: AvailableWalletConnection[] = [];
+      let connections: WalletConnection[] = [];
       let listenerID: string;
 
       listenerID = this._client.onDiscover(({ error, result }) => {
@@ -157,17 +157,13 @@ export default class AVMWebProviderConnector extends AbstractConnector {
           resolve(
             result.accounts.map(({ address, name }) => ({
               __type: AccountTypeEnum.Connected,
-              connectors: [
+              connections: [
                 {
-                  id: AVMWebProviderConnector.id,
-                  connections: [
-                    {
-                      ...connection,
-                      createdAt: new Date().getTime() / 1000,
-                      lastUsedAt: new Date().getTime() / 1000,
-                      sessionID: result.sessionId,
-                    },
-                  ],
+                  connectorID: this.id(),
+                  wallet: connection,
+                  createdAt: new Date().getTime() / 1000,
+                  lastUsedAt: new Date().getTime() / 1000,
+                  sessionID: result.sessionId,
                 },
               ],
               key: base58.encode(AVMAddress.fromAddress(address).publicKey()),

@@ -1,14 +1,17 @@
-import { CAIP002Namespace, VoiTestnet } from '@kibisis/chains';
 import { base58, base64 } from '@kibisis/encoding';
 import { ed25519 } from '@noble/curves/ed25519';
 import { randomBytes } from '@noble/hashes/utils';
 import type { Meta, StoryObj } from '@storybook/preact';
 
 // enums
-import { AccountTypeEnum, EphemeralAccountOriginEnum } from '@/enums';
+import { AccountTypeEnum, ConnectorIDEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // components
 import AccountCard from './AccountCard';
+
+// mocks
+import chain from '@test/mocks/chain';
+import connection from '@test/mocks/connection';
 
 // types
 import { Props } from './types';
@@ -27,24 +30,7 @@ const meta: Meta<Props> = {
         origin: EphemeralAccountOriginEnum.Credential,
       };
     })(),
-    chains: [
-      {
-        ...VoiTestnet,
-        chainID: () => 'avm:mufvzhECYAe3WaU075v0z4k1_SNUIuUPCyBTE-Z_08s',
-        namespace: () => CAIP002Namespace.AVM,
-        networkConfiguration: () => VoiTestnet.networkConfiguration,
-        networkInformation: {
-          feeSinkAddress: 'TBEIGCNK4UCN3YDP2NODK3MJHTUZMYS3TABRM2MVSI2MPUR2V36E5JYHSY',
-          genesisHash: 'mufvzhECYAe3WaU075v0z4k1/SNUIuUPCyBTE+Z/08s=',
-          genesisID: 'voitest-v1.1',
-        },
-        reference: 'mufvzhECYAe3WaU075v0z4k1_SNUIuUPCyBTE-Z_08s',
-        displayName: () => VoiTestnet.displayName,
-        iconURI: () => VoiTestnet.iconURI,
-        nativeCurrency: () => VoiTestnet.nativeCurrency,
-        testnet: () => VoiTestnet.testnet,
-      },
-    ],
+    chains: [chain],
     colorMode: 'dark',
   },
   component: AccountCard,
@@ -79,12 +65,17 @@ export const AccountWithNoName: StoryObj<Props> = {
 };
 
 export const WithConnectedAccount: StoryObj<Props> = {
-  render: (props, { globals, parameters }) => (
+  render: (props, { globals }) => (
     <AccountCard
       {...props}
       account={{
         __type: AccountTypeEnum.Connected,
-        connectors: [parameters.connector],
+        connections: [{
+          connectorID: ConnectorIDEnum.AVMWebProvider,
+          createdAt: new Date().getTime() / 1000,
+          lastUsedAt: new Date().getTime() / 1000,
+          wallet: connection,
+        }],
         key: props.account.key,
         name: props.account.name,
       }}

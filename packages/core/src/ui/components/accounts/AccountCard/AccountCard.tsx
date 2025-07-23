@@ -97,7 +97,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
           title={(
             <Text colorMode={colorMode} fullWidth={true} textAlign="left">
               {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.networks') : translate('headings.connections', {
-                count: account.connectors.length,
+                count: account.connections.length,
               })}
             </Text>
           )}

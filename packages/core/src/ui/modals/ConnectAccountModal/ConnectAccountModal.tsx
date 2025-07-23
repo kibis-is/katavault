@@ -1,12 +1,10 @@
-import type { IDiscoverResult } from '@agoralabs-sh/avm-web-provider';
-import { base58 } from '@kibisis/encoding';
 import type { FunctionComponent } from 'preact';
-import { useCallback, useMemo } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
 import Button from '@/ui/components/buttons/Button';
 import CircularLoaderWithIcon from '@/ui/components/loaders/CircularLoaderWithIcon';
-import ConnectorButton from '@/ui/components/buttons/ConnectorButton';
+import ConnectionButton from '@/ui/components/buttons/ConnectionButton';
 import Heading from '@/ui/components/typography/Heading';
 import HStack from '@/ui/components/layouts/HStack';
 import IconButton from '@/ui/components/buttons/IconButton';
@@ -19,16 +17,14 @@ import VStack from '@/ui/components/layouts/VStack';
 // constants
 import { DEFAULT_PADDING } from '@/ui/constants';
 
-// decorators
-import AVMAddress from '@/decorators/avm/AVMAddress';
-
 // enums
-import { AccountTypeEnum } from '@/enums';
+import { ConnectorIDEnum } from '@/enums';
 
 // hooks
 import useAddAccounts from '@/ui/hooks/accounts/useAddAccount';
-import useAVMWebProviderConnect from '@/ui/hooks/connections/useAVMWebProviderConnect';
-import useAVMProviderDiscovery from '@/ui/hooks/connections/useAVMProviderDiscovery';
+import useAvailableConnections from '@/ui/hooks/connectors/useAvailableConnections';
+import useConnectors from '@/ui/hooks/connectors/useConnectors';
+import useLogger from '@/ui/hooks/logging/useLogger';
 import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
 import useTabletAndUp from '@/ui/hooks/screens/useTabletAndUp';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
@@ -38,9 +34,9 @@ import CloseIcon from '@/ui/icons/CloseIcon';
 import WalletIcon from '@/ui/icons/WalletIcon';
 
 // types
+import type { ConnectedAccount, WalletConnection } from '@/types';
 import type { StackProps } from '@/ui/types';
 import type { Props } from './types';
-import { AVMWebProviderConnector } from '@/decorators/connectors';
 
 const ConnectAccountModal: FunctionComponent<Props> = ({
   onClose,
@@ -48,14 +44,14 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
 }) => {
   // hooks
   const addAccounts = useAddAccounts();
-  const {
-    connection,
-    connect,
-  } = useAVMWebProviderConnect();
-  const { connectors } = useAVMProviderDiscovery();
+  const availableConnections = useAvailableConnections();
+  const connectors = useConnectors();
+  const logger = useLogger();
   const colorMode = useSettingsColorMode();
   const tabletAndUp = useTabletAndUp();
   const translate = useTranslate();
+  // states
+  const [connection, setConnection] = useState<WalletConnection | null>(null);
   // memos
   const defaultBodyProps = useMemo<Partial<StackProps>>(() => ({
     fullWidth: true,
@@ -66,44 +62,42 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
     spacing: 'md',
   }), []);
   // callbacks
-  const handleOnConnectorClick = useCallback((_connector: IDiscoverResult) => () => {
-    connect({
-      connector: _connector,
-      onError: (error) => {
-        console.error(error);
-      },
-      onSuccess: ({ accounts }) => {
-        addAccounts(accounts.map(({ address, name }) => ({
-          __type: AccountTypeEnum.Connected,
-          connectors: [new AVMWebProviderConnector({
-            connections: [{
+  const handleOnConnectionClick = useCallback((connectorID: ConnectorIDEnum, connection: WalletConnection) => async () => {
+    const __logPrefix = `${ConnectAccountModal.displayName}#handleOnConnectionClick`;
+    const connector = connectors.find((_connector) => _connector.id() === connectorID) ?? null;
+    let accounts: ConnectedAccount[];
 
-            }],
-          }){
+    if (!connector) {
+      logger?.error(`${__logPrefix} - connector not found`);
 
-            icon: _connector.icon,
-            id: _connector.providerId,
-            name: _connector.name,
-            host: _connector.host,
-          }],
-          key: base58.encode(AVMAddress.fromAddress(address).publicKey()),
-          name,
-        })));
-        onClose();
-      },
-    });
-  }, [addAccounts, connect, onClose]);
+      return;
+    }
+
+    setConnection(connection);
+
+    try {
+      accounts = await connector.connect(connection.id);
+
+      addAccounts(accounts);
+      onClose();
+    } catch (error) {
+      logger?.error(`${__logPrefix} - `, error);
+    } finally {
+      setConnection(null);
+    }
+
+  }, [addAccounts, connectors, logger, onClose, setConnection]);
 
   return (
     <Modal
       colorMode={colorMode}
-      body={connector ? (
+      body={connection ? (
         <VStack {...defaultBodyProps} align="center">
           <CircularLoaderWithIcon colorMode={colorMode} icon={<WalletIcon />} size="lg" />
 
           <Text colorMode={colorMode} fullWidth={true} textAlign="center">
             {translate('captions.connectingWallet', {
-              name: connector.name,
+              name: connection.name,
             })}
           </Text>
         </VStack>
@@ -120,12 +114,12 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
             justify="center"
             spacing="sm"
           >
-            {connectors.map((connector) => (
-              <ConnectorButton
+            {availableConnections.map(({ connectorID, ...connection }, index) => (
+              <ConnectionButton
                 colorMode={colorMode}
-                connector={connector}
-                key={connector.providerId}
-                onClick={handleOnConnectorClick(connector)}
+                connection={connection}
+                key={`${connection.id}-${index}`}
+                onClick={handleOnConnectionClick(connectorID, connection)}
               />
             ))}
           </Stack>
@@ -156,5 +150,7 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
     />
   );
 };
+
+ConnectAccountModal.displayName = 'ConnectAccountModal';
 
 export default ConnectAccountModal;

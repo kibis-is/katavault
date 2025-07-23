@@ -13,23 +13,25 @@ import styles from './styles.module.scss';
 
 // types
 import type { ConnectedAccountCardContentProps } from './types';
+
+// utilities
 import dataURIToImageElement from '@/ui/utilities/dataURIToImageElement';
 
 const ConnectedAccountCardContent: FunctionComponent<ConnectedAccountCardContentProps> = ({ account }) => {
   return (
     <VStack className={clsx(styles.footerContent)}>
       <HStack spacing="xs">
-        {account.connectors.map((connector) => {
+        {account.connections.map(({ wallet }) => {
           const defaultIcon = (<WalletIcon className={clsx(styles.connectorIcon)} />);
 
-          if (!connector.icon) {
+          if (!wallet.iconURI) {
             return defaultIcon;
           }
 
           return dataURIToImageElement({
             className: clsx(styles.connectorIcon),
-            dataURI: connector.icon,
-            title: connector.name,
+            dataURI: wallet.iconURI,
+            title: wallet.name,
           }) ?? defaultIcon;
         })}
       </HStack>
