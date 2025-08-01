@@ -1,6 +1,8 @@
-import { Chain } from '@kibisis/chains';
+import { Chain, ChainConstructor } from '@kibisis/chains';
 import { base58 } from '@kibisis/encoding';
-import type { ILogger } from '@kibisis/utilities';
+
+// _base
+import { BaseClass } from '@/_base';
 
 // constants
 import {
@@ -17,10 +19,13 @@ import { AccountStore } from '@/decorators';
 import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError, NotAuthenticatedError } from '@/errors';
+import { AccountDoesNotExistError, FailedToFetchChainInformationError, NotAuthenticatedError } from '@/errors';
 
 // facades
 import AppManager from './AppManager';
+
+// strategies
+import { TransactionContext } from '@/strategies';
 
 // types
 import type {
@@ -36,7 +41,10 @@ import type {
   PasskeyStoreSchema,
   RenderVaultAppParameters,
   SetAccountNameByKeyParameters,
+  SignRawTransactionParameter,
   Vault,
+  WithAccountStoreItem,
+  WithChain,
 } from '@/types';
 
 // utilities
@@ -50,25 +58,31 @@ import {
   usernameFromVault,
 } from '@/utilities';
 
-export default class Katavault {
-  // public static variables
+export default class Katavault extends BaseClass {
+  /**
+   * public static properties
+   */
   public static readonly displayName = 'Katavault';
-  // private variables
+  /**
+   * private properties
+   */
   private _accountsStore: AccountStore | null = null;
   private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
   private _chains: Chain[];
   private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
-  private readonly _logger: ILogger;
+  private readonly _transactionContext: TransactionContext;
   private _vault: Vault | null = null;
 
-  public constructor({ chains, clientInformation, debug = false, logger }: KatavaultParameters) {
+  public constructor({ chains, clientInformation, debug = false, ...commonParams }: KatavaultParameters) {
+    super(commonParams);
+
     this._chains = chains;
     this._clientInformation = clientInformation;
     this._debug = debug;
-    this._logger = logger;
-    this._appManager = new AppManager({ logger });
+    this._appManager = new AppManager(commonParams);
+    this._transactionContext = new TransactionContext(commonParams);
   }
 
   /**
@@ -317,20 +331,33 @@ export default class Katavault {
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
    * chain by the chain ID.
    * @param {Chain} chain - The chain to be added.
+   * @throws {FailedToFetchChainInformationError} If the chain failed to fetch the chain information.
    * @public
    */
-  public async addChain(chain: Chain): Promise<void> {
-    const index = this._chains.findIndex((_chain) => _chain.chainID() === chain.chainID());
+  public async addChain(chain: ChainConstructor): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#addChain`;
+    let _chain: Chain;
+    let index: number;
+
+    try {
+      _chain = await chain.initialize();
+    } catch (error) {
+      this._logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
+
+      throw new FailedToFetchChainInformationError(error.message);
+    }
+
+    index = this._chains.findIndex((value) => value.chainID() === _chain.chainID());
 
     // if the chain already exists, update the chain
     if (index >= 0) {
-      this._chains[index] = chain;
+      this._chains[index] = _chain;
 
       return;
     }
 
     // otherwise, add the chain
-    this._chains.push(chain);
+    this._chains.push(_chain);
 
     return;
   }
@@ -588,7 +615,7 @@ export default class Katavault {
    * **NOTE:** The message is prepended with "MX" for domain separation.
    * @param {SignMessageParameters} params - The signer, the message and optional output encoding.
    * @returns {Promise<string | Uint8Array>} A promise that resolves to the signature of the signed message. If the
-   * encoding parameter was specified, the signature will be encoded in that format, otherwise signature will be in raw
+   * encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in raw
    * bytes.
    * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
    * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
@@ -619,4 +646,69 @@ export default class Katavault {
   //       return signature;
   //   }
   // }
+
+  /**
+   * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will contain
+   * the signature of the signed transaction whose index will match that of the supplied transaction array.
+   *
+   * @param {SignRawTransactionParameter[]} params - An array containing the base58 encoded account ID, the chain ID and
+   * the raw transaction to be signed.
+   * @return {Promise<(Uint8Array | null)[]>} A promise that resolves to an array of signed transaction data or null
+   * values if the transaction failed to be signed by the designated signer (account).
+   * @throws {NotAuthenticatedError} If the user is not authenticated.
+   * @throws {ChainNotSupportedError} If the specified chain is not supported.
+   * @throws {AccountDoesNotExistError} If an account does not exist in the vault.
+   */
+  public async signRawTransactions(params: SignRawTransactionParameter[]): Promise<(Uint8Array | null)[]> {
+    const __logPrefix = `${Katavault.displayName}#signRawTransactions`;
+    const extendedParams: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[] = Array.from(
+      { length: params.length },
+      () => null
+    );
+    let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
+    let chain: Chain | null;
+
+    if (!this.isAuthenticated() || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    for (let i = 0; i < params.length; i++) {
+      const { accountID, chainID, transaction } = params[i];
+
+      chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+      if (!chain) {
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported, ignoring`);
+
+        continue;
+      }
+
+      account = await (
+        this._accountsStore ??
+        new AccountStore({
+          logger: this._logger,
+          vault: this._vault,
+        })
+      ).accountByKey(accountID);
+
+      if (!account) {
+        this._logger.warn(`account "${accountID}", at transaction index "${i}", does not exist, ignoring`);
+
+        continue;
+      }
+
+      // TODO: check if connected account supports chain ID
+      // if (account.__type === AccountTypeEnum.Connected) {
+      //
+      // }
+
+      extendedParams[i] = {
+        account,
+        chain,
+        transaction,
+      };
+    }
+
+    return await this._transactionContext.signRawTransactions(extendedParams);
+  }
 }

@@ -123,8 +123,8 @@ importers:
         specifier: 'catalog:'
         version: 2.2.0
       '@kibisis/encoding':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       '@kibisis/utilities':
         specifier: 'catalog:'
         version: 1.0.0
@@ -1873,8 +1873,8 @@ packages:
   '@kibisis/chains@2.2.0':
     resolution: {integrity: sha512-iab8UIHgpB30sek6icUE0HoLEjfEkgazsfPgjAnGG6IfgjuQKB274JPeNNT3aPjoDOmmChdi4pysO7TuvNfPyA==}
 
-  '@kibisis/encoding@1.0.0':
-    resolution: {integrity: sha512-7FiRUEcFXcgnNk4R4qaklQn2qGWfV2RNE5hAGYq98Kn3nthnvL+FQC8xSQ6MQI32IX6vIjBrJiodffKHgrUuEQ==}
+  '@kibisis/encoding@1.0.1':
+    resolution: {integrity: sha512-MqiHgF2DRUzpJIFua6zl15uUGzVdfbvUhYY6YLJvg8GVokSEBeOmZQRVEeAaBdPI1SWfK/LbA/A5IOMJYVO5jg==}
 
   '@kibisis/utilities@1.0.0':
     resolution: {integrity: sha512-txMnNKLYubNW1N5tOMThHnjGdLnuF8fJ1liGIwAZO2TT6U5J9EFCzyv1k/Y35ilvAzyGK48F5P20qXiOdJyZxg==}
@@ -10222,12 +10222,12 @@ snapshots:
 
   '@kibisis/chains@2.2.0':
     dependencies:
-      '@kibisis/encoding': 1.0.0
+      '@kibisis/encoding': 1.0.1
       axios: 1.10.0
     transitivePeerDependencies:
       - debug
 
-  '@kibisis/encoding@1.0.0':
+  '@kibisis/encoding@1.0.1':
     dependencies:
       '@oslojs/encoding': 1.1.0
       '@stablelib/utf8': 2.0.1

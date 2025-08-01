@@ -1,5 +1,6 @@
 export * from './accounts';
 export * from './authentication';
+export * from './chains';
 export * from './common';
 export * from './client';
 export * from './connectors';

@@ -74,7 +74,7 @@
     "@agoralabs-sh/bytes": "^1.0.0",
     "@agoralabs-sh/uuid": "^1.1.0",
     "@kibisis/chains": "catalog:",
-    "@kibisis/encoding": "^1.0.0",
+    "@kibisis/encoding": "^1.0.1",
     "@kibisis/utilities": "catalog:",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
