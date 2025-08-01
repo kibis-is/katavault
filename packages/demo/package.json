@@ -1,0 +1,55 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "This is a demo that explores the features of Katavault from the perspective of a dApp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kibis-is/katavault"
+  },
+  "author": {
+    "name": "Kieran O'Neill",
+    "email": "hello@kieranoneill.com",
+    "url": "https://github.com/kieranroneill"
+  },
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && vite build --config vite.config.ts",
+    "build:dependencies": "./scripts/prebuild.sh",
+    "clean": "shx rm -rf dist && shx rm -rf tsconfig.*.tsbuildinfo",
+    "dev": "pnpm build:dependencies && vite dev --config vite.config.ts",
+    "lint": "eslint .",
+    "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts,tsx}\"",
+    "test": "exit 0"
+  },
+  "devDependencies": {
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "^18.x",
+    "@types/react-dom": "18.x",
+    "@vitejs/plugin-react": "^4.3.4",
+    "chalk": "catalog:",
+    "concurrently": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "globals": "catalog:",
+    "prettier": "catalog:",
+    "shx": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:"
+  },
+  "dependencies": {
+    "@kibisis/chains": "catalog:",
+    "@kibisis/katavault-core": "workspace:",
+    "@kibisis/utilities": "catalog:",
+    "react": "^18.x",
+    "react-dom": "^18.x"
+  }
+}

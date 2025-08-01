@@ -17,7 +17,7 @@ permissions:
   pull-requests: write # to be able to comment on released pull requests
 
 jobs:
-  release_core:
+  core:
     name: "Release - @kibisis/katavault-core"
     uses: ./.github/workflows/publish_release.yml
     with:
@@ -27,9 +27,9 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPM_PUBLISH_PACKAGES_ACCESS_TOKEN }}
 
   # **MUST** come after [release_core] as it uses them as dependencies
-  release_react:
+  react:
     name: "Release - @kibisis/katavault-react"
-    needs: [release_core]
+    needs: [core]
     uses: ./.github/workflows/publish_release.yml
     with:
       package_dir: "react"

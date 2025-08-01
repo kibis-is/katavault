@@ -11,6 +11,7 @@ jobs:
       pull-requests: read
     outputs:
       core: ${{ steps.filter.outputs.core }}
+      demo: ${{ steps.filter.outputs.demo }}
       react: ${{ steps.filter.outputs.react }}
     steps:
       - name: "📥 Filter"
@@ -20,6 +21,8 @@ jobs:
           filters: |
             core:
               - 'packages/core/**'
+            demo:
+              - 'packages/demo/**'
             react:
               - 'packages/react/**'
 
@@ -50,7 +53,7 @@ jobs:
   # package specific
   ##
 
-  lint_build_test_core:
+  core:
     name: "Lint, Build & Test - @kibisis/katavault-core"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.core == 'true' }}
@@ -58,7 +61,15 @@ jobs:
     with:
       package_name: "@kibisis/katavault-core"
 
-  lint_build_test_react:
+  demo:
+    name: "Lint, Build & Test - demo"
+    needs: [changed_files, validate_pr_title]
+    if: ${{ needs.changed_files.outputs.demo == 'true' }}
+    uses: ./.github/workflows/lint_build_test.yml
+    with:
+      package_name: "demo"
+
+  react:
     name: "Lint, Build & Test - @kibisis/katavault-react"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.react == 'true' }}
