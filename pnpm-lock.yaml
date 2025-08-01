@@ -207,9 +207,6 @@ importers:
       '@types/zxcvbn':
         specifier: ^4.4.5
         version: 4.4.5
-      algosdk:
-        specifier: ^3.x
-        version: 3.2.0
       chalk:
         specifier: 'catalog:'
         version: 5.4.1

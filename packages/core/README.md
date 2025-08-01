@@ -44,13 +44,7 @@
 
 ### 1.1. Installation
 
-First, install the dependencies:
-
-```shell
-npm install algosdk@3.x
-```
-
-Then install the SDK using:
+Install the SDK using:
 ```shell
 npm install @kibisis/katavault-core
 ```

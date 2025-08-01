@@ -46,7 +46,6 @@
     "@storybook/theming": "^8.6.14",
     "@types/node": "catalog:",
     "@types/zxcvbn": "^4.4.5",
-    "algosdk": "^3.x",
     "chalk": "catalog:",
     "concurrently": "catalog:",
     "eslint": "catalog:",
@@ -65,9 +64,6 @@
     "vite-plugin-dts": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
-  },
-  "peerDependencies": {
-    "algosdk": "^3.x"
   },
   "dependencies": {
     "@agoralabs-sh/avm-web-provider": "^1.7.0",

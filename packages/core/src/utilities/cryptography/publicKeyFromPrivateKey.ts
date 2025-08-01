@@ -5,6 +5,7 @@ import { InvalidPrivateKeyError } from '@/errors';
 
 /**
  * Gets the public for a given private key.
+ *
  * @param {Uint8Array} privateKey - The private key.
  * @returns {Uint8Array} The public key for the given private key.
  * @throws {InvalidPrivateKeyError} If the supplied private key is invalid.
