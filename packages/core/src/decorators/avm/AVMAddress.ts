@@ -15,11 +15,15 @@ import { InvalidAVMAddressError } from '@/errors';
  * @see {@link https://developer.algorand.org/docs/get-details/accounts/}
  */
 export default class AVMAddress {
-  // public static variables
+  /**
+   * public static properties
+   */
   public static addressByteLength = 36;
   public static checksumByteLength = 4;
   public static displayName = 'AVMAddress';
-  // private variables
+  /**
+   * private properties
+   */
   private readonly _publicKey: Uint8Array;
 
   private constructor(publicKey: Uint8Array) {

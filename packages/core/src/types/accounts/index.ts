@@ -4,4 +4,5 @@ export type { default as ConnectedAccount } from './ConnectedAccount';
 export type { default as ConnectedAccountStoreItem } from './ConnectedAccountStoreItem';
 export type { default as EphemeralAccount } from './EphemeralAccount';
 export type { default as EphemeralAccountStoreItem } from './EphemeralAccountStoreItem';
+export type { default as EphemeralAccountStoreItemWithDecryptedKeyData } from './EphemeralAccountStoreItemWithDecryptedKeyData';
 export type { default as WithAccountStoreItem } from './WithAccountStoreItem';

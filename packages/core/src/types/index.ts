@@ -10,6 +10,7 @@ export * from './katavault';
 export * from './passkeys';
 export * from './settings';
 export * from './signing';
+export * from './transactions';
 export * from './ui';
 export * from './user';
 export * from './vault';

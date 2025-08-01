@@ -5,4 +5,5 @@ export * from './avm';
 export * from './chains';
 export * from './connectors';
 export * from './cryptography';
+export * from './signing';
 export * from './ui';

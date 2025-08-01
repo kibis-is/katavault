@@ -30,12 +30,12 @@ export default class TransactionContext extends BaseClass {
    */
 
   public async signRawTransactions(
-    params: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[]
+    parameters: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[]
   ): Promise<(Uint8Array | null)[]> {
     const __logPrefix = `${TransactionContext.displayName}#signRawTransactions`;
     // group the transactions into a map by the namespace, so we can pass it to a strategy - ensuring we add the index
     // so we know where the transaction belongs in the original list
-    const transactionsByNamespaceMap = params.reduce((acc, currentValue, index) => {
+    const transactionsByNamespaceMap = parameters.reduce((acc, currentValue, index) => {
       let entry: WithIndex<WithAccountStoreItem<Record<'transaction', Uint8Array>>>[] | null;
 
       if (!currentValue) {
@@ -73,7 +73,7 @@ export default class TransactionContext extends BaseClass {
     const results = Array.from<
       WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null,
       Uint8Array | null
-    >({ length: params.length }, () => null); // create the results - defaulting to null values
+    >({ length: parameters.length }, () => null); // create the results - defaulting to null values
     let signedTransactions: WithIndex<Record<'signature', Uint8Array | null>>[] = [];
 
     // for each namespace, use the corresponding strategy to handle the transaction signing

@@ -1,5 +1,3 @@
-export const ACCOUNT_PASSKEY_CREDENTIAL_ID_PREFIX = 'passkey';
-export const ACCOUNT_PASSWORD_CREDENTIAL_ID_PREFIX = 'password';
 export const IDB_ACCOUNTS_STORE_NAME = 'accounts';
 export const IDB_DB_NAME_PREFIX = 'katavault';
 export const IDB_PASSKEY_STORE_NAME = 'passkey';

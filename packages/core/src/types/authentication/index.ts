@@ -1,9 +1,10 @@
 export type { default as AuthenticateWithPasskeyParameters } from './AuthenticateWithPasskeyParameters';
 export type { default as AuthenticateWithPasswordParameters } from './AuthenticateWithPasswordParameters';
 export type { default as AuthenticationStore } from './AuthenticationStore';
+export type { default as AuthenticationStoreInterface } from './AuthenticationStoreInterface';
 export type { default as AuthenticationStoreWithPasskey } from './AuthenticationStoreWithPasskey';
 export type { default as AuthenticationStoreWithPassword } from './AuthenticationStoreWithPassword';
-export type { default as BaseAuthenticationStore } from './BaseAuthenticationStore';
 export type { default as CredentialIDParameters } from './CredentialIDParameters';
+export type { default as CreateCredentialIDParameters } from './CreateCredentialIDParameters';
 export type { default as PasskeyStoreSchema } from './PasskeyStoreSchema';
 export type { default as PasswordStoreSchema } from './PasswordStoreSchema';

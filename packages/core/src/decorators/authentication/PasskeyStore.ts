@@ -1,15 +1,17 @@
 import { generate } from '@agoralabs-sh/uuid';
-import { base64, utf8 } from '@kibisis/encoding';
+import { base58, base64, utf8 } from '@kibisis/encoding';
 import { randomBytes } from '@noble/hashes/utils';
 
 // constants
 import { IDB_PASSKEY_STORE_NAME } from '@/constants';
 
 // decorators
+import { CredentialID } from '@/decorators';
 import BaseStore from '@/decorators/_base/BaseStore';
 
 // errors
 import {
+  DecryptionError,
   FailedToAuthenticatePasskeyError,
   FailedToRegisterPasskeyError,
   NotAuthenticatedError,
@@ -20,7 +22,9 @@ import {
 // types
 import type {
   AuthenticatePasskeyParameters,
-  BaseAuthenticationStore,
+  AuthenticationStoreInterface,
+  EphemeralAccountStoreItem,
+  EphemeralAccountStoreItemWithDecryptedKeyData,
   GenerateEncryptionKeyFromKeyMaterialParameters,
   PasskeyStoreSchema,
   RegisterPasskeyParameters,
@@ -30,8 +34,10 @@ import type {
 // utilities
 import { bufferSourceToUint8Array } from '@/utilities';
 
-export default class PasskeyStore extends BaseStore implements BaseAuthenticationStore {
-  // private static variables
+export default class PasskeyStore extends BaseStore implements AuthenticationStoreInterface {
+  /**
+   * private static properties
+   */
   private static readonly _challengeByteSize = 32; // 32-bytes
   private static readonly _derivationKeyAlgorithm = 'HKDF';
   private static readonly _derivationKeyHashAlgorithm = 'SHA-256';
@@ -39,9 +45,13 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   private static readonly _encryptionKeyBitSize = 256; // 256-bits
   private static readonly _initializationVectorByteSize = 12; // 12-bytes
   private static readonly _saltByteSize = 32; // 32-bytes
-  // public static variables
+  /**
+   * public static properties
+   */
   public static readonly displayName = 'PasskeyStore';
-  // private variables
+  /**
+   * private properties
+   */
   private _keyMaterial: Uint8Array | null = null;
 
   public constructor(params: StoreParameters) {
@@ -167,7 +177,7 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
   }
 
   /**
-   * Convenience function that simply checks if the browser supports public key WebAuthn.
+   * Checks if the browser supports public key WebAuthn.
    * @returns {boolean} true of the browser supports public key WebAuthn, false otherwise.
    * @public
    * @static
@@ -305,6 +315,40 @@ export default class PasskeyStore extends BaseStore implements BaseAuthenticatio
     );
 
     return bufferSourceToUint8Array(decryptedBytes);
+  }
+
+  /**
+   * Decrypts the ephemeral account's key data (private key).
+   *
+   * @param {EphemeralAccountStoreItem} account - The ephemeral account.
+   * @returns {Promise<EphemeralAccountStoreItemWithDecryptedKeyData>} A promise that resolves to the ephemeral account
+   * with the key data (private key) decrypted.
+   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
+   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
+   * credentials.
+   * @private
+   */
+  public async decryptEphemeralAccount(
+    account: EphemeralAccountStoreItem
+  ): Promise<EphemeralAccountStoreItemWithDecryptedKeyData> {
+    const __logPrefix = `${PasskeyStore.displayName}#decryptEphemeralAccount`;
+    const credentialID = CredentialID.fromString(account.credentialID);
+    const passkey = await this.passkey();
+    let _error: string;
+
+    // check that the account is encrypted using the correct credential
+    if (!passkey || credentialID.verify(passkey.credentialID)) {
+      _error = `account "${account.key}" found is not encrypted using the supplied passkey`;
+
+      this._logger.error(`${__logPrefix}: ${_error}`);
+
+      throw new DecryptionError(_error);
+    }
+
+    return {
+      ...account,
+      keyData: await this.decryptBytes(base58.decode(account.keyData)),
+    };
   }
 
   /**

@@ -1,5 +1,5 @@
 import { Chain, ChainConstructor } from '@kibisis/chains';
-import { base58 } from '@kibisis/encoding';
+import { base58, base64, hex } from '@kibisis/encoding';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -13,19 +13,24 @@ import {
 } from '@/constants';
 
 // decorators
-import { AccountStore } from '@/decorators';
+import { AccountStore, CredentialID } from '@/decorators';
 
 // enums
 import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
-import { AccountDoesNotExistError, FailedToFetchChainInformationError, NotAuthenticatedError } from '@/errors';
+import {
+  AccountDoesNotExistError,
+  ChainNotSupportedError,
+  FailedToFetchChainInformationError,
+  NotAuthenticatedError,
+} from '@/errors';
 
 // facades
 import AppManager from './AppManager';
 
 // strategies
-import { TransactionContext } from '@/strategies';
+import { SignContext, TransactionContext } from '@/strategies';
 
 // types
 import type {
@@ -41,17 +46,18 @@ import type {
   PasskeyStoreSchema,
   RenderVaultAppParameters,
   SetAccountNameByKeyParameters,
+  SignMessageParameters,
   SignRawTransactionParameter,
   Vault,
   WithAccountStoreItem,
   WithChain,
+  WithEncoding,
 } from '@/types';
 
 // utilities
 import {
   authenticateWithPasskey,
   authenticateWithPassword,
-  credentialID,
   initializeVault,
   privateKeyFromPasswordCredentials,
   publicKeyFromPrivateKey,
@@ -72,6 +78,7 @@ export default class Katavault extends BaseClass {
   private _chains: Chain[];
   private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
+  private readonly _signContext: SignContext;
   private readonly _transactionContext: TransactionContext;
   private _vault: Vault | null = null;
 
@@ -82,6 +89,7 @@ export default class Katavault extends BaseClass {
     this._clientInformation = clientInformation;
     this._debug = debug;
     this._appManager = new AppManager(commonParams);
+    this._signContext = new SignContext(commonParams);
     this._transactionContext = new TransactionContext(commonParams);
   }
 
@@ -90,66 +98,12 @@ export default class Katavault extends BaseClass {
    */
 
   /**
-   * Gets the decrypted ephemeral account's private key by the base58 encoded public key.
-   * @param {string} key - The public key, encoded with base58, of the account to get the private key from.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted private key or null if the private key
-   * could not be retrieved.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @throws {DecryptionError} If there was an issue with decryption or the credentials were not found.
-   * @private
-   */
-  // private async _decryptEphemeralAccountByKey(key: string): Promise<Uint8Array | null> {
-  //   const __logPrefix = `${Katavault.displayName}#_decryptEphemeralAccountByKey`;
-  //   const account = await this._ephemeralAccountStore.accountByKey(key);
-  //   let credentialID: string | null;
-  //   let passkey: PasskeyStoreSchema | null;
-  //   let passwordHash: string | null;
-  //
-  //   if (!account) {
-  //     this._logger.debug(`${__logPrefix}: account "${key}" not found`);
-  //
-  //     return null;
-  //   }
-  //
-  //   switch (this._authenticationStore?.__type) {
-  //     case AuthenticationMethodEnum.Passkey:
-  //       credentialID = (account as EphemeralAccountStoreItemWithPasskey).credentialID ?? null;
-  //       passkey = await this._authenticationStore.store.passkey();
-  //
-  //       // check that the account is encrypted using the correct credential
-  //       if (!credentialID || !passkey || credentialID !== passkey.credentialID) {
-  //         this._logger.debug(
-  //           `${__logPrefix}: account "${key}" found, but not encrypted using the supplied passkey`
-  //         );
-  //
-  //         return null;
-  //       }
-  //
-  //       return await this._authenticationStore.store.decryptBytes(base58ToBytes(account.keyData));
-  //     case AuthenticationMethodEnum.Password:
-  //       passwordHash = (account as EphemeralAccountStoreItemWithPassword).passwordHash ?? null;
-  //
-  //       // check if the account was encrypted using the correct password
-  //       if (!passwordHash || passwordHash !== bytesToHex(this._authenticationStore.store.hash())) {
-  //         this._logger.debug(
-  //           `${__logPrefix}: account "${key}" found, but not encrypted using the supplied password`
-  //         );
-  //
-  //         return null;
-  //       }
-  //
-  //       return await this._authenticationStore.store.decryptBytes(base58ToBytes(account.keyData));
-  //     default:
-  //       throw new NotAuthenticatedError('not authenticated');
-  //   }
-  // }
-
-  /**
    * Generates a credential account in the wallet. The credential account is an account derived from the user's
    * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
    * of the username, password and hostname.
    *
    * **NOTE:** Requires authentication.
+   *
    * @returns {Promise<Account>} A promise that resolves to the generated credential account.
    * @throws {EncryptionError} If the account's private key failed to be encrypted.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
@@ -159,7 +113,7 @@ export default class Katavault extends BaseClass {
     const __logPrefix = `${Katavault.displayName}#_generateCredentialAccountIfNoneExists`;
     let account: EphemeralAccountStoreItem | null;
     let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
-    let _credentialID: string;
+    let _credentialID: CredentialID;
     let encryptedKeyData: Uint8Array;
     let key: string;
     let keyMaterial: Uint8Array | null;
@@ -184,7 +138,7 @@ export default class Katavault extends BaseClass {
           throw new NotAuthenticatedError('not authenticated');
         }
 
-        _credentialID = credentialID({
+        _credentialID = CredentialID.create({
           method: AuthenticationMethodEnum.Passkey,
           passkeyCredentialID: passkey.credentialID,
         });
@@ -194,7 +148,9 @@ export default class Katavault extends BaseClass {
         account =
           (accounts.find(
             (value) =>
-              value.__type === AccountTypeEnum.Ephemeral && value.credentialID === _credentialID && value.key === key
+              value.__type === AccountTypeEnum.Ephemeral &&
+              value.credentialID === _credentialID.toString() &&
+              value.key === key
           ) as EphemeralAccountStoreItem | undefined) ?? null;
 
         if (account) {
@@ -213,7 +169,7 @@ export default class Katavault extends BaseClass {
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
         account = {
           __type: AccountTypeEnum.Ephemeral,
-          credentialID: _credentialID,
+          credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
           name: username,
@@ -239,7 +195,7 @@ export default class Katavault extends BaseClass {
           throw new NotAuthenticatedError('not authenticated');
         }
 
-        _credentialID = credentialID({
+        _credentialID = CredentialID.create({
           method: AuthenticationMethodEnum.Password,
           password,
         });
@@ -254,7 +210,9 @@ export default class Katavault extends BaseClass {
         account =
           (accounts.find(
             (value) =>
-              value.__type === AccountTypeEnum.Ephemeral && value.credentialID === _credentialID && value.key === key
+              value.__type === AccountTypeEnum.Ephemeral &&
+              value.credentialID === _credentialID.toString() &&
+              value.key === key
           ) as EphemeralAccountStoreItem | undefined) ?? null;
 
         // if a credential account already exists, return it
@@ -275,7 +233,7 @@ export default class Katavault extends BaseClass {
 
         account = {
           __type: AccountTypeEnum.Ephemeral,
-          credentialID: _credentialID,
+          credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
           name: username,
@@ -307,8 +265,9 @@ export default class Katavault extends BaseClass {
    * Gets a list of accounts within the wallet.
    *
    * **NOTE:** Requires authentication.
+   *
    * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
   public async accounts(): Promise<Account[]> {
@@ -330,6 +289,7 @@ export default class Katavault extends BaseClass {
   /**
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
    * chain by the chain ID.
+   *
    * @param {Chain} chain - The chain to be added.
    * @throws {FailedToFetchChainInformationError} If the chain failed to fetch the chain information.
    * @public
@@ -364,6 +324,7 @@ export default class Katavault extends BaseClass {
 
   /**
    * Opens up a modal to allow the user to choose how to authenticate.
+   *
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
@@ -391,6 +352,7 @@ export default class Katavault extends BaseClass {
 
   /**
    * Authenticates with a passkey.
+   *
    * @param {AuthenticateWithPasskeyParameters} params - The user information.
    * @param {UserInformation} params.user - The user information.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
@@ -425,6 +387,7 @@ export default class Katavault extends BaseClass {
 
   /**
    * Authenticates with the supplied password.
+   *
    * @param {AuthenticateWithPasswordParameters} params - The password and user information.
    * @param {string} params.password - The password.
    * @param {UserInformation} params.user - The user information.
@@ -458,6 +421,7 @@ export default class Katavault extends BaseClass {
 
   /**
    * Gets the supported chains.
+   *
    * @returns {Chain[]} The supported chains.
    * @public
    */
@@ -469,7 +433,8 @@ export default class Katavault extends BaseClass {
    * Deletes all accounts and settings.
    *
    * **NOTE:** Requires authentication.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   *
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
   public async clear(): Promise<void> {
@@ -489,8 +454,9 @@ export default class Katavault extends BaseClass {
 
   /**
    * Checks if Katavault is authenticated.
+   *
    * @returns {boolean} True if Katavault is authenticated, false otherwise.
-   * @private
+   * @public
    */
   public isAuthenticated(): boolean {
     return !!this._authenticationStore;
@@ -500,7 +466,9 @@ export default class Katavault extends BaseClass {
    * Opens the vault application.
    *
    * **NOTE:** Requires authentication.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   *
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
    */
   public openVault(): void {
     let params: RenderVaultAppParameters;
@@ -529,6 +497,7 @@ export default class Katavault extends BaseClass {
    * Removes the account from the provider for the specified key if it exists.
    *
    * **NOTE:** Requires authentication.
+   *
    * @param {string} key - The key, encoded with base58, of the account to remove from the wallet.
    * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
    * @public
@@ -554,9 +523,9 @@ export default class Katavault extends BaseClass {
 
   /**
    * Removes a chain from the list of supported chains based on the provided genesis hash.
+   *
    * @param {string} chainID - The chain ID - the concatenation of the namespace and the reference:
    * `<namespace>:<reference>`.
-   * @see {@link }
    * @public
    */
   public removeChainByChainID(chainID: string): void {
@@ -567,6 +536,7 @@ export default class Katavault extends BaseClass {
    * Updates the name of the account.
    *
    * **NOTE:** Requires authentication.
+   *
    * @param {SetAccountNameByKeyParameters} params - The address and name to set.
    * @returns {Promise<Account>} A promise that resolves to the updated account.
    * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
@@ -606,74 +576,116 @@ export default class Katavault extends BaseClass {
     };
   }
 
-  // public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
-  // public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;
+  public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
+  public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;
   /**
-   * Signs a message or some arbitrary bytes.
+   * Signs a message or some arbitrary bytes using the appropriate account and chain.
    *
    * **NOTE:** Requires authentication.
-   * **NOTE:** The message is prepended with "MX" for domain separation.
-   * @param {SignMessageParameters} params - The signer, the message and optional output encoding.
+   *
+   * @param {SignMessageParameters} params - The input parameters.
+   * @param {string} params.accountKey - The base58 public key of the account that will be used for signing.
+   * @param {string} params.chainID - The CAIP-002 chain ID.
+   * @param {Encoding} [params.encoding] - The output encoding of the signature. If no encoding is specified, the
+   * signature will be as raw bytes (Uint8Array).
+   * @param {string | Uint8Array} params.message - A UTF-8 encoded message or raw bytes to sign.
    * @returns {Promise<string | Uint8Array>} A promise that resolves to the signature of the signed message. If the
-   * encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in raw
-   * bytes.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
-   * @see {@link https://algorand.github.io/js-algorand-sdk/functions/signBytes.html}
+   * encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in
+   * raw bytes.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {ChainNotSupportedError} If the specified chain is not supported.
+   * @throws {AccountDoesNotExistError} If the specified address does not exist in the vault.
+   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
+   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
+   * credentials.
    * @public
    */
-  // public async signMessage({ address, encoding, message }: SignMessageParameters): Promise<string | Uint8Array> {
-  //   const privateKey = await this._decryptedAccountKeyByAddress(address);
-  //   let signature: Uint8Array;
-  //   let toSign: Uint8Array;
-  //
-  //   if (!privateKey) {
-  //     throw new AccountDoesNotExistError(`account "${address}" does not exist`);
-  //   }
-  //
-  //   toSign = concatBytes(
-  //     utf8ToBytes(SIGN_MESSAGE_PREFIX), // "MX" prefix
-  //     typeof message === 'string' ? utf8ToBytes(message) : message
-  //   );
-  //   signature = ed25519.sign(toSign, privateKey);
-  //
-  //   switch (encoding) {
-  //     case 'base64':
-  //       return bytesToBase64(signature);
-  //     case 'hex':
-  //       return bytesToHex(signature);
-  //     default:
-  //       return signature;
-  //   }
-  // }
+  public async signMessage({
+    accountKey,
+    chainID,
+    encoding,
+    message,
+  }: SignMessageParameters): Promise<string | Uint8Array> {
+    let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
+    let chain: Chain | null;
+    let signature: Uint8Array;
+
+    if (!this._authenticationStore || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+    if (!chain) {
+      throw new ChainNotSupportedError(`chain "${chainID}" not supported`);
+    }
+
+    account = await (
+      this._accountsStore ??
+      new AccountStore({
+        logger: this._logger,
+        vault: this._vault,
+      })
+    ).accountByKey(accountKey);
+
+    if (!account) {
+      throw new AccountDoesNotExistError(`account "${accountKey}" does not exist`);
+    }
+
+    // TODO: check if connected account supports chain ID
+    // if (account.__type === AccountTypeEnum.Connected) {
+    //
+    // }
+
+    signature = await this._signContext.signMessage({
+      account:
+        account.__type === AccountTypeEnum.Ephemeral
+          ? await this._authenticationStore?.store.decryptEphemeralAccount(account)
+          : account,
+      chain,
+      message,
+    });
+
+    // encode if necessary
+    switch (encoding) {
+      case 'base64':
+        return base64.encode(signature);
+      case 'hex':
+        return hex.encode(signature);
+      default:
+        return signature;
+    }
+  }
 
   /**
    * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will contain
    * the signature of the signed transaction whose index will match that of the supplied transaction array.
    *
-   * @param {SignRawTransactionParameter[]} params - An array containing the base58 encoded account ID, the chain ID and
+   * @param {SignRawTransactionParameter[]} parameters - An array containing the base58 encoded account ID, the chain ID and
    * the raw transaction to be signed.
    * @return {Promise<(Uint8Array | null)[]>} A promise that resolves to an array of signed transaction data or null
-   * values if the transaction failed to be signed by the designated signer (account).
+   * values if the transaction failed to be signed by the designated account or the chain ID is not supported.
    * @throws {NotAuthenticatedError} If the user is not authenticated.
-   * @throws {ChainNotSupportedError} If the specified chain is not supported.
-   * @throws {AccountDoesNotExistError} If an account does not exist in the vault.
+   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
+   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
+   * credentials.
+   * @public
    */
-  public async signRawTransactions(params: SignRawTransactionParameter[]): Promise<(Uint8Array | null)[]> {
+  public async signRawTransactions(parameters: SignRawTransactionParameter[]): Promise<(Uint8Array | null)[]> {
     const __logPrefix = `${Katavault.displayName}#signRawTransactions`;
     const extendedParams: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[] = Array.from(
-      { length: params.length },
+      { length: parameters.length },
       () => null
     );
     let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
     let chain: Chain | null;
 
-    if (!this.isAuthenticated() || !this._vault) {
+    if (!this._authenticationStore || !this._vault) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    for (let i = 0; i < params.length; i++) {
-      const { accountID, chainID, transaction } = params[i];
+    for (let i = 0; i < parameters.length; i++) {
+      const { accountKey, chainID, transaction } = parameters[i];
 
       chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
 
@@ -689,10 +701,10 @@ export default class Katavault extends BaseClass {
           logger: this._logger,
           vault: this._vault,
         })
-      ).accountByKey(accountID);
+      ).accountByKey(accountKey);
 
       if (!account) {
-        this._logger.warn(`account "${accountID}", at transaction index "${i}", does not exist, ignoring`);
+        this._logger.warn(`account "${accountKey}", at transaction index "${i}", does not exist, ignoring`);
 
         continue;
       }
@@ -703,7 +715,10 @@ export default class Katavault extends BaseClass {
       // }
 
       extendedParams[i] = {
-        account,
+        account:
+          account.__type === AccountTypeEnum.Ephemeral
+            ? await this._authenticationStore.store.decryptEphemeralAccount(account)
+            : account,
         chain,
         transaction,
       };

@@ -1,8 +1,10 @@
 // types
 import type ConnectedAccountStoreItem from './ConnectedAccountStoreItem';
-import type EphemeralAccountStoreItem from './EphemeralAccountStoreItem';
+import type EphemeralAccountStoreItemWithDecryptedKeyData from './EphemeralAccountStoreItemWithDecryptedKeyData';
 
-type WithAccountStoreItem<Item, AccountType = ConnectedAccountStoreItem | EphemeralAccountStoreItem> = Item &
-  Record<'account', AccountType>;
+type WithAccountStoreItem<
+  Item,
+  AccountType = ConnectedAccountStoreItem | EphemeralAccountStoreItemWithDecryptedKeyData,
+> = Item & Record<'account', AccountType>;
 
 export default WithAccountStoreItem;

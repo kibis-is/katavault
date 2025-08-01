@@ -1,4 +1,4 @@
-import { base64, utf8 } from '@kibisis/encoding';
+import { base58, base64, utf8 } from '@kibisis/encoding';
 import { randomBytes } from '@noble/hashes/utils';
 import { secretbox } from 'tweetnacl';
 
@@ -6,24 +6,36 @@ import { secretbox } from 'tweetnacl';
 import { IDB_PASSWORD_STORE_NAME } from '@/constants';
 
 // decorators
+import { CredentialID } from '@/decorators';
 import BaseStore from '@/decorators/_base/BaseStore';
 
 // errors
 import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/errors';
 
 // types
-import type { BaseAuthenticationStore, StoreParameters } from '@/types';
+import type {
+  AuthenticationStoreInterface,
+  EphemeralAccountStoreItem,
+  EphemeralAccountStoreItemWithDecryptedKeyData,
+  StoreParameters,
+} from '@/types';
 
 // utilities
 import { createDerivationKey } from '@/utilities';
 
-export default class PasswordStore extends BaseStore implements BaseAuthenticationStore {
-  // private static variables
+export default class PasswordStore extends BaseStore implements AuthenticationStoreInterface {
+  /**
+   * private static properties
+   */
   private static readonly _saltByteSize = 64; // 64-bytes
-  // public static variables
+  /**
+   * public static properties
+   */
   public static readonly challenge = 'Katavault rules!';
   public static readonly displayName = 'PasswordStore';
-  // private variables
+  /**
+   * private properties
+   */
   private _password: string | null = null;
 
   public constructor(params: StoreParameters) {
@@ -56,7 +68,7 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
    * @param {Uint8Array} bytes - The encrypted bytes.
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
    * @throws {NotAuthenticatedError} If the password has not been set.
-   * @throws {DecryptionError} If the supplied bytes are malformed or there was a problem deriving a key from the
+   * @throws {DecryptionError} If the supplied bytes are malformed, or there was a problem deriving a key from the
    * password.
    * @public
    */
@@ -100,6 +112,41 @@ export default class PasswordStore extends BaseStore implements BaseAuthenticati
 
     return decryptedBytes;
   }
+
+  /**
+   * Decrypts the ephemeral account's key data (private key).
+   *
+   * @param {EphemeralAccountStoreItem} account - The ephemeral account.
+   * @returns {Promise<EphemeralAccountStoreItemWithDecryptedKeyData>} A promise that resolves to the ephemeral account
+   * with the key data (private key) decrypted.
+   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
+   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
+   * credentials.
+   * @private
+   */
+  public async decryptEphemeralAccount(
+    account: EphemeralAccountStoreItem
+  ): Promise<EphemeralAccountStoreItemWithDecryptedKeyData> {
+    const __logPrefix = `${PasswordStore.displayName}#decryptEphemeralAccount`;
+    const credentialID = CredentialID.fromString(account.credentialID);
+    const password = this.password();
+    let _error: string;
+
+    // check if the account was encrypted using the correct password
+    if (!password || credentialID.verify(password)) {
+      _error = `account "${account.key}" found is not encrypted using the supplied password`;
+
+      this._logger.debug(`${__logPrefix}: ${_error}`);
+
+      throw new DecryptionError(_error);
+    }
+
+    return {
+      ...account,
+      keyData: await this.decryptBytes(base58.decode(account.keyData)),
+    };
+  }
+
   /**
    * Encrypts some arbitrary bytes using the password. This function uses the xsalsa20-poly1305
    * algorithm to encrypt the bytes.
