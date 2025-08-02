@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 // versions
-import { version } from './package.json';
+import { description, version } from './package.json';
 
 export default defineConfig({
   build: {
@@ -17,6 +17,8 @@ export default defineConfig({
     },
   },
   define: {
+    __APP_DESCRIPTION__: JSON.stringify(description),
+    __APP_TITLE__: JSON.stringify('Katavault Sandbox'),
     __VERSION__: JSON.stringify(version),
   },
   plugins: [react(), tsconfigPaths()],

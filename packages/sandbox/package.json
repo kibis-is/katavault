@@ -1,7 +1,7 @@
 {
-  "name": "demo",
+  "name": "sandbox",
   "version": "1.0.0",
-  "description": "This is a demo that explores the features of Katavault from the perspective of a dApp.",
+  "description": "The Katavault Sandbox is a React app that explores the features of Katavault from the perspective of a dApp.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kibis-is/katavault"
