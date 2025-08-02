@@ -11,10 +11,10 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunction } from '@/types';
 
 /**
- * Hook to remove a chain by a genesis hash.
- * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove a chain by its genesis hash.
+ * Hook to remove a chain by a CAIP-002 chain ID.
+ * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove a chain by its chain ID.
  */
-export default function useRemoveChainByGenesisHash(): HookFunction<string, undefined, BaseError> {
+export default function useRemoveChainByChainID(): HookFunction<string, undefined, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -25,13 +25,11 @@ export default function useRemoveChainByGenesisHash(): HookFunction<string, unde
       }
 
       try {
-        katavault.removeChainByGenesisHash(params);
+        katavault.removeChainByChainID(params);
 
-        if (onUpdate) {
-          onUpdate();
-        }
+        onUpdate?.();
 
-        options?.onSuccess?.(undefined, params);
+        return options?.onSuccess?.(undefined, params);
       } catch (error) {
         return options?.onError?.(error, params);
       }

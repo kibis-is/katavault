@@ -11,10 +11,14 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunction } from '@/types';
 
 /**
- * Hook to remove an account.
- * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove an account.
+ * Hook to remove an account by the account key.
+ *
+ * **NOTE:** Requires authentication.
+ *
+ * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove an account by the account
+ * key.
  */
-export default function useRemoveAccount(): HookFunction<string, undefined, BaseError> {
+export default function removeAccountByKey(): HookFunction<string, undefined, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -25,11 +29,9 @@ export default function useRemoveAccount(): HookFunction<string, undefined, Base
       }
 
       try {
-        await katavault.removeAccount(params);
+        await katavault.removeAccountByKey(params);
 
-        if (onUpdate) {
-          onUpdate();
-        }
+        onUpdate?.();
 
         return options?.onSuccess?.(undefined, params);
       } catch (error) {

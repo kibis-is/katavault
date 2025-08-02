@@ -11,12 +11,14 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunctionWithoutParams } from '@/types';
 
 /**
- * Hook to perform a "factory reset". This will remove the passkey credentials and all accounts.
+ * Hook to perform a "factory reset". This will remove the authentication credentials and all account data.
  *
  * 🚨 **WARNING:** Use with extreme caution. This is action is irreversible.
- * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to reset Katavault.
+ * **NOTE:** Requires authentication.
+ *
+ * @returns {HookFunctionWithoutParams<undefined, BaseError>} A function that can be used to reset Katavault.
  */
-export default function useClear(): HookFunctionWithoutParams<undefined, BaseError> {
+export default function useClearVault(): HookFunctionWithoutParams<undefined, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -29,9 +31,7 @@ export default function useClear(): HookFunctionWithoutParams<undefined, BaseErr
       try {
         await katavault.clear();
 
-        if (onUpdate) {
-          onUpdate();
-        }
+        onUpdate?.();
 
         return options?.onSuccess?.(undefined, undefined);
       } catch (error) {

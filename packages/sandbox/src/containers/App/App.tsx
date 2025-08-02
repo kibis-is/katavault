@@ -1,11 +1,15 @@
 import type { ColorMode } from '@chakra-ui/color-mode';
 import { VoiTestnet } from '@kibisis/chains';
 import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+import { KatavaultProvider } from '@kibisis/katavault-react';
 import { KibisisAppProvider } from '@kibisis/react';
 import { type FC, useCallback, useMemo, useState } from 'react';
 
 // containers
 import Root from '@/containers/Root';
+
+// contexts
+import { LoggerContext } from '@/contexts';
 
 // types
 import type { Props } from './types';
@@ -28,9 +32,13 @@ const App: FC<Props> = ({ logger }) => {
   );
 
   return (
-    <KibisisAppProvider colorMode={colorMode} debug={true} logger={logger}>
-      <Root onToggleColorMode={handleOnToggleColorMode} />
-    </KibisisAppProvider>
+    <LoggerContext.Provider value={logger}>
+      <KibisisAppProvider colorMode={colorMode} debug={true} logger={logger}>
+        <KatavaultProvider config={config}>
+          <Root onToggleColorMode={handleOnToggleColorMode} />
+        </KatavaultProvider>
+      </KibisisAppProvider>
+    </LoggerContext.Provider>
   );
 };
 

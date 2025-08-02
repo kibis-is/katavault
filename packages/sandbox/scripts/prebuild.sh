@@ -10,6 +10,7 @@
 function main {
   # build workspace dependencies
   pnpm -F @kibisis/katavault-core build
+  pnpm -F @kibisis/katavault-react build
 
   exit 0
 }

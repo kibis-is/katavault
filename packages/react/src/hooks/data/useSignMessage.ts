@@ -11,8 +11,12 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunction } from '@/types';
 
 /**
- * Hook to sign a message.
- * @returns {HookFunction<SignMessageParameters, string | Uint8Array, BaseError>} A function that can be used to remove an account.
+ * Hook to sign a message or some arbitrary bytes using the appropriate account and chain.
+ *
+ * **NOTE:** Requires authentication.
+ *
+ * @returns {HookFunction<SignMessageParameters, string | Uint8Array, BaseError>} A function that can be used to sign a
+ * message or some arbitrary bytes using the appropriate account and chain.
  */
 export default function useSignMessage(): HookFunction<SignMessageParameters, string | Uint8Array, BaseError> {
   // contexts

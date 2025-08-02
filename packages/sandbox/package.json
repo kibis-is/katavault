@@ -52,6 +52,7 @@
     "@emotion/react": "^11.14.0",
     "@kibisis/chains": "catalog:",
     "@kibisis/katavault-core": "workspace:",
+    "@kibisis/katavault-react": "workspace:",
     "@kibisis/react": "^1.6.0",
     "@kibisis/utilities": "catalog:",
     "clsx": "^2.1.0",

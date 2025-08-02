@@ -6,6 +6,9 @@ import { KatavaultContext } from '@/contexts';
 
 /**
  * Hook for getting the accounts.
+ *
+ * **NOTE:** Requires authentication.
+ *
  * @returns {Account[]} The accounts in the wallet.
  */
 export default function useAccounts(): Account[] {
