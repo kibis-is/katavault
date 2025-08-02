@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+// versions
+import { version } from './package.json';
+
 export default defineConfig({
   build: {
     outDir: 'dist',
@@ -12,6 +15,9 @@ export default defineConfig({
     modules: {
       localsConvention: 'camelCaseOnly',
     },
+  },
+  define: {
+    __VERSION__: JSON.stringify(version),
   },
   plugins: [react(), tsconfigPaths()],
   resolve: {

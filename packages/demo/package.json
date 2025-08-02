@@ -28,10 +28,12 @@
     "test": "exit 0"
   },
   "devDependencies": {
+    "@chakra-ui/color-mode": "^2.2.0",
     "@eslint/js": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "^18.x",
     "@types/react-dom": "18.x",
+    "@types/react-helmet": "^6.1.11",
     "@vitejs/plugin-react": "^4.3.4",
     "chalk": "catalog:",
     "concurrently": "catalog:",
@@ -46,10 +48,16 @@
     "vite-tsconfig-paths": "catalog:"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.24.0",
+    "@emotion/react": "^11.14.0",
     "@kibisis/chains": "catalog:",
     "@kibisis/katavault-core": "workspace:",
+    "@kibisis/react": "^1.6.0",
     "@kibisis/utilities": "catalog:",
+    "clsx": "^2.1.0",
     "react": "^18.x",
-    "react-dom": "^18.x"
+    "react-dom": "^18.x",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^5.5.0"
   }
 }

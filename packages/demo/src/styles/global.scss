@@ -1,48 +1,20 @@
-:root {
-  --primary-300-color: #E707FB;
-  --primary-400-color: #BC03CD;
-  --primary-500-color: #8d029b;
-  --gray-300-color: #d4d4d8;
-  --gray-400-color: #a1a1aa;
-  --gray-500-color: #71717a;
-  color: var(--gray-500-color);
-  font-family: "Nunito", sans-serif;
-  font-optical-sizing: auto;
-}
-
-html, body {
+body, #root {
   margin: 0;
   min-height: 100vh;
   padding: 0;
   width: 100%;
 }
 
-h1, h2, h3, h4, h5, h6, p {
-  margin: 0;
-}
-
 body {
+  background-color: #ffffff;
+
+  &[data-color-mode="dark"] {
+    background-color: #1A202C;
+  }
+}
+
+#root {
   align-items: center;
   display: flex;
   flex-direction: column;
-}
-
-header, main {
-  display: flex;
-  justify-content: center;
-}
-
-header {
-  align-items: center;
-  height: 10vh;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-main {
-  flex-direction: column;
-  gap: 2rem;
-  min-height: 90vh;
-  max-width: 1024px;
-  min-width: 400px;
 }
