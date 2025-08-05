@@ -1,22 +1,24 @@
 import { concat } from '@agoralabs-sh/bytes';
-import { AVMChain, AVMNode } from '@kibisis/chains';
 import { utf8 } from '@kibisis/encoding';
-import { encode as encodeMsgpack } from '@msgpack/msgpack';
 import { ed25519 } from '@noble/curves/ed25519';
-import axios, { AxiosResponse } from 'axios';
 
 // _base
 import { BaseClass } from '@/_base';
+
+// decorators
+import { AVMClient } from '@/decorators';
 
 // enums
 import { AccountTypeEnum } from '@/enums';
 
 // errors
-import { FailedToFetchChainInformationError, FailedToSendTransactionError } from '@/errors';
+import { FailedToSendTransactionError } from '@/errors';
 
 // types
 import type {
+  AVMPendingTransactionResponse,
   AVMSignRawTransactionParameters,
+  AVMStatusResponse,
   CommonParameters,
   // ConnectedAccountStoreItem,
   EphemeralAccountStoreItemWithDecryptedKeyData,
@@ -40,14 +42,6 @@ export default class AVMTransactionStrategy extends BaseClass {
     super(params);
 
     this._rawPrefix = utf8.decode(AVMTransactionStrategy.transactionPrefix);
-  }
-
-  /**
-   * private static methods
-   */
-
-  private static _defaultNode(chain: AVMChain): AVMNode | null {
-    return chain.networkConfiguration().algods.nodes[chain.networkConfiguration().algods.default] ?? null;
   }
 
   /**
@@ -78,41 +72,73 @@ export default class AVMTransactionStrategy extends BaseClass {
     transaction,
   }: WithChain<Record<'signature' | 'transaction', Uint8Array>>): Promise<string> {
     const __logPrefix = `${AVMTransactionStrategy.displayName}#sendRawTransaction`;
-    const node = AVMTransactionStrategy._defaultNode(chain);
-    let _error: string;
-    let response: AxiosResponse<Record<'txId', string>>;
-
-    if (!node) {
-      _error = `failed to get default algod node for chain "${chain.chainID()}"`;
-
-      this._logger.error(`${__logPrefix} - ${_error}`);
-
-      throw new FailedToFetchChainInformationError(_error);
-    }
+    const client = new AVMClient({
+      chain,
+      logger: this._logger,
+    });
+    let currentRound: number;
+    let pendingTransaction: AVMPendingTransactionResponse | null = null;
+    let status: AVMStatusResponse;
+    let stopRound: number;
+    let transactionID: string;
 
     try {
-      response = await axios.post(
-        `${node.origin}/v2/transactions`,
-        encodeMsgpack({
-          sig: signature,
-          txn: transaction,
-        }),
-        {
-          headers: {
-            ['Content-Type']: 'application/x-binary',
-            ...(node.token && {
-              ['X-Algo-API-Token']: node.token,
-            }),
-          },
-        }
-      );
-
-      return response.data.txId;
+      transactionID = await client.sendTransaction({
+        signature,
+        transaction,
+      });
     } catch (error) {
       this._logger.error(`${__logPrefix} - `, error);
 
       throw new FailedToSendTransactionError(error.message);
     }
+
+    try {
+      status = await client.status();
+    } catch (error) {
+      this._logger.error(`${__logPrefix} - failed to get avm chain status:`, error);
+
+      throw new FailedToSendTransactionError(error.message);
+    }
+
+    currentRound = status['last-round'];
+    stopRound = currentRound + 4; // transaction should be confirmed by at least 4 rounds
+
+    // iterate each round and check if the transaction has been confirmed
+    while (currentRound < stopRound) {
+      try {
+        pendingTransaction = await client.pendingTransaction(transactionID);
+      } catch (_) {
+        /* ignore errors */
+      }
+
+      // check if the transaction was successful
+      if (pendingTransaction?.['confirmed-round']) {
+        this._logger.debug(
+          `${__logPrefix} - transaction confirmed at round "${pendingTransaction['confirmed-round']}"`
+        );
+
+        return transactionID;
+      }
+
+      // throw an error id the transaction was submitted but rejected
+      if (pendingTransaction?.['pool-error']) {
+        this._logger.error(`${__logPrefix} - ${pendingTransaction['pool-error']}`);
+
+        throw new FailedToSendTransactionError(pendingTransaction['pool-error']);
+      }
+
+      // wait for the next round to appear onchain
+      try {
+        await client.statusAfterRound(currentRound);
+      } catch (_) {
+        /* ignore errors */
+      }
+
+      currentRound = currentRound + 1;
+    }
+
+    throw new FailedToSendTransactionError('failed to send transaction');
   }
 
   public async signRawTransactions(

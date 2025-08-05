@@ -1,4 +1,5 @@
 export * from './_base';
 export * from './accounts';
+export * from './avm';
 export * from './authentication';
 export * from './settings';
