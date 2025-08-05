@@ -1,12 +1,15 @@
-import { HStack, Spacer, VStack } from '@chakra-ui/react';
+import { Button as ChakraButton, HStack, Spacer, VStack } from '@chakra-ui/react';
 import { useAuthenticate, useClearVault, useOpenVault } from '@kibisis/katavault-react';
 import { Button, DEFAULT_GAP, Heading, IconButton, Text, useColorMode } from '@kibisis/react';
-import { type FC, useCallback } from 'react';
+import { type FC, useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { LuMoon, LuSun } from 'react-icons/lu';
 
 // hooks
 import useLogger from '@/hooks/useLogger';
+
+// modals
+import SendTransactionsModal from '@/modals/SendTransactionsModal';
 
 // types
 import type { Props } from './types';
@@ -17,6 +20,10 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
   const openVault = useOpenVault();
   const colorMode = useColorMode();
   const logger = useLogger();
+  // states
+  const [sendTransactionsModalOpen, setSendTransactionsModalOpen] = useState<boolean>(false);
+  // memos
+  const minButtonWidth = useMemo(() => '350px', []);
   // callbacks
   const handleOnAuthenticateClick = useCallback(
     () =>
@@ -32,7 +39,7 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
         onError: (error) => logger?.error('failed clear vault', error),
         onSuccess: () => logger?.success('successfully cleared vault'),
       }),
-    [authenticate, logger]
+    [clearVault, logger]
   );
   const handleOnOpenVaultClick = useCallback(
     () =>
@@ -40,7 +47,15 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
         onError: (error) => logger?.error('failed to open vault', error),
         onSuccess: () => logger?.success('successfully opened vault'),
       }),
-    [authenticate, logger]
+    [logger, openVault]
+  );
+  const handleOnSendTransactionsClick = useCallback(
+    () => setSendTransactionsModalOpen(true),
+    [setSendTransactionsModalOpen]
+  );
+  const handleOnSendTransactionsClose = useCallback(
+    () => setSendTransactionsModalOpen(false),
+    [setSendTransactionsModalOpen]
   );
 
   return (
@@ -52,6 +67,9 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
 
         <body data-color-mode={colorMode} />
       </Helmet>
+
+      {/*modals*/}
+      <SendTransactionsModal onClose={handleOnSendTransactionsClose} open={sendTransactionsModalOpen} />
 
       {/*header*/}
       <HStack align="center" as="header" gap={1} justify="center" p={DEFAULT_GAP / 2} w="full">
@@ -71,7 +89,7 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
         align="center"
         as="main"
         flexGrow={1}
-        gap={DEFAULT_GAP}
+        gap={DEFAULT_GAP * 2}
         justify="center"
         maxW="1024px"
         minW="400px"
@@ -81,8 +99,8 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
           <>
             <Text colorMode={colorMode}>Begin by logging in or signing up to the vault.</Text>
             {/*actions*/}
-            <VStack align="center" gap={1} justify="center" minW="250px">
-              <Button onClick={handleOnAuthenticateClick} w="full">
+            <VStack align="center" gap={DEFAULT_GAP / 3} justify="center" minW={minButtonWidth}>
+              <Button colorMode={colorMode} onClick={handleOnAuthenticateClick} w="full">
                 Authenticate
               </Button>
             </VStack>
@@ -92,13 +110,34 @@ const Root: FC<Props> = ({ onToggleColorMode }) => {
             <Text colorMode={colorMode}>You have been successfully authenticated.</Text>
 
             {/*actions*/}
-            <VStack align="center" gap={1} justify="center" minW="250px">
-              <Button onClick={handleOnOpenVaultClick} w="full">
+            <VStack align="center" gap={DEFAULT_GAP / 3} justify="center" minW={minButtonWidth}>
+              <Button colorMode={colorMode} onClick={handleOnOpenVaultClick} w="full">
                 Open Vault
               </Button>
-              <Button onClick={handleOnClearVaultClick} w="full">
-                Clear Vault
+
+              <Button colorMode={colorMode} onClick={handleOnSendTransactionsClick} w="full">
+                Send Transactions
               </Button>
+            </VStack>
+
+            <VStack
+              borderColor="red.500"
+              borderRadius="3xl"
+              borderStyle="solid"
+              borderWidth={1}
+              align="center"
+              gap={DEFAULT_GAP - 2}
+              justify="center"
+              p={DEFAULT_GAP - 2}
+              maxW={minButtonWidth}
+            >
+              <Text color="red.500" fontSize="sm" textAlign="center">
+                This will clear the database and any credentials, settings and account data.
+              </Text>
+
+              <ChakraButton borderRadius="3xl" colorPalette="red" onClick={handleOnClearVaultClick} w="full">
+                Clear Vault
+              </ChakraButton>
             </VStack>
           </>
         )}

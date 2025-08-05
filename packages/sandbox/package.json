@@ -55,6 +55,7 @@
     "@kibisis/katavault-react": "workspace:",
     "@kibisis/react": "^1.6.0",
     "@kibisis/utilities": "catalog:",
+    "algosdk": "^3.3.1",
     "clsx": "^2.1.0",
     "react": "^18.x",
     "react-dom": "^18.x",

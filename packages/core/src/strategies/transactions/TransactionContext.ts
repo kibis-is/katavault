@@ -3,6 +3,9 @@ import { CAIP002Namespace } from '@kibisis/chains';
 // _base
 import { BaseClass } from '@/_base';
 
+// errors
+import { ChainNotSupportedError } from '@/errors';
+
 // strategies
 import AVMTransactionStrategy from './AVMTransactionStrategy';
 
@@ -28,6 +31,18 @@ export default class TransactionContext extends BaseClass {
   /**
    * public methods
    */
+
+  public async sendRawTransaction(
+    parameters: WithChain<Record<'signature' | 'transaction', Uint8Array>>
+  ): Promise<string> {
+    switch (parameters.chain.namespace()) {
+      case CAIP002Namespace.Algorand:
+      case CAIP002Namespace.AVM:
+        return await this._avmTransactionStrategy.sendRawTransaction(parameters);
+      default:
+        throw new ChainNotSupportedError(`chain "${parameters.chain.chainID()}" not supported`);
+    }
+  }
 
   public async signRawTransactions(
     parameters: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[]

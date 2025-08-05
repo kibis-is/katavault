@@ -6,4 +6,5 @@ export * from './chains';
 export * from './connectors';
 export * from './cryptography';
 export * from './signing';
+export * from './transactions';
 export * from './ui';

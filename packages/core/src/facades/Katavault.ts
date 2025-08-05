@@ -45,6 +45,7 @@ import type {
   KatavaultParameters,
   PasskeyStoreSchema,
   RenderVaultAppParameters,
+  SendRawTransactionParameters,
   SetAccountNameByKeyParameters,
   SignMessageParameters,
   SignRawTransactionParameter,
@@ -530,6 +531,33 @@ export default class Katavault extends BaseClass {
    */
   public removeChainByChainID(chainID: string): void {
     this._chains = this._chains.filter((chain) => chain.chainID() !== chainID);
+  }
+
+  /**
+   * Sends a raw transaction, along with its signature, to the specified chain.
+   *
+   * @param {Object} params - The parameters for sending the raw transaction.
+   * @param {string} params.chainID - The CAIP-002 chain ID.
+   * @param {string} params.signature - The signature of the transaction.
+   * @param {Object} params.transaction - The raw transaction data to be sent.
+   * @return {Promise<string>} A promise that resolves to the transaction hash upon successful submission.
+   * @throws {ChainNotSupportedError} If the specified chainID is not supported.
+   * @throws {FailedToFetchChainInformationError} If the specified chain information is unavailable.
+   * @throws {FailedToSendTransactionError} If the network rejected the transaction.
+   * @public
+   */
+  public async sendRawTransaction({ chainID, signature, transaction }: SendRawTransactionParameters): Promise<string> {
+    const chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+    if (!chain) {
+      throw new ChainNotSupportedError(`chain "${chainID}" not supported`);
+    }
+
+    return await this._transactionContext.sendRawTransaction({
+      chain,
+      signature,
+      transaction,
+    });
   }
 
   /**
