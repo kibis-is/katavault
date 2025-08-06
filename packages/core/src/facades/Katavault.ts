@@ -535,7 +535,7 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Sends a list of raw transaction, along with their signatures, to the specified chain. The corresponding array will
+   * Sends a list of raw transactions, along with their signatures, to the specified chain. The corresponding array will
    * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
    * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
    *
@@ -710,6 +710,8 @@ export default class Katavault extends BaseClass {
   /**
    * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will contain
    * the signature of the signed transaction whose index will match that of the supplied transaction array.
+   *
+   * **NOTE:** Requires authentication.
    *
    * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account ID, the chain ID and
    * the raw transaction to be signed.
