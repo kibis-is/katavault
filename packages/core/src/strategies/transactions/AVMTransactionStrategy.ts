@@ -5,20 +5,15 @@ import { ed25519 } from '@noble/curves/ed25519';
 // _base
 import { BaseClass } from '@/_base';
 
-// decorators
-import { AVMClient } from '@/decorators';
+// adapters
+import { AVMAdapter } from '@/adapters';
 
 // enums
 import { AccountTypeEnum } from '@/enums';
 
-// errors
-import { FailedToSendTransactionError } from '@/errors';
-
 // types
 import type {
-  AVMPendingTransactionResponse,
   AVMSignRawTransactionParameters,
-  AVMStatusResponse,
   CommonParameters,
   // ConnectedAccountStoreItem,
   EphemeralAccountStoreItemWithDecryptedKeyData,
@@ -74,6 +69,7 @@ export default class AVMTransactionStrategy extends BaseClass {
    * @param {Uint8Array} params.signature - The signature of the signed transaction.
    * @param {Uint8Array} params.transaction - The raw transaction data.
    * @return {Promise<string>} A promise that resolves to the transaction ID of the confirmed transaction.
+   * @throws {FailedToFetchChainInformationError} If the default Algod node information cannot be fetched.
    * @throws {FailedToSendTransactionError} If the transaction failed to be submitted to the network, or the transaction
    * failed to be added to the round, after a maximum of 4 rounds.
    * @public
@@ -83,74 +79,15 @@ export default class AVMTransactionStrategy extends BaseClass {
     signature,
     transaction,
   }: WithChain<Record<'signature' | 'transaction', Uint8Array>>): Promise<string> {
-    const __logPrefix = `${AVMTransactionStrategy.displayName}#sendRawTransaction`;
-    const client = new AVMClient({
+    const adapter = new AVMAdapter({
       chain,
       logger: this._logger,
     });
-    let currentRound: number;
-    let pendingTransaction: AVMPendingTransactionResponse | null = null;
-    let status: AVMStatusResponse;
-    let stopRound: number;
-    let transactionID: string;
 
-    try {
-      transactionID = await client.sendTransaction({
-        signature,
-        transaction,
-      });
-    } catch (error) {
-      this._logger.error(`${__logPrefix} - `, error);
-
-      throw new FailedToSendTransactionError(error.message);
-    }
-
-    try {
-      status = await client.status();
-    } catch (error) {
-      this._logger.error(`${__logPrefix} - failed to get avm chain status:`, error);
-
-      throw new FailedToSendTransactionError(error.message);
-    }
-
-    currentRound = status['last-round'];
-    stopRound = currentRound + 4; // transaction should be confirmed by at least 4 rounds
-
-    // iterate each round and check if the transaction has been confirmed
-    while (currentRound < stopRound) {
-      try {
-        pendingTransaction = await client.pendingTransaction(transactionID);
-      } catch (_) {
-        /* ignore errors */
-      }
-
-      // check if the transaction was successful
-      if (pendingTransaction?.['confirmed-round']) {
-        this._logger.debug(
-          `${__logPrefix} - transaction confirmed at round "${pendingTransaction['confirmed-round']}"`
-        );
-
-        return transactionID;
-      }
-
-      // throw an error id the transaction was submitted but rejected
-      if (pendingTransaction?.['pool-error']) {
-        this._logger.error(`${__logPrefix} - ${pendingTransaction['pool-error']}`);
-
-        throw new FailedToSendTransactionError(pendingTransaction['pool-error']);
-      }
-
-      // wait for the next round to appear onchain
-      try {
-        await client.statusAfterRound(currentRound);
-      } catch (_) {
-        /* ignore errors */
-      }
-
-      currentRound = currentRound + 1;
-    }
-
-    throw new FailedToSendTransactionError('failed to send transaction');
+    return await adapter.sendTransaction({
+      signature,
+      transaction,
+    });
   }
 
   public async signRawTransactions(

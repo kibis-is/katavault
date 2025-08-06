@@ -1,7 +1,7 @@
 import type { AVMChain } from '@kibisis/chains';
 
-interface AVMClientParameters {
+interface AVMAdapterParameters {
   chain: AVMChain;
 }
 
-export default AVMClientParameters;
+export default AVMAdapterParameters;

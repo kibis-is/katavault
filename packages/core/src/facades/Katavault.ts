@@ -527,7 +527,7 @@ export default class Katavault extends BaseClass {
    * @public
    */
   public async removeAccountByKey(key: string): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#removeAccount`;
+    const __logPrefix = `${Katavault.displayName}#removeAccountByKey`;
     let results: string[];
 
     if (!this.isAuthenticated() || !this._vault) {
@@ -566,6 +566,9 @@ export default class Katavault extends BaseClass {
    * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
    * whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
    * Each element's index in the result list corresponds to the supplied parameter list indices.
+   * @throws {FailedToFetchChainInformationError} If the chain information cannot be fetched.
+   * @throws {FailedToSendTransactionError} If the transaction failed to be submitted to the network, or the network
+   * rejected the transaction.
    * @public
    */
   public async sendRawTransactions(parameters: SendRawTransactionParameters[]): Promise<SendRawTransactionResult[]> {
