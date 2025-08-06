@@ -18,7 +18,7 @@ import type { HookFunction } from '@/types';
  * @returns {HookFunction<string, undefined, BaseError>} A function that can be used to remove an account by the account
  * key.
  */
-export default function removeAccountByKey(): HookFunction<string, undefined, BaseError> {
+export default function useRemoveAccountByKey(): HookFunction<string, undefined, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 

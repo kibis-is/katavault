@@ -18,7 +18,7 @@ import type { HookFunction } from '@/types';
  * @returns {HookFunction<SetAccountNameByKeyParameters, Account, BaseError>} A function that can be used to set the
  * name for an account by its key.
  */
-export default function setAccountNameByKey(): HookFunction<SetAccountNameByKeyParameters, Account, BaseError> {
+export default function useSetAccountNameByKey(): HookFunction<SetAccountNameByKeyParameters, Account, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
