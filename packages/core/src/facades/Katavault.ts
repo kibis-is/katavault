@@ -264,7 +264,7 @@ export default class Katavault extends BaseClass {
    */
 
   /**
-   * Gets a list of accounts within the wallet.
+   * Gets a list of accounts within the vault.
    *
    * **NOTE:** Requires authentication.
    *
@@ -452,6 +452,29 @@ export default class Katavault extends BaseClass {
       await this._vault.clear(IDB_PASSWORD_STORE_NAME);
       await this._vault.clear(IDB_SETTINGS_STORE_NAME);
     }
+  }
+
+  /**
+   * Gets the holding accounts of the vault. If no holding accounts exist, a new one is created from the saved
+   * credentials.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @returns {Promise<[Account, ...Account[]]>} A promise that resolves to the holding accounts.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   * @public
+   */
+  public async holdingAccounts(): Promise<[Account, ...Account[]]> {
+    const accounts = await this.accounts();
+    let holdingAccounts = accounts.filter(({ __type }) => __type === AccountTypeEnum.Ephemeral);
+
+    if (holdingAccounts.length > 0) {
+      return holdingAccounts as [Account, ...Account[]];
+    }
+
+    // if there are no holding accounts, create a new one from the credentials
+    return [await this._generateCredentialAccountIfNoneExists()];
   }
 
   /**
