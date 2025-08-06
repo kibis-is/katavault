@@ -10,7 +10,7 @@ import { ChainNotSupportedError } from '@/errors';
 import AVMTransactionStrategy from './AVMTransactionStrategy';
 
 // types
-import type { CommonParameters, WithAccountStoreItem, WithChain, WithIndex } from '@/types';
+import type { CommonParameters, SendRawTransactionResult, WithAccountStoreItem, WithChain, WithIndex } from '@/types';
 
 export default class TransactionContext extends BaseClass {
   /**
@@ -34,13 +34,29 @@ export default class TransactionContext extends BaseClass {
 
   public async sendRawTransaction(
     parameters: WithChain<Record<'signature' | 'transaction', Uint8Array>>
-  ): Promise<string> {
-    switch (parameters.chain.namespace()) {
-      case CAIP002Namespace.Algorand:
-      case CAIP002Namespace.AVM:
-        return await this._avmTransactionStrategy.sendRawTransaction(parameters);
-      default:
-        throw new ChainNotSupportedError(`chain "${parameters.chain.chainID()}" not supported`);
+  ): Promise<SendRawTransactionResult> {
+    try {
+      switch (parameters.chain.namespace()) {
+        case CAIP002Namespace.Algorand:
+        case CAIP002Namespace.AVM:
+          return {
+            error: null,
+            success: true,
+            transactionID: await this._avmTransactionStrategy.sendRawTransaction(parameters),
+          };
+        default:
+          return {
+            error: new ChainNotSupportedError(`chain "${parameters.chain.chainID()}" not supported`),
+            success: false,
+            transactionID: null,
+          };
+      }
+    } catch (error) {
+      return {
+        error,
+        success: false,
+        transactionID: null,
+      };
     }
   }
 

@@ -66,6 +66,18 @@ export default class AVMTransactionStrategy extends BaseClass {
    * public methods
    */
 
+  /**
+   * Sends a raw transaction to the specified AVM chain and waits for it to be confirmed after a maximum of 4 rounds.
+   *
+   * @param {WithChain<Record<'signature' | 'transaction', Uint8Array>>} params - The input parameters.
+   * @param {AVMChain} params.chain - The CAIP-002 AVM chain ID.
+   * @param {Uint8Array} params.signature - The signature of the signed transaction.
+   * @param {Uint8Array} params.transaction - The raw transaction data.
+   * @return {Promise<string>} A promise that resolves to the transaction ID of the confirmed transaction.
+   * @throws {FailedToSendTransactionError} If the transaction failed to be submitted to the network, or the transaction
+   * failed to be added to the round, after a maximum of 4 rounds.
+   * @public
+   */
   public async sendRawTransaction({
     chain,
     signature,

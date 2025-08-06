@@ -18,7 +18,11 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
 
   return (
     <Modal
-      body={<div>Hello humie!</div>}
+      body={
+        <VStack>
+          <Text>{`Send transactions to signed, effortlessly by the holding account.`}</Text>
+        </VStack>
+      }
       closeButton={true}
       colorMode={colorMode}
       header={

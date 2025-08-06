@@ -3,10 +3,10 @@
  * @property {string} chainID - The CAIP-002 chain ID.
  * @property {Uint8Array} transaction - The raw transaction data. This will be different for different chains.
  */
-interface SignRawTransactionParameter {
+interface SignRawTransactionParameters {
   accountKey: string;
   chainID: string;
   transaction: Uint8Array;
 }
 
-export default SignRawTransactionParameter;
+export default SignRawTransactionParameters;

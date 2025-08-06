@@ -46,9 +46,10 @@ import type {
   PasskeyStoreSchema,
   RenderVaultAppParameters,
   SendRawTransactionParameters,
+  SendRawTransactionResult,
   SetAccountNameByKeyParameters,
   SignMessageParameters,
-  SignRawTransactionParameter,
+  SignRawTransactionParameters,
   Vault,
   WithAccountStoreItem,
   WithChain,
@@ -534,30 +535,51 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Sends a raw transaction, along with its signature, to the specified chain.
+   * Sends a list of raw transaction, along with their signatures, to the specified chain. The corresponding array will
+   * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
+   * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
    *
-   * @param {Object} params - The parameters for sending the raw transaction.
-   * @param {string} params.chainID - The CAIP-002 chain ID.
-   * @param {string} params.signature - The signature of the transaction.
-   * @param {Object} params.transaction - The raw transaction data to be sent.
-   * @return {Promise<string>} A promise that resolves to the transaction hash upon successful submission.
-   * @throws {ChainNotSupportedError} If the specified chainID is not supported.
-   * @throws {FailedToFetchChainInformationError} If the specified chain information is unavailable.
-   * @throws {FailedToSendTransactionError} If the network rejected the transaction.
+   * @param {SendRawTransactionParameters[]} parameters - An array containing the chain ID, the raw transaction and
+   * the signature of the signed transaction.
+   * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
+   * Each element's index in the result list corresponds to the supplied parameter list indices.
    * @public
    */
-  public async sendRawTransaction({ chainID, signature, transaction }: SendRawTransactionParameters): Promise<string> {
-    const chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+  public async sendRawTransactions(parameters: SendRawTransactionParameters[]): Promise<SendRawTransactionResult[]> {
+    const __logPrefix = `${Katavault.displayName}#sendRawTransactions`;
+    const results: SendRawTransactionResult[] = Array.from({ length: parameters.length }, () => ({
+      error: null,
+      success: false,
+      transactionID: null,
+    }));
+    let chain: Chain | null;
 
-    if (!chain) {
-      throw new ChainNotSupportedError(`chain "${chainID}" not supported`);
+    for (let i = 0; i < parameters.length; i++) {
+      const { chainID, signature, transaction } = parameters[i];
+
+      chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+      if (!chain) {
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported, ignoring`);
+
+        results[i] = {
+          error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+          success: false,
+          transactionID: null,
+        };
+
+        continue;
+      }
+
+      results[i] = await this._transactionContext.sendRawTransaction({
+        chain,
+        signature,
+        transaction,
+      });
     }
 
-    return await this._transactionContext.sendRawTransaction({
-      chain,
-      signature,
-      transaction,
-    });
+    return results;
   }
 
   /**
@@ -689,7 +711,7 @@ export default class Katavault extends BaseClass {
    * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will contain
    * the signature of the signed transaction whose index will match that of the supplied transaction array.
    *
-   * @param {SignRawTransactionParameter[]} parameters - An array containing the base58 encoded account ID, the chain ID and
+   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account ID, the chain ID and
    * the raw transaction to be signed.
    * @return {Promise<(Uint8Array | null)[]>} A promise that resolves to an array of signed transaction data or null
    * values if the transaction failed to be signed by the designated account or the chain ID is not supported.
@@ -699,7 +721,7 @@ export default class Katavault extends BaseClass {
    * credentials.
    * @public
    */
-  public async signRawTransactions(parameters: SignRawTransactionParameter[]): Promise<(Uint8Array | null)[]> {
+  public async signRawTransactions(parameters: SignRawTransactionParameters[]): Promise<(Uint8Array | null)[]> {
     const __logPrefix = `${Katavault.displayName}#signRawTransactions`;
     const extendedParams: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[] = Array.from(
       { length: parameters.length },
