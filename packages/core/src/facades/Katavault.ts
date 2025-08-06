@@ -232,7 +232,6 @@ export default class Katavault extends BaseClass {
         }
 
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
         account = {
           __type: AccountTypeEnum.Ephemeral,
           credentialID: _credentialID.toString(),

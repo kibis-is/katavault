@@ -12,6 +12,9 @@ catalogs:
     '@kibisis/chains':
       specifier: ^2.2.0
       version: 2.2.0
+    '@kibisis/encoding':
+      specifier: ^1.0.1
+      version: 1.0.1
     '@kibisis/utilities':
       specifier: ^1.0.0
       version: 1.0.0
@@ -123,7 +126,7 @@ importers:
         specifier: 'catalog:'
         version: 2.2.0
       '@kibisis/encoding':
-        specifier: ^1.0.1
+        specifier: 'catalog:'
         version: 1.0.1
       '@kibisis/utilities':
         specifier: 'catalog:'
@@ -413,6 +416,9 @@ importers:
       '@kibisis/chains':
         specifier: 'catalog:'
         version: 2.2.0
+      '@kibisis/encoding':
+        specifier: 'catalog:'
+        version: 1.0.1
       '@kibisis/katavault-core':
         specifier: 'workspace:'
         version: link:../core

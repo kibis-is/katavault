@@ -133,7 +133,7 @@ export default class PasswordStore extends BaseStore implements AuthenticationSt
     let _error: string;
 
     // check if the account was encrypted using the correct password
-    if (!password || credentialID.verify(password)) {
+    if (!password || !credentialID.verify(password)) {
       _error = `account "${account.key}" found is not encrypted using the supplied password`;
 
       this._logger.debug(`${__logPrefix}: ${_error}`);

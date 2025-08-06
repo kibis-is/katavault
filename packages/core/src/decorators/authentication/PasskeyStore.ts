@@ -337,7 +337,7 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
     let _error: string;
 
     // check that the account is encrypted using the correct credential
-    if (!passkey || credentialID.verify(passkey.credentialID)) {
+    if (!passkey || !credentialID.verify(passkey.credentialID)) {
       _error = `account "${account.key}" found is not encrypted using the supplied passkey`;
 
       this._logger.error(`${__logPrefix}: ${_error}`);

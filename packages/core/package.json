@@ -70,7 +70,7 @@
     "@agoralabs-sh/bytes": "^1.0.0",
     "@agoralabs-sh/uuid": "^1.1.0",
     "@kibisis/chains": "catalog:",
-    "@kibisis/encoding": "^1.0.1",
+    "@kibisis/encoding": "catalog:",
     "@kibisis/utilities": "catalog:",
     "@msgpack/msgpack": "^3.1.2",
     "@noble/curves": "^1.8.1",
