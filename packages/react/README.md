@@ -35,7 +35,6 @@
 * [3. Development](#-3-development)
   - [3.1. Requirements](#31-requirements)
   - [3.2. Setup](#32-setup)
-  - [3.3. Running the example](#33-running-the-example)
 * [4. Appendix](#-4-appendix)
   - [4.1. Useful commands](#41-useful-commands)
 * [5. How to contribute](#-5-how-to-contribute)
@@ -48,7 +47,7 @@
 First, install the dependencies:
 
 ```shell
-npm install algosdk@3.x react@18.x @kibisis/katavault-core
+npm install react@18.x @kibisis/katavault-core
 ```
 
 Then install the SDK using:
@@ -79,18 +78,6 @@ For full documentation on usage, see [here](https://katavault.kibis.is/react/get
 ```bash
 $ pnpm install
 ```
-
-### 3.3. Running the example
-
-The example can be run by using:
-
-```shell
-pnpm -F @kibisis/katavault-react start
-```
-
-This will build a local copy of the SDK and start a development server running the example code in [`example/`](./example).
-
-The example site will be running on [http://localhost:8080](http://localhost:8080).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
