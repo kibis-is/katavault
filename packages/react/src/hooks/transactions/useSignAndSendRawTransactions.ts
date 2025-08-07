@@ -1,4 +1,4 @@
-import { BaseError, type SignRawTransactionParameters, type SignRawTransactionResult } from '@kibisis/katavault-core';
+import { BaseError, type SendRawTransactionResult, type SignRawTransactionParameters } from '@kibisis/katavault-core';
 import { useContext } from 'react';
 
 // contexts
@@ -11,16 +11,16 @@ import { NotInitializedError } from '@/errors';
 import { HookFunction } from '@/types';
 
 /**
- * Hook to sign an array of raw transactions using the appropriate account and chain.
+ * Hook to sign and send an array of raw transactions using the appropriate account and chain.
  *
  * **NOTE:** Requires authentication.
  *
- * @returns {HookFunction<SignRawTransactionParameters[], SignRawTransactionResult[], BaseError>} A function that can be
- * used to sign an array of raw transactions using the appropriate account and chain.
+ * @returns {HookFunction<SignRawTransactionParameters[], SendRawTransactionResult[], BaseError>} A function that can be
+ * used to sign and send an array of raw transactions using the appropriate account and chain.
  */
-export default function useSendRawTransactions(): HookFunction<
+export default function useSignAndSendRawTransactions(): HookFunction<
   SignRawTransactionParameters[],
-  SignRawTransactionResult[],
+  SendRawTransactionResult[],
   BaseError
 > {
   // contexts
@@ -33,7 +33,7 @@ export default function useSendRawTransactions(): HookFunction<
       }
 
       try {
-        const result = await katavault.signRawTransactions(params);
+        const result = await katavault.signAndSendRawTransactions(params);
 
         return options?.onSuccess?.(result, params);
       } catch (error) {
