@@ -1,11 +1,11 @@
 import { HStack, Icon, Separator, Spinner, Table, VStack } from '@chakra-ui/react';
 import { type AVMNode, Chain } from '@kibisis/chains';
-import { base58, utf8 } from '@kibisis/encoding';
-import { type Account, FailedToSignError } from '@kibisis/katavault-core';
-import { useChains, useHoldingAccounts, useKatavault } from '@kibisis/katavault-react';
+import { base58 } from '@kibisis/encoding';
+import { type Account } from '@kibisis/katavault-core';
+import { useChains, useHoldingAccounts, useSignAndSendRawTransactions } from '@kibisis/katavault-react';
 import { Button, DEFAULT_GAP, Heading, Modal, Text, useColorMode } from '@kibisis/react';
 import { upsertItemsByKey } from '@kibisis/utilities';
-import { uuid } from '@stablelib/uuid';
+import { randomBytes } from '@stablelib/random';
 import { makePaymentTxnWithSuggestedParamsFromObject, type Transaction, encodeAddress, Algodv2 } from 'algosdk';
 import { type FC, useCallback, useState } from 'react';
 import { LuCircleCheck, LuCircleX } from 'react-icons/lu';
@@ -20,28 +20,20 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
   const accounts = useHoldingAccounts();
   const chains = useChains();
   const colorMode = useColorMode();
-  const katavault = useKatavault();
   const logger = useLogger();
+  const signAndSendRawTransactions = useSignAndSendRawTransactions();
   // states
   const [transactions, setTransactions] = useState<SendTransactionModalTransactionItem[]>([]);
   // callbacks
   const handleOnClose = useCallback(() => onClose(), []);
   const handleOnSendDummyTransactionClick = useCallback(async () => {
     const __logPrefix = `${SendTransactionsModal.displayName}#handleOnSendDummyTransactionClick`;
-    let chain: Chain | null;
-    let account: Account | null;
+    const account: Account | null = accounts[0] ?? null;
+    const chain: Chain | null = chains[0] ?? null;
     let algod: Algodv2;
     let node: AVMNode;
     let transaction: Transaction;
-
-    if (!katavault) {
-      logger?.error(`${__logPrefix} - katavault has not been initialized`);
-
-      return;
-    }
-
-    chain = chains[0] ?? null;
-    account = accounts[0] ?? null;
+    let transactionID: string;
 
     // TODO: display error toast
     if (!account || !chain) {
@@ -55,9 +47,9 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
       algod = new Algodv2(node.token ?? '', node.origin, node.port);
       transaction = makePaymentTxnWithSuggestedParamsFromObject({
         amount: BigInt(1),
+        lease: randomBytes(32), // use a random lease to ensure the transaction hash does not clash with another transaction in the block
         receiver: encodeAddress(base58.decode(account.key)),
         sender: encodeAddress(base58.decode(account.key)),
-        note: utf8.decode(uuid()),
         suggestedParams: await algod.getTransactionParams().do(),
       });
     } catch (error) {
@@ -66,6 +58,10 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
       return;
     }
 
+    transactionID = transaction.txID();
+
+    logger?.debug(`${__logPrefix} - created transaction "${transactionID}":`, transaction.toEncodingData());
+
     setTransactions((prevState) =>
       upsertItemsByKey(
         prevState,
@@ -73,86 +69,59 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
           {
             loading: true,
             result: null,
-            transactionID: transaction.txID(),
+            transactionID,
           },
         ],
         'transactionID'
       )
     );
 
-    try {
-      const [signature] = await katavault.signRawTransactions([
+    signAndSendRawTransactions(
+      [
         {
           accountKey: account.key,
           chainID: chain.chainID(),
           transaction: transaction.toByte(),
         },
-      ]);
-
-      if (!signature) {
-        return setTransactions((prevState) =>
-          upsertItemsByKey(
-            prevState,
-            [
-              {
-                loading: false,
-                result: {
-                  error: new FailedToSignError('failed to sign transaction'),
-                  success: false,
+      ],
+      {
+        onError: (error) =>
+          setTransactions((prevState) =>
+            upsertItemsByKey(
+              prevState,
+              [
+                {
+                  loading: false,
+                  result: {
+                    error: error,
+                    success: false,
+                  },
+                  transactionID,
                 },
-                transactionID: transaction.txID(),
-              },
-            ],
-            'transactionID'
-          )
-        );
+              ],
+              'transactionID'
+            )
+          ),
+        onSuccess: ([result]) =>
+          setTransactions((prevState) =>
+            upsertItemsByKey(
+              prevState,
+              [
+                {
+                  loading: false,
+                  result: {
+                    error: result.error,
+                    success: result.success,
+                  },
+                  transactionID,
+                },
+              ],
+              'transactionID'
+            )
+          ),
       }
-
-      logger?.debug(`${__logPrefix} - signed transaction "${transaction.txID()}"`);
-
-      const [result] = await katavault.sendRawTransactions([
-        {
-          chainID: chain.chainID(),
-          signature,
-          transaction: transaction.toByte(),
-        },
-      ]);
-
-      return setTransactions((prevState) =>
-        upsertItemsByKey(
-          prevState,
-          [
-            {
-              loading: false,
-              result: {
-                error: result.error,
-                success: result.success,
-              },
-              transactionID: transaction.txID(),
-            },
-          ],
-          'transactionID'
-        )
-      );
-    } catch (error) {
-      return setTransactions((prevState) =>
-        upsertItemsByKey(
-          prevState,
-          [
-            {
-              loading: false,
-              result: {
-                error: error,
-                success: false,
-              },
-              transactionID: transaction.txID(),
-            },
-          ],
-          'transactionID'
-        )
-      );
-    }
-  }, [accounts, chains, katavault, setTransactions]);
+    );
+  }, [accounts, chains, setTransactions, signAndSendRawTransactions]);
 
   return (
     <Modal

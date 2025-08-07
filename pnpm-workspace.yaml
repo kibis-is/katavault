@@ -6,6 +6,7 @@ catalog:
   "@kibisis/chains": ^2.2.0
   "@kibisis/encoding": ^1.0.1
   "@kibisis/utilities": ^1.0.0
+  "@stablelib/random": ^2.0.1
   "@types/node": ^22.10.1
   "algosdk": ^3.3.1
   chalk: ^5.3.0

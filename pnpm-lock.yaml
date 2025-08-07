@@ -18,6 +18,9 @@ catalogs:
     '@kibisis/utilities':
       specifier: ^1.0.0
       version: 1.0.0
+    '@stablelib/random':
+      specifier: ^2.0.1
+      version: 2.0.1
     '@types/node':
       specifier: ^22.10.1
       version: 22.13.10
@@ -144,7 +147,7 @@ importers:
         specifier: ^1.7.1
         version: 1.7.1
       '@stablelib/random':
-        specifier: ^2.0.1
+        specifier: 'catalog:'
         version: 2.0.1
       algosdk:
         specifier: 'catalog:'
@@ -437,8 +440,8 @@ importers:
       '@kibisis/utilities':
         specifier: 'catalog:'
         version: 1.0.0
-      '@stablelib/uuid':
-        specifier: ^2.0.1
+      '@stablelib/random':
+        specifier: 'catalog:'
         version: 2.0.1
       algosdk:
         specifier: 'catalog:'

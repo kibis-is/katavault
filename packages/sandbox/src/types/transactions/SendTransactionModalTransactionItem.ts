@@ -1,8 +1,8 @@
-import type { SendRawTransactionResult } from '@kibisis/katavault-core';
+import type { CommonResult } from '@kibisis/katavault-core';
 
 interface SendTransactionModalTransactionItem {
   loading: boolean;
-  result: Omit<SendRawTransactionResult, 'transactionID'> | null;
+  result: CommonResult | null;
   transactionID: string;
 }
 

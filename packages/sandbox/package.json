@@ -56,7 +56,7 @@
     "@kibisis/katavault-react": "workspace:",
     "@kibisis/react": "^1.6.0",
     "@kibisis/utilities": "catalog:",
-    "@stablelib/uuid": "^2.0.1",
+    "@stablelib/random": "catalog:",
     "algosdk": "catalog:",
     "clsx": "^2.1.0",
     "react": "^18.x",
