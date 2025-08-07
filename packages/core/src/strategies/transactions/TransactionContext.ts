@@ -10,7 +10,14 @@ import { ChainNotSupportedError } from '@/errors';
 import AVMTransactionStrategy from './AVMTransactionStrategy';
 
 // types
-import type { CommonParameters, SendRawTransactionResult, WithAccountStoreItem, WithChain, WithIndex } from '@/types';
+import type {
+  CommonParameters,
+  SendRawTransactionResult,
+  SignRawTransactionResult,
+  WithAccountStoreItem,
+  WithChain,
+  WithIndex,
+} from '@/types';
 
 export default class TransactionContext extends BaseClass {
   /**
@@ -61,19 +68,19 @@ export default class TransactionContext extends BaseClass {
   }
 
   public async signRawTransactions(
-    parameters: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[]
-  ): Promise<(Uint8Array | null)[]> {
+    parameters: WithIndex<WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>>>[]
+  ): Promise<WithIndex<SignRawTransactionResult>[]> {
     const __logPrefix = `${TransactionContext.displayName}#signRawTransactions`;
     // group the transactions into a map by the namespace, so we can pass it to a strategy - ensuring we add the index
     // so we know where the transaction belongs in the original list
-    const transactionsByNamespaceMap = parameters.reduce((acc, currentValue, index) => {
+    const transactionsByNamespaceMap = parameters.reduce((acc, currentValue) => {
       let entry: WithIndex<WithAccountStoreItem<Record<'transaction', Uint8Array>>>[] | null;
 
       if (!currentValue) {
         return acc;
       }
 
-      const { account, chain, transaction } = currentValue;
+      const { account, chain, index, transaction } = currentValue;
 
       entry = acc.get(chain.namespace()) ?? null;
 
@@ -101,28 +108,31 @@ export default class TransactionContext extends BaseClass {
       return acc;
     }, new Map<CAIP002Namespace, WithIndex<WithAccountStoreItem<Record<'transaction', Uint8Array>>>[]>());
     const entries = transactionsByNamespaceMap.entries();
-    const results = Array.from<
-      WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null,
-      Uint8Array | null
-    >({ length: parameters.length }, () => null); // create the results - defaulting to null values
-    let signedTransactions: WithIndex<Record<'signature', Uint8Array | null>>[] = [];
+    let results: WithIndex<SignRawTransactionResult>[] = [];
 
     // for each namespace, use the corresponding strategy to handle the transaction signing
     for (const [namespace, transactions] of entries) {
       switch (namespace) {
         case CAIP002Namespace.Algorand:
         case CAIP002Namespace.AVM:
-          signedTransactions = await this._avmTransactionStrategy.signRawTransactions(transactions);
+          results = [...results, ...(await this._avmTransactionStrategy.signRawTransactions(transactions))];
 
           break;
         default:
-          this._logger.warn(`${__logPrefix}: namespace "${namespace}" not supported, ignoring`);
+          this._logger.warn(`${__logPrefix}: namespace "${namespace}" not supported`);
+
+          results = [
+            ...results,
+            ...transactions.map(({ index }) => ({
+              error: new ChainNotSupportedError(`namespace "${namespace}" not supported`),
+              index,
+              signature: null,
+              success: false,
+            })),
+          ];
 
           break;
       }
-
-      // add the signed transaction signatures back to the original index, using the passed index
-      signedTransactions.forEach(({ index, signature }) => (results[index] = signature));
     }
 
     return results;

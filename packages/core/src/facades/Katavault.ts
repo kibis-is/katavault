@@ -50,10 +50,12 @@ import type {
   SetAccountNameByKeyParameters,
   SignMessageParameters,
   SignRawTransactionParameters,
+  SignRawTransactionResult,
   Vault,
   WithAccountStoreItem,
   WithChain,
   WithEncoding,
+  WithIndex,
 } from '@/types';
 
 // utilities
@@ -109,9 +111,9 @@ export default class Katavault extends BaseClass {
    * @returns {Promise<Account>} A promise that resolves to the generated credential account.
    * @throws {EncryptionError} If the account's private key failed to be encrypted.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
+   * @private
    */
-  public async _generateCredentialAccountIfNoneExists(): Promise<EphemeralAccount> {
+  private async _generateCredentialAccountIfNoneExists(): Promise<EphemeralAccount> {
     const __logPrefix = `${Katavault.displayName}#_generateCredentialAccountIfNoneExists`;
     let account: EphemeralAccountStoreItem | null;
     let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
@@ -573,11 +575,14 @@ export default class Katavault extends BaseClass {
    */
   public async sendRawTransactions(parameters: SendRawTransactionParameters[]): Promise<SendRawTransactionResult[]> {
     const __logPrefix = `${Katavault.displayName}#sendRawTransactions`;
-    const results: SendRawTransactionResult[] = Array.from({ length: parameters.length }, () => ({
-      error: null,
-      success: false,
-      transactionID: null,
-    }));
+    const results = Array.from<SendRawTransactionParameters, SendRawTransactionResult>(
+      { length: parameters.length },
+      () => ({
+        error: null,
+        success: false,
+        transactionID: null,
+      })
+    );
     let chain: Chain | null;
 
     for (let i = 0; i < parameters.length; i++) {
@@ -586,7 +591,7 @@ export default class Katavault extends BaseClass {
       chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
 
       if (!chain) {
-        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported, ignoring`);
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported`);
 
         results[i] = {
           error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
@@ -649,6 +654,69 @@ export default class Katavault extends BaseClass {
       key,
       name,
     };
+  }
+
+  /**
+   * Signs and sends an array of raw transactions using the appropriate account and chain. The corresponding array will
+   * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
+   * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
+   * ID and the raw transaction to be signed.
+   * @return {Promise<SignRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
+   * signing was unsuccessful. Each element's index in the result list corresponds to the supplied parameter list
+   * indices.
+   * @throws {NotAuthenticatedError} If the user is not authenticated.
+   * @public
+   */
+  public async signAndSendRawTransactions(
+    parameters: SignRawTransactionParameters[]
+  ): Promise<SendRawTransactionResult[]> {
+    const __logPrefix = `${Katavault.displayName}#signAndSendRawTransactions`;
+    let signatures: SignRawTransactionResult[];
+
+    if (!this.isAuthenticated() || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    signatures = await this.signRawTransactions(parameters);
+
+    return await Promise.all(
+      signatures.map(async ({ error, success, signature }, index) => {
+        let chain: Chain | null;
+
+        if (error || !signature || !success) {
+          return {
+            error,
+            success,
+            transactionID: null,
+          };
+        }
+
+        const { chainID, transaction } = parameters[index];
+
+        chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+        if (!chain) {
+          this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${index}", not supported`);
+
+          return {
+            error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+            success: false,
+            transactionID: null,
+          };
+        }
+
+        return await this._transactionContext.sendRawTransaction({
+          chain,
+          signature,
+          transaction,
+        });
+      })
+    );
   }
 
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
@@ -733,33 +801,40 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will contain
-   * the signature of the signed transaction whose index will match that of the supplied transaction array.
+   * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will
+   * contain whether the transaction signing was successful, the signature (if successful) and an error if the
+   * transaction signing was unsuccessful. The index of the result array will match that of the supplied transaction
+   * array.
    *
    * **NOTE:** Requires authentication.
    *
-   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account ID, the chain ID and
-   * the raw transaction to be signed.
-   * @return {Promise<(Uint8Array | null)[]>} A promise that resolves to an array of signed transaction data or null
-   * values if the transaction failed to be signed by the designated account or the chain ID is not supported.
+   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
+   * ID and the raw transaction to be signed.
+   * @return {Promise<SignRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
+   * signing was unsuccessful. Each element's index in the result list corresponds to the supplied parameter list
+   * indices.
    * @throws {NotAuthenticatedError} If the user is not authenticated.
-   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
-   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
-   * credentials.
    * @public
    */
-  public async signRawTransactions(parameters: SignRawTransactionParameters[]): Promise<(Uint8Array | null)[]> {
+  public async signRawTransactions(parameters: SignRawTransactionParameters[]): Promise<SignRawTransactionResult[]> {
     const __logPrefix = `${Katavault.displayName}#signRawTransactions`;
-    const extendedParams: (WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>> | null)[] = Array.from(
-      { length: parameters.length },
-      () => null
-    );
     let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
     let chain: Chain | null;
+    let extendedParams: WithIndex<WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>>>[];
+    let results: SignRawTransactionResult[];
+    let signedTransactions: WithIndex<SignRawTransactionResult>[];
 
     if (!this._authenticationStore || !this._vault) {
       throw new NotAuthenticatedError('not authenticated');
     }
+
+    extendedParams = [];
+    results = Array.from<SignRawTransactionParameters, SignRawTransactionResult>({ length: parameters.length }, () => ({
+      error: null,
+      signature: null,
+      success: false,
+    }));
 
     for (let i = 0; i < parameters.length; i++) {
       const { accountKey, chainID, transaction } = parameters[i];
@@ -767,7 +842,13 @@ export default class Katavault extends BaseClass {
       chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
 
       if (!chain) {
-        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported, ignoring`);
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported`);
+
+        results[i] = {
+          error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+          success: false,
+          signature: null,
+        };
 
         continue;
       }
@@ -781,7 +862,13 @@ export default class Katavault extends BaseClass {
       ).accountByKey(accountKey);
 
       if (!account) {
-        this._logger.warn(`account "${accountKey}", at transaction index "${i}", does not exist, ignoring`);
+        this._logger.warn(`account "${accountKey}", at transaction index "${i}", does not exist`);
+
+        results[i] = {
+          error: new AccountDoesNotExistError(`account "${accountKey}" does not exist`),
+          success: false,
+          signature: null,
+        };
 
         continue;
       }
@@ -791,16 +878,22 @@ export default class Katavault extends BaseClass {
       //
       // }
 
-      extendedParams[i] = {
+      extendedParams.push({
         account:
           account.__type === AccountTypeEnum.Ephemeral
             ? await this._authenticationStore.store.decryptEphemeralAccount(account)
             : account,
         chain,
+        index: i,
         transaction,
-      };
+      });
     }
 
-    return await this._transactionContext.signRawTransactions(extendedParams);
+    signedTransactions = await this._transactionContext.signRawTransactions(extendedParams);
+
+    // add the signed transaction results to the result array by the passed index
+    signedTransactions.forEach(({ index, ...result }) => (results[index] = result));
+
+    return results;
   }
 }

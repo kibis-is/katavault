@@ -17,6 +17,7 @@ import type {
   CommonParameters,
   // ConnectedAccountStoreItem,
   EphemeralAccountStoreItemWithDecryptedKeyData,
+  SignRawTransactionResult,
   WithAccountStoreItem,
   WithChain,
   WithIndex,
@@ -92,28 +93,30 @@ export default class AVMTransactionStrategy extends BaseClass {
 
   public async signRawTransactions(
     parameters: WithIndex<WithAccountStoreItem<Record<'transaction', Uint8Array>>>[]
-  ): Promise<WithIndex<Record<'signature', Uint8Array | null>>[]> {
+  ): Promise<WithIndex<SignRawTransactionResult>[]> {
     // const connectedAccountTransactions = params.filter(({ account }) => account.__type === AccountTypeEnum.Connected) as WithIndex<WithAccountStoreItem<Record<'transaction', Uint8Array>, ConnectedAccountStoreItem>>[];
     const ephemeralAccountTransactions = parameters.filter(
       ({ account }) => account.__type === AccountTypeEnum.Ephemeral
     ) as WithIndex<
       WithAccountStoreItem<Record<'transaction', Uint8Array>, EphemeralAccountStoreItemWithDecryptedKeyData>
     >[];
-    const signedTransactions: WithIndex<Record<'signature', Uint8Array | null>>[] = [];
+    const results: WithIndex<SignRawTransactionResult>[] = [];
 
     // TODO: for connected accounts group them by their respected connectors and send them to be signed
 
     // for ephemeral accounts, simply use the key data and sign the transaction
     for (const { account, index, transaction } of ephemeralAccountTransactions) {
-      signedTransactions.push({
+      results.push({
+        error: null,
         index,
         signature: this._signTransaction({
           privateKey: account.keyData,
           transaction,
         }),
+        success: true,
       });
     }
 
-    return signedTransactions;
+    return results;
   }
 }

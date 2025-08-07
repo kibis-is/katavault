@@ -1,10 +1,6 @@
-// errors
-import { BaseError } from '@/errors';
+// types
+import type { WithCommonResult } from '@/types';
 
-interface SendRawTransactionResult {
-  error: BaseError | null;
-  success: boolean;
-  transactionID: string | null;
-}
+type SendRawTransactionResult = WithCommonResult<Record<'transactionID', string | null>>;
 
 export default SendRawTransactionResult;
