@@ -57,7 +57,7 @@ jobs:
     name: "Lint, Build & Test - @kibisis/katavault-core"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.core == 'true' }}
-    uses: ./.github/workflows/lint_build_test.yml
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
     with:
       package_name: "@kibisis/katavault-core"
 
@@ -65,7 +65,7 @@ jobs:
     name: "Lint, Build & Test - @kibisis/katavault-react"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.react == 'true' }}
-    uses: ./.github/workflows/lint_build_test.yml
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
     with:
       package_name: "@kibisis/katavault-react"
 
@@ -73,6 +73,6 @@ jobs:
     name: "Lint, Build & Test - sandbox"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.sandbox == 'true' }}
-    uses: ./.github/workflows/lint_build_test.yml
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
     with:
       package_name: "sandbox"
