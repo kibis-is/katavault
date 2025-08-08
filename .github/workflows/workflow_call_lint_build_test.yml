@@ -1,4 +1,4 @@
-name: "Lint, build & test"
+name: "Workflow call: lint, build & test"
 
 on:
   workflow_call:

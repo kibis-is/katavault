@@ -1,12 +1,13 @@
 {
   "name": "documentation",
-  "description": "The documentation for the Katavault.",
+  "version": "1.0.0",
+  "description": "The documentation for Katavault.",
   "private": true,
   "scripts": {
     "build": "docusaurus build --out-dir dist",
+    "dev": "docusaurus start --no-open --port 8080",
     "clean": "docusaurus clear",
-    "serve": "docusaurus serve --dir dist --no-open",
-    "start": "docusaurus start --no-open --port 8080"
+    "serve": "docusaurus serve --dir dist --no-open"
   },
   "devDependencies": {
     "@docusaurus/core": "^3.7.0",
