@@ -13,8 +13,8 @@ body:
 
   - type: textarea
     attributes:
-      label: What is your idea or feature suggestion?
-      description: Tell us, what idea or feature you suggest to be added.
+      label: Summary
+      description: Tell us, what idea or feature you suggest to be added. This can be as simple as bulleted points or a detailed description.
     validations:
       required: true
 

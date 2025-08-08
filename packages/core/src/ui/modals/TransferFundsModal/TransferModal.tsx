@@ -60,7 +60,7 @@ const TransferModal: FunctionComponent<Props> = ({
       closeOnEscape={!transferring}
       closeOnInteractOutside={!transferring}
       colorMode={colorMode}
-      body={false ? (
+      body={transferring ? (
         <VStack {...defaultBodyProps} align="center">
           <CircularLoaderWithIcon colorMode={colorMode} icon={<ArrowLeftRightIcon />} size="lg" />
 

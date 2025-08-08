@@ -95,7 +95,7 @@ describe(CredentialID.displayName, () => {
     });
   });
 
-  describe.only(`verify()`, () => {
+  describe(`verify()`, () => {
     test('should fail if the passkey claim is invalid', () => {
       const credentialID = CredentialID.create({
         method: AuthenticationMethodEnum.Passkey,
