@@ -1,33 +1,45 @@
 name: "✨ Feature"
-description: Suggest an idea or feature
+description: "Suggest a feature"
 title: "feat: "
 labels: ["✨ feature"]
 assignees:
   - kieraroneill
 
 body:
-  - type: markdown
-    attributes:
+  # welcome
+  - attributes:
       value: |
         Thanks for taking the time to fill out this feature request, all features are welcome and remember, you're awesome!
+    type: markdown
 
-  - type: textarea
-    attributes:
+  # summary
+  - attributes:
       label: Summary
-      description: Tell us, what idea or feature you suggest to be added. This can be as simple as bulleted points or a detailed description.
+      description: "Tell us, what feature you would like to suggest to be added. This can be as simple as bulleted points or a detailed description."
+    id: summary
+    type: textarea
     validations:
       required: true
 
-  - type: textarea
-    attributes:
-      label: Benefits
-      description: Tell us, how this this will be beneficial.
+  # acceptance criteria
+  - attributes:
+      label: Acceptance Criteria
+      description: "Use bulleted points or Gherkin syntax to explain the acceptance criteria."
+      value: |
+        *Scenario 1*: User logins in
+        _GIVEN_ the User is on the login page
+        _WHEN_ the User enters in a valid email and password
+        _THEN_ the User is directed to the home page
+    id: acceptance-criteria
+    type: textarea
     validations:
       required: false
 
-  - type: textarea
-    attributes:
-      label: Where can we find information about this?
-      description: If you are proposing an integration or third-party plugins, please add relevant links and documentation.
+  # notes
+  - attributes:
+      label: Notes
+      description: "This is a space to further expand with links, diagrams and technical deep-dives."
+    id: notes
+    type: textarea
     validations:
       required: false

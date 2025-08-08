@@ -4,87 +4,92 @@ title: "fix: "
 labels: ["\U0001F41B bug"]
 assignees:
   - kieranroneill
+
 body:
   # welcome
-  - type: markdown
-    attributes:
+  - attributes:
       value: |
         Thanks for taking the time to fill out this bug report, all issues are welcome and remember, you're awesome!
-  # contact
-  - type: input
+    type: markdown
+
+  # contact details
+  - attributes:
+      description: "How can we get in touch with you if we need more info?"
+      label: "Contact Details"
+      placeholder: "e.g. email@example.com"
     id: contact
-    attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: e.g. email@example.com
+    type: input
     validations:
       required: false
+
   # version
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of the sdk are you running?
+  - attributes:
+      description: "What version of the SDK are you running?"
+      label: "Version"
       options:
         - 1.0.0
+    id: version
+    type: dropdown
     validations:
       required: true
+
   # browser
-  - type: dropdown
-    id: browsers
-    attributes:
-      label: What browser are you seeing the problem on?
+  - attributes:
+      description: "What browser are you seeing the problem on?"
+      label: "Browser"
       multiple: true
       options:
         - Brave
         - Chrome
         - Edge
         - Firefox
+    id: browsers
+    type: dropdown
     validations:
       required: false
-  # description
-  - type: textarea
-    id: description
-    attributes:
-      label: Description
-      description: A detailed description of what is occurring.
-      placeholder: Tell us what you see!
-      value: "A bug happened!"
+
+  # summary
+  - attributes:
+      description: "Give a brief summary of the bug in one or two sentences."
+      label: "Summary"
+    id: summary
+    type: textarea
     validations:
       required: true
+
   # steps to reproduce
-  - type: textarea
-    id: reproduction
-    attributes:
-      label: Steps To Reproduce
-      description: Use a simple bulleted pointed list of the steps to reproduce.
-      placeholder: "* Light a small spark..."
+  - attributes:
+      label: "Steps To Reproduce"
+      description: "Use a simple bulleted pointed list of the steps to reproduce."
+    id: steps-to-reproduce
+    type: textarea
     validations:
       required: true
+
   # expected results
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected Results
-      description: What you expected to happen.
-      placeholder: Accounts, accounts everywhere!
+  - attributes:
+      description: "Give a brief description or bullet points of what you expect to happen."
+      label: "Expected Results"
+    id: expected-results
+    type: textarea
     validations:
       required: true
+
   # actual results
-  - type: textarea
-    id: actual
-    attributes:
-      label: Actual Results
-      description: What actually occurs.
-      placeholder: The quantum realm is threatened and we must miniaturize to save it!
+  - attributes:
+      description: "Give a brief description or bullet points of what actual happens."
+      label: "Actual Results"
+    id: actual-results
+    type: textarea
     validations:
       required: true
+
   # logs
-  - type: textarea
-    id: browser-console-logs
-    attributes:
-      label: Relevant browser console output
-      description: Please copy and paste any relevant browser console output. This will be automatically formatted into code, so no need for backticks.
+  - attributes:
+      label: "Logs"
+      description: "Please copy and paste any relevant browser console output. This will be automatically formatted into code, so no need for backticks."
       render: shell
+    id: logs
+    type: textarea
     validations:
       required: false
