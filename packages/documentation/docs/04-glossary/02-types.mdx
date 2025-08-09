@@ -3,7 +3,11 @@ sidebar_label: Types
 slug: /glossary/types
 ---
 
+<!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL, CAIP_002_SPECIFICATION_URL, KIBISIS_CHAINS_NPM_PACKAGE_URL } from '@site/src/constants';
 
 # Types
 
@@ -13,10 +17,11 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 ## Account
 
-| Name    | Type     | Required | Default     | Description                                                                                                                      |
-|---------|----------|----------|-------------|----------------------------------------------------------------------------------------------------------------------------------|
-| address | `string` | yes      | -           | A [base32][rfc4648_6] encoded public key with a 4-byte checksum appended as defined in [keys and addresses][keys-and-addresses]. |
-| name    | `string` | no       | `undefined` | A human-readable name for this account.                                                                                          |
+| Name   | Type                       | Required | Default     | Description                                                                                                                          |
+|--------|----------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| __type | `connected` \| `ephemeral` | yes      | -           | The type of account: `connected` or `ephemeral`.                                                                                     |
+| key    | `string`                   | yes      | -           | The public key of the account encoded with <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a>. |
+| name   | `string`                   | no       | `undefined` | A human-readable name for this account.                                                                                              |
 
 <SectionBreak />
 
@@ -49,47 +54,80 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 ## CreateKatavaultParameters
 
-| Name   | Type                                  | Required | Default | Description                     |
-|--------|---------------------------------------|----------|---------|---------------------------------|
-| debug  | `boolean`                             | no       | `false` | Whether to log debug messages.  |
-| client | `{ icon?: string; name: string; }`    | no       | -       | The client's name and icon URL. |
+| Name   | Type                                        | Required | Default | Description                                                                                                                                                                                      |
+|--------|---------------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| debug  | `boolean`                                   | no       | `false` | Whether to log debug messages.                                                                                                                                                                   |
+| chains | `[ChainConstructor, ...ChainConstructor[]]` | yes      | -       | A collection of chains. It is **RECOMMENDED** to use <a href={KIBISIS_CHAINS_NPM_PACKAGE_URL} rel="noopener noreferrer" target="_blank">`@kibisis/chains`</a> to handle the chain configuration. |
+| client | `{ icon?: string; name: string; }`          | no       | -       | The client's name and icon URL.                                                                                                                                                                  |
+<SectionBreak />
+
+## SendRawTransactionParameters
+
+| Name        | Type         | Required | Default | Description                                                                                               |
+|-------------|--------------|----------|---------|-----------------------------------------------------------------------------------------------------------|
+| chainID     | `string`     | yes      | -       | The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID. |
+| signature   | `Uint8Array` | yes      | -       | he signature of the signed transaction. This will be different for different chains.                      |
+| transaction | `Uint8Array` | yes      | -       | The raw transaction data. This will be different for different chains.                                    |
 
 <SectionBreak />
 
-## ImportAccountWithMnemonicParameters
+## SendRawTransactionParameters
 
-| Name     | Type     | Required | Default | Description                                                                            |
-|----------|----------|----------|---------|----------------------------------------------------------------------------------------|
-| mnemonic | `string` | yes      | -       | A whitespace or comma separated 25-word mnemonic seed phrase containing BIP-039 words. |
-| name     | `string` | no       | -       | The name of the account.                                                               |
-
-<SectionBreak />
-
-## ImportAccountWithPrivateKeyParameters
-
-| Name       | Type         | Required | Default | Description                                              |
-|------------|--------------|----------|---------|----------------------------------------------------------|
-| name       | `string`     | no       | -       | The name of the account.                                 |
-| privateKey | `Uint8Array` | yes      | -       | The raw private key used to derive the Ed25519 key pair. |
+| Name        | Type         | Required | Default | Description                                                                                               |
+|-------------|--------------|----------|---------|-----------------------------------------------------------------------------------------------------------|
+| chainID     | `string`     | yes      | -       | The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID. |
+| signature   | `Uint8Array` | yes      | -       | The signature of the signed transaction. This will be different for different chains.                     |
+| transaction | `Uint8Array` | yes      | -       | The raw transaction data. This will be different for different chains.                                    |
 
 <SectionBreak />
 
-## SetAccountNameByAddressParameters
+## SendRawTransactionResult
 
-| Name    | Type     | Required | Default | Description                           |
-|---------|----------|----------|---------|---------------------------------------|
-| address | `string` | yes      | -       | The address of the account to update. |
-| name    | `string` | yes      | -       | The name of the account.              |
+| Name          | Type                            | Required | Default | Description                                                                                                                                           |
+|---------------|---------------------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| error         | [`BaseError`][errors] \| `null` | yes      | `null`  | If the transaction submission was unsuccessful, the exact error will be available.                                                                    |
+| success       | `boolean`                       | yes      | -       | Whether the transaction submission was successful.                                                                                                    |
+| transactionID | `string` \| `null`              | yes      | `null`  | If the transaction was sent successfully created, this will be the transaction ID. The structure and encoding will be different for different chains. |
 
 <SectionBreak />
 
-## SignParameters
+## SetAccountNameByKeyParameters
 
-| Name     | Type                     | Required | Default     | Description                                                                                                           |
-|----------|--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
-| address  | `string`                 | yes      | -           | The address of the account to be used to sign the message.                                                            |
-| encoding | `base64` \| `hex`        | no       | `undefined` | The output encoding of the signature. If no encoding is specified, the signature will be in raw bytes (`Uint8Array`). |
-| message  | `string` \| `Uint8Array` | yes      | -           | A UTF-8 encoded message or raw bytes to sign.                                                                         |
+| Name | Type     | Required | Default | Description                                                                                                                     |
+|------|----------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------|
+| key  | `string` | yes      | -       | The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account. |
+| name | `string` | yes      | -       | The new name for the account.                                                                                                   |
+
+<SectionBreak />
+
+## SignMessageParameters
+
+| Name       | Type                     | Required | Default     | Description                                                                                                                                                   |
+|------------|--------------------------|----------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| accountKey | `string`                 | yes      | -           | The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account that will be used for signing. |
+| chainID    | `string`                 | yes      | -           | The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.                                                     |
+| encoding   | `base64` \| `hex`        | no       | `undefined` | The output encoding of the signature. If no encoding is specified, the signature will be in raw bytes (`Uint8Array`).                                         |
+| message    | `string` \| `Uint8Array` | yes      | -           | A UTF-8 encoded message or raw bytes to sign.                                                                                                                 |
+
+<SectionBreak />
+
+## SignRawTransactionParameters
+
+| Name        | Type         | Required | Default | Description                                                                                                                                                   |
+|-------------|--------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| accountKey  | `string`     | yes      | -       | The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account that will be used for signing. |
+| chainID     | `string`     | yes      | -       | The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.                                                     |
+| transaction | `Uint8Array` | yes      | -       | The raw transaction data to be signed. This will be different for different chains.                                                                           |
+
+<SectionBreak />
+
+## SignRawTransactionResult
+
+| Name      | Type                            | Required | Default | Description                                                                           |
+|-----------|---------------------------------|----------|---------|---------------------------------------------------------------------------------------|
+| error     | [`BaseError`][errors] \| `null` | yes      | `null`  | If the transaction signing was unsuccessful, the exact error will be available.       |
+| success   | `boolean`                       | yes      | -       | Whether the transaction signing was successful.                                       |
+| signature | `Uint8Array`                    | yes      | -       | The signature of the signed transaction. This will be different for different chains. |
 
 <SectionBreak />
 
@@ -101,5 +139,4 @@ import SectionBreak from '@site/src/components/SectionBreak';
 | username    | `string` | yes      | -       | A globally unique identifier for the user. This could be, for example, an email address.                      |
 
 <!-- links -->
-[keys-and-addresses]: https://developer.algorand.org/docs/get-details/accounts/#keys-and-addresses
-[rfc4648_6]: https://datatracker.ietf.org/doc/html/rfc4648#section-6
+[errors]: 04-glossary/02-types.mdx#baseerror

@@ -1,15 +1,15 @@
 ---
-sidebar_label: accounts
-slug: /core/accounts/accounts
+sidebar_label: holdingAccounts
+slug: /core/accounts/holding-accounts
 ---
 
 import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# accounts
+# holdingAccounts
 
-> Gets a list of the accounts within the vault.
+> Gets the holding accounts of the vault. If no holding accounts exist, a new one is created from the saved credentials.
 
 :::note
 
@@ -44,18 +44,14 @@ Authentication is **REQUIRED**.
       },
     });
 
-    accounts = await katavault.accounts();
+    accounts = await katavault.holdingAccounts();
 
     console.log(accounts);
     /*
     [
       {
         key: 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo',
-        name: 'Account-1',
-      },
-      {
-        key: 'CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a',
-        name: 'Account-2',
+        name: 'My Holdings',
       },
     ]
     */
@@ -68,9 +64,9 @@ Authentication is **REQUIRED**.
 
 ## Returns
 
-[`Promise<Account[]>`](04-glossary/02-types.mdx#account)
+[`Promise<[Account, ...Account[]]>`](04-glossary/02-types.mdx#account)
 
-A promise that resolves to the list of accounts stored in the vault.
+A promise that resolves to the holding accounts stored in the vault.
 
 <SectionBreak />
 

@@ -7,6 +7,14 @@ import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<!-- components -->
+import CenteredImage from '@site/src/components/CenteredImage';
+
+<!-- images -->
+import authenticate001Image from './images/authenticate_001.png';
+import authenticate002Image from './images/authenticate_002.png';
+import authenticate003Image from './images/authenticate_003.png';
+
 # Getting started
 
 > Katavault can be started simply with a few lines of code.
@@ -15,7 +23,7 @@ import TabItem from '@theme/TabItem';
 
 ## Overview
 
-The core implementation contains the main functionality that handles all the authentication, encryption and storage of wallet keys.
+The core implementation contains the main functionality that handles all the authentication, encryption and storage of accounts.
 
 <SectionBreak />
 
@@ -39,11 +47,11 @@ While not a requirement, it is **RECOMMENDED** to use [`@kibisis/chains`](https:
   <TabItem value="main">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Algorand, Voi } from '@kibisis/chains';
     import { createKatavault } from '@kibisis/katavault-core';
 
     const katavault = await createKatavault({
-      chains: [voi],
+      chains: [Algorand, Voi],
     });
     ```
 
@@ -58,20 +66,72 @@ See [`CreateKatavaultParameters`](04-glossary/02-types.mdx#createkatavaultparame
 
 ### 2. Authentication
 
-Katavault currently supports two types of encryption:
+Katavault offers a variety of authentication methods, including:
 
-* [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (WebAuthn) — utilizing the [PRF extension][prf_extension] to extract encryption key material that can be used with strong AES-GCM data encryption.
-* Password — more traditional, but more widely supported.
+* **Password** — A more traditional approach and more widely supported.
+* **Passkey** — Biometric or passkey-based login based on the [WebAuthn](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) standard and uses the [PRF extension][prf_extension] to extract encryption key material that can be used with strong AES-GCM data encryption.
 
 The choice of authentication method comes down to either support or to the prerogative of the integration.
 
 :::note
 
-Authentication using one of the below methods is **REQUIRED** for all interactions with sensitive (private keys) information — including write operations, such as signing.
+Authentication using one of the below flows is **REQUIRED** for all interactions with sensitive (private keys) information — including write operations, such as signing.
 
 :::
 
-#### 2.1. Passkey authentication
+#### 2.1. User Authentication
+
+The Katavault toolkit comes bundled with a user interface that allows authentication to be taken care of via the Katavault UI.
+
+To initialize the user authentication flow, use:
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    // opens a modal for the user to authenticate
+    await katavault.authenticate();
+
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+A modal will display over the dApp prompting the user to authenticate by first entering a username/email.
+
+<CenteredImage
+  label="A screenshot showing the username/email entry of the user authentication flow."
+  src={authenticate001Image}
+/>
+
+If this is the first time the user has used Katavault on the dApp, they will be prompted to choose their authentication method.
+
+<CenteredImage
+  label="A screenshot showing the username/email entry of the user authentication flow."
+  src={authenticate002Image}
+/>
+
+However, if the user has previously logged in to Katavault on this device, they will be asked for their credentials once more.
+
+<CenteredImage
+  label="A screenshot showing the username/email entry of the user authentication flow."
+  src={authenticate003Image}
+/>
+
+#### 2.2. Authentication API
+
+If the dApp has its own authentication process, Katavault also offers the ability to authenticate programmatically through the API.
+
+#### 2.1.1. Passkey authentication
 
 <Tabs
   defaultValue="main"
@@ -113,7 +173,7 @@ If passkeys are not supported, or the supplied passkey does not support the [PRF
 
 :::
 
-#### 2.2. Password authentication
+#### 2.2.2. Password authentication
 
 <Tabs
   defaultValue="main"
@@ -154,7 +214,7 @@ See [`AuthenticateWithPasswordParameters`](04-glossary/02-types.mdx#authenticate
 
 ### 3. Using Katavault
 
-Once the client is set up and authenticated, you can start interacting with the embedded wallet.
+Once the client is set up and authenticated, you can start interacting with Katavault.
 
 <Tabs
   defaultValue="main"
@@ -164,14 +224,20 @@ Once the client is set up and authenticated, you can start interacting with the 
   <TabItem value="main">
 
     ```typescript
-    const account = await katavault.generateAccount('Personal');
+    accounts = await katavault.accounts();
 
-    console.log(account);
+    console.log(accounts);
     /*
-    {
-      address: 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU',
-      name: 'Personal',
-    }
+    [
+      {
+        key: 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo',
+        name: 'Account-1',
+      },
+      {
+        key: 'CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a',
+        name: 'Account-2',
+      },
+    ]
     */
     ```
 

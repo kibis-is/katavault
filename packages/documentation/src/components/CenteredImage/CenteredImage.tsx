@@ -12,7 +12,7 @@ interface IProps {
 
 const CenteredImage: FC<IProps> = ({
   label,
-  maxWidth = '400px',
+  maxWidth,
   src,
 }: IProps) => {
   return (

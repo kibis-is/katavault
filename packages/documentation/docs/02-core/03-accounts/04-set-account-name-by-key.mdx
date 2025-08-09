@@ -1,0 +1,99 @@
+---
+sidebar_label: setAccountNameByKey
+slug: /core/accounts/set-account-name-by-key
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL } from '@site/src/constants';
+
+# setAccountNameByKey
+
+> Updates the name of an account by its key.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.authenticateWithPasskey({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+    await katavault.setAccountNameByKey({
+      key: 'CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a',
+      name: 'New name',
+    });
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### params
+
+* Type: [`SetAccountNameByKeyParameters`](04-glossary/02-types.mdx#setaccountnamebykeyparameters)
+
+The key of the account and the new name to set.
+
+### params.key
+
+* Type: `string`
+
+The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account.
+
+### params.name
+
+* Type: `string`
+
+The new name for the account.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<Account>`](04-glossary/02-types.mdx#account)
+
+A promise that resolves to the updated account.
+
+<SectionBreak />
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.
+
+### [AccountDoesNotExistError](04-glossary/03-errors.mdx#accountdoesnotexisterror)
+
+If the specified key does not exist in the vault.

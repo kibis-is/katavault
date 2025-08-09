@@ -1,15 +1,20 @@
 ---
-sidebar_label: accounts
-slug: /core/accounts/accounts
+sidebar_label: removeAccountByKey
+slug: /core/accounts/remove-account-by-key
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# accounts
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
-> Gets a list of the accounts within the vault.
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL } from '@site/src/constants';
+
+# removeAccountByKey
+
+> Removes the account from the vault for the specified key if it exists.
 
 :::note
 
@@ -30,12 +35,11 @@ Authentication is **REQUIRED**.
 
     ```typescript
     import { Voi } from '@kibisis/chains';
-    import { type Account, createKatavault } from '@kibisis/katavault-core';
+    import { createKatavault } from '@kibisis/katavault-core';
 
     const katavault = await createKatavault({
       chains: [Voi],
     });
-    let accounts: Account[];
 
     await katavault.authenticateWithPasskey({
       user: {
@@ -43,22 +47,7 @@ Authentication is **REQUIRED**.
         username: 'kibi@kibis.is',
       },
     });
-
-    accounts = await katavault.accounts();
-
-    console.log(accounts);
-    /*
-    [
-      {
-        key: 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo',
-        name: 'Account-1',
-      },
-      {
-        key: 'CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a',
-        name: 'Account-2',
-      },
-    ]
-    */
+    await katavault.removeAccountByKey('CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a');
     ```
 
   </TabItem>
@@ -66,11 +55,13 @@ Authentication is **REQUIRED**.
 
 <SectionBreak />
 
-## Returns
+## Parameters
 
-[`Promise<Account[]>`](04-glossary/02-types.mdx#account)
+### key
 
-A promise that resolves to the list of accounts stored in the vault.
+* Type: `string`
+
+The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account to remove from the vault.
 
 <SectionBreak />
 

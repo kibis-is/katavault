@@ -1,6 +1,6 @@
 ---
-sidebar_label: addChain
-slug: /core/chains/add-chain
+sidebar_label: removeChainByChainID
+slug: /core/chains/remove-chain-by-chain-id
 ---
 
 import Tabs from '@theme/Tabs';
@@ -12,9 +12,9 @@ import SectionBreak from '@site/src/components/SectionBreak';
 <!-- constants -->
 import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
 
-# addChain
+# removeChainByChainID
 
-> Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing chain by the <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+> Removes a chain from the list of supported chains based on the <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
 
 <SectionBreak />
 
@@ -32,10 +32,10 @@ import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
     import { createKatavault } from '@kibisis/katavault-core';
 
     const katavault = await createKatavault({
-      chains: [Voi],
+      chains: [Algorand, Voi],
     });
 
-    await katavault.addChain(Algorand);
+    katavault.removeChainByChainID('algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k');
     ```
 
   </TabItem>
@@ -45,16 +45,8 @@ import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
 
 ## Parameters
 
-### chain
+### chainID
 
-* Type: `ChainConstructor`
+* Type: `string`
 
-The chain to be added.
-
-<SectionBreak />
-
-## Throws
-
-### [FailedToFetchChainInformationError](04-glossary/03-errors.mdx#failedtofetchchaininformationerror)
-
-If the chain failed to fetch the chain information.
+The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID of the chain to be removed.

@@ -269,7 +269,7 @@ export default class Katavault extends BaseClass {
    *
    * **NOTE:** Requires authentication.
    *
-   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
+   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
@@ -291,9 +291,9 @@ export default class Katavault extends BaseClass {
 
   /**
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
-   * chain by the chain ID.
+   * chain by the CAIP-002 chain ID.
    *
-   * @param {Chain} chain - The chain to be added.
+   * @param {ChainConstructor} chain - The chain to be added.
    * @throws {FailedToFetchChainInformationError} If the chain failed to fetch the chain information.
    * @public
    */
@@ -461,7 +461,7 @@ export default class Katavault extends BaseClass {
    *
    * **NOTE:** Requires authentication.
    *
-   * @returns {Promise<[Account, ...Account[]]>} A promise that resolves to the holding accounts.
+   * @returns {Promise<[Account, ...Account[]]>} A promise that resolves to the holding accounts stored in the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @throws {EncryptionError} If the account's private key failed to be encrypted.
    * @public
@@ -520,12 +520,12 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Removes the account from the provider for the specified key if it exists.
+   * Removes the account from the vault for the specified key if it exists.
    *
    * **NOTE:** Requires authentication.
    *
-   * @param {string} key - The key, encoded with base58, of the account to remove from the wallet.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @param {string} key - The base58 encoded public key of the account to remove from the vault.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
   public async removeAccountByKey(key: string): Promise<void> {
@@ -548,10 +548,9 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Removes a chain from the list of supported chains based on the provided genesis hash.
+   * Removes a chain from the list of supported chains based on the CAIP-002 chain ID.
    *
-   * @param {string} chainID - The chain ID - the concatenation of the namespace and the reference:
-   * `<namespace>:<reference>`.
+   * @param {string} chainID - The CAIP-002 chain ID of the chain to be removed.
    * @public
    */
   public removeChainByChainID(chainID: string): void {
@@ -613,13 +612,16 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Updates the name of the account.
+   * Updates the name of an account by its key.
    *
    * **NOTE:** Requires authentication.
    *
-   * @param {SetAccountNameByKeyParameters} params - The address and name to set.
+   * @param {SetAccountNameByKeyParameters} params - The key of the account and the new name to set.
+   * @param {string} params.key - The base58 encoded public key of the account.
+   * @param {string} params.name - The new name for the account.
    * @returns {Promise<Account>} A promise that resolves to the updated account.
-   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {AccountDoesNotExistError} If the specified key does not exist in the vault.
    * @public
    */
   public async setAccountNameByKey({ key, name }: SetAccountNameByKeyParameters): Promise<Account> {
