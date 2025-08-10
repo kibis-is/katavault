@@ -26,7 +26,7 @@
     "clean": "shx rm -rf dist && shx rm -rf tsconfig.*.tsbuildinfo",
     "generate:index": "tsx ./scripts/generate-index.ts",
     "lint": "eslint .",
-    "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts}\"",
+    "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts,tsx}\"",
     "start": "pnpm build:dependencies && pnpm build && vite dev --config example/vite.config.ts",
     "test": "vitest run --config vitest.config.ts"
   },
