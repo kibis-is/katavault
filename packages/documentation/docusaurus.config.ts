@@ -48,7 +48,7 @@ const config: () => Promise<Config> = async () => {
             routeBasePath: '/',
             versions: {
               current: {
-                label: '1.0.0',
+                label: '1.x',
               },
             },
           },

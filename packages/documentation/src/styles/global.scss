@@ -1,5 +1,7 @@
 @use "palette";
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
 :root {
   // custom
   @each $key, $value in palette.$primary-dark-palette {
@@ -17,6 +19,8 @@
   --ifm-color-primary-light: var(--primary-color-light-400);
   --ifm-color-primary-lighter: var(--primary-color-light-300);
   --ifm-color-primary-lightest: var(--primary-color-light-200);
+  --ifm-font-family-base: 'Nunito';
+  --ifm-heading-font-family: 'Nunito';
 }
 
 [data-theme='dark'] {
