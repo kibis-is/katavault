@@ -1,6 +1,8 @@
 ---
+id: use-set-account-name-by-key
 sidebar_label: useSetAccountNameByKey
-slug: /core/accounts/use-set-account-name-by-key
+slug: /react/accounts/use-set-account-name-by-key
+title: useSetAccountNameByKey
 ---
 
 import Tabs from '@theme/Tabs';
@@ -142,15 +144,15 @@ Authentication is **REQUIRED**.
 
 The function can be called with callbacks that are invoked on error/success.
 
-#### onError
+#### options.onError
 
-`(error: BaseError, params: SetAccountNameByKeyParameters) => void | Promimse<void>`
+Type: `(error: BaseError, params: SetAccountNameByKeyParameters) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
-#### onSuccess
+#### options.onSuccess
 
-`(result: Account, params: SetAccountNameByKeyParameters) => void | Promimse<void>`
+Type: `(result: Account, params: SetAccountNameByKeyParameters) => void | Promise<void>`
 
 This will be invoked if the account update was successful and will return the updated account.
 

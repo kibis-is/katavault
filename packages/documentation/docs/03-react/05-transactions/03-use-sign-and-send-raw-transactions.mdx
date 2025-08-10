@@ -1,8 +1,8 @@
 ---
-id: use-remove-account-by-key
-sidebar_label: useRemoveAccountByKey
-slug: /react/accounts/use-remove-account-by-key
-title: useRemoveAccountByKey
+id: use-sign-and-send-raw-transactions
+sidebar_label: useSignAndSendRawTransactions
+slug: /react/transactions/use-sign-and-send-raw-transactions
+title: useSignAndSendRawTransactions
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,9 +11,9 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useRemoveAccountByKey
+# useSignAndSendRawTransactions
 
-> Hook to remove an account by the account key.
+> Hook to sign and send an array of raw transactions using the appropriate account and chain.
 
 :::note
 
@@ -26,32 +26,44 @@ Authentication is **REQUIRED**.
 ## Usage
 
 <Tabs
-  defaultValue="accounts"
+  defaultValue="sign-and-send-raw-transactions"
   values={[
-    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'SignAndSendRawTransactions.tsx', value: 'sign-and-send-raw-transactions' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="accounts">
+  <TabItem value="sign-and-send-raw-transactions">
 
     ```typescript
-    import { useAccounts, useRemoveAccountByKey } from '@kibisis/katavault-react';
+    import { useAccounts, useSignAndSendRawTransactions } from '@kibisis/katavault-react';
     import { useCallback } from 'react';
 
-    function Accounts() {
+    function SignAndSendRawTransactions() {
       const accounts = useAccounts();
-      const removeAccountByKey = useRemoveAccountByKey();
-      const handleOnRemoveAccountByKeyClick = useCallback((key: string) => () => {
-        removeAccountByKey(key, {
+      const signAndSendRawTransactions = useSignAndSendRawTransactions();
+      const handleOnSignAndSendRawTransactionsClick = useCallback((key: string) => () => {
+        signRawTransactions([
+          {
+            accountKey: key,
+            chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+            transaction: [36, 9, 22, ...], // the raw transaction data
+          }
+        ], {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: () => {
-            console.log(`removed account ${key}`);
+          onSuccess: ([result]) => {
+            if (result.error || !result.success) {
+              console.error(result.error ?? 'failed to sign or send transaction');
+
+              return;
+            }
+
+            console.log(`transaction ${result.transactionID} submitted successfully`);
           },
         });
-      }, [useRemoveAccountByKey]);
+      }, [signAndSendRawTransactions]);
 
       return (
         <div>
@@ -59,7 +71,7 @@ Authentication is **REQUIRED**.
             <div>
               <p>Key: {key}</p>
               <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnRemoveAccountByKeyClick(key)}>Remove</button>
+              <button onClick={handleOnSignAndSendRawTransactionsClick(key)}>Sign</button>
             </div>
           ))}
         </div>
@@ -72,15 +84,15 @@ Authentication is **REQUIRED**.
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
+    import { SignAndSendRawTransactions } from './SignAndSendRawTransactions';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Accounts />
+          <SignAndSendRawTransactions />
         </KatavaultProvider>
       );
     }
@@ -137,22 +149,24 @@ Authentication is **REQUIRED**.
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+`(params: SignRawTransactionParameters[], options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### options.onError
 
-Type: `(error: BaseError, params: string) => void | Promise<void>`
+Type: `(error: BaseError, params: SignRawTransactionParameters[]) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
 #### options.onSuccess
 
-Type: `(result: undefined, params: string) => void | Promise<void>`
+Type: `(result: SendRawTransactionResult[], params: SignRawTransactionParameters[]) => void | Promise<void>`
 
-This will be invoked if the account removal was successful.
+This will be invoked with an array of results that will contain whether the transaction signed and submitted was successfully, the transaction ID and an error if the transaction signing or submission was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list indices.
 
 ## See also
 
-* [removeAccountByKey](02-core/03-accounts/03-remove-account-by-key.mdx)
+* [signAndSendRawTransactions](02-core/05-transactions/03-sign-and-send-raw-transactions.mdx)

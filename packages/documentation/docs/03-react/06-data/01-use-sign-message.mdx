@@ -1,6 +1,8 @@
 ---
+id: use-sign-message
 sidebar_label: useSignMessage
 slug: /react/data/use-sign-message
+title: useSignMessage
 ---
 
 import Tabs from '@theme/Tabs';
@@ -103,7 +105,7 @@ Authentication is **REQUIRED**.
       } = useAuthenticate();
 
       useEffect(() => {
-        authenticateWithPasskey({
+        authenticate({
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -144,15 +146,15 @@ Authentication is **REQUIRED**.
 
 The function can be called with callbacks that are invoked on error/success.
 
-#### onError
+#### options.onError
 
-`(error: BaseError, params: SignMessageParameters) => void | Promimse<void>`
+Type: `(error: BaseError, params: SignMessageParameters) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
-#### onSuccess
+#### options.onSuccess
 
-`(result: string | Uint8Array, params: SignMessageParameters) => void | Promimse<void>`
+Type: `(result: string | Uint8Array, params: SignMessageParameters) => void | Promise<void>`
 
 This will be invoked with the signature as the result if the message signing was successful.
 

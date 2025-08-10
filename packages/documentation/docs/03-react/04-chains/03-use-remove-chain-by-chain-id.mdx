@@ -1,6 +1,8 @@
 ---
+id: use-remove-chain-by-chain-id
 sidebar_label: useRemoveChainByChainID
 slug: /react/chains/use-remove-chain-by-chain-id
+title: useRemoveChainByChainID
 ---
 
 import Tabs from '@theme/Tabs';
@@ -106,15 +108,15 @@ import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
 
 The function can be called with callbacks that are invoked on error/success.
 
-#### onError
+#### options.onError
 
-`(error: BaseError, params: string) => void | Promimse<void>`
+Type: `(error: BaseError, params: string) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
-#### onSuccess
+#### options.onSuccess
 
-`(result: undefined, params: string) => void | Promimse<void>`
+Type: `(result: undefined, params: string) => void | Promise<void>`
 
 This will be invoked if the chain removal was successful.
 

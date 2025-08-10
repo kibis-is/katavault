@@ -1,6 +1,8 @@
 ---
+id: use-add-chain
 sidebar_label: useAddChain
 slug: /react/chains/use-add-chain
+title: useAddChain
 ---
 
 import Tabs from '@theme/Tabs';
@@ -105,15 +107,15 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 The function can be called with callbacks that are invoked on error/success.
 
-#### onError
+#### options.onError
 
-`(error: BaseError, params?: Chain) => void | Promimse<void>`
+Type: `(error: BaseError, params?: Chain) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
-#### onSuccess
+#### options.onSuccess
 
-`(result: Chain, params?: Chain) => void | Promimse<void>`
+Type: `(result: Chain, params?: Chain) => void | Promise<void>`
 
 This will be invoked if the chain was added successfully.
 
