@@ -52,7 +52,7 @@ npm install @kibisis/katavault-core
 
 ## 📚 2. Documentation
 
-For full documentation on usage, see [here](https://katavault.kibis.is/core/getting-started).
+For full documentation on usage, see [here](https://docs.katavault.kibis.is/core/getting-started).
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
