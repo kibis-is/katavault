@@ -1,10 +1,10 @@
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 // configs
-import commonConfig from './vite.common.config';
+import defaultConfig from './vite.default.config';
 
 export default mergeConfig(
-  commonConfig,
+  defaultConfig,
   defineConfig({
     test: {
       dir: 'src',

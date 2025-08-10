@@ -1,0 +1,79 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+$icon-size: 1.25rem; // 20px
+
+.button {
+  @include mixins.button-transition;
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: map.get(variables.$border-radius, "sm");
+  cursor: pointer;
+  display: flex;
+  height: auto;
+  justify-content: center;
+  min-width: auto;
+  padding: 0.625rem; // 10px
+  width: auto;
+
+  &:focus {
+    border-color: palette.focus-border-color("light");
+    outline: none;
+
+    &[data-color-mode="dark"] {
+      border-color: palette.focus-border-color("dark");
+    }
+  }
+
+  &:hover {
+    background-color: palette.ghost-button-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: palette.ghost-button-background-color("dark");
+    }
+  }
+
+  &--xs {
+    padding: 0.525rem; // 8.4px
+  }
+
+  &--sm {
+    padding: 0.575rem; // 9.2px
+  }
+
+  &--lg {
+    padding: 0.7rem; // 11.2px
+  }
+
+  &--xl {
+    padding: 0.75rem; // 12px
+  }
+}
+
+.icon {
+  height: 1.25rem; // 20px
+  width: 1.25rem; // 20px
+
+  &--xs {
+    height: 0.75rem; // 12px
+    width: 0.75rem; // 12px
+  }
+
+  &--sm {
+    height: 1rem; // 16px
+    width: 1rem; // 16px
+  }
+
+  &--lg {
+    height: 1.5rem; // 24px
+    width: 1.5rem; // 24px
+  }
+
+  &--xl {
+    height: 2rem; // 32px
+    width: 2rem; // 32px
+  }
+}

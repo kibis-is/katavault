@@ -5,8 +5,11 @@ import { useContext, useEffect, useState } from 'react';
 import { KatavaultContext } from '@/contexts';
 
 /**
- * Hook for getting the accounts.
- * @returns {Account[]} The accounts in the wallet.
+ * Hook for getting the list of accounts stored in the vault.
+ *
+ * **NOTE:** Requires authentication.
+ *
+ * @returns {Account[]} The accounts in the vault.
  */
 export default function useAccounts(): Account[] {
   const { katavault, timestamp } = useContext(KatavaultContext);

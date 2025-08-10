@@ -1,11 +1,14 @@
 ---
 sidebar_label: Getting started
 slug: /react/getting-started
+title: Getting started
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
 # Getting started
 
@@ -50,9 +53,11 @@ Wrap the app in the `KatavaultProvider` React Context Provider and pass the para
   <TabItem value="config">
 
     ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -74,7 +79,82 @@ See [`CreateKatavaultParameters`](04-glossary/02-types.mdx#createkatavaultparame
 
 As explained in the [core](02-core/02-getting-started.mdx#2-authentication) documentation, before the app is able to start using the provider, the user **MUST** authenticate.
 
-#### 2.1. Passkey authentication
+#### 2.1. User authentication
+
+<Tabs
+  defaultValue="auth"
+  values={[
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        // opens a modal for the user to authenticate
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+#### 2.2. Authentication API
+
+#### 2.2.1. Passkey authentication
 
 <Tabs
   defaultValue="auth"
@@ -135,9 +215,11 @@ As explained in the [core](02-core/02-getting-started.mdx#2-authentication) docu
   <TabItem value="config">
 
     ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -155,7 +237,7 @@ See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatew
 
 :::
 
-#### 2.2. Password authentication
+#### 2.2.2. Password authentication
 
 <Tabs
   defaultValue="auth"
@@ -217,9 +299,11 @@ See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatew
   <TabItem value="config">
 
     ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -258,9 +342,9 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
     export function Accounts() {
       const accounts = useAccounts();
 
-      return accounts.map(({ address, name }) => (
+      return accounts.map(({ key, name }) => (
         <div>
-          <p>Address: {address}</p>
+          <p>Key: {key}</p>
           <p>Name: {name ?? '-'}</p>
         </div>
       ));
@@ -295,17 +379,12 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
 
     export function AuthScript() {
       const {
-        authenticateWithPasskey,
+        authenticate,
         isAuthenticated,
       } = useAuthenticate();
 
       useEffect(() => {
-        authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
+        authenticate({
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -322,9 +401,11 @@ Now that everything is set up, every component inside the `KatavaultProvider` ca
   <TabItem value="config">
 
     ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
       client: {
         name: 'Awesome App!!',
       },

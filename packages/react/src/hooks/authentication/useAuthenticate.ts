@@ -12,7 +12,7 @@ import { KatavaultContext } from '@/contexts';
 import { NotInitializedError } from '@/errors';
 
 // types
-import type { HookFunction, UseAuthenticateState } from '@/types';
+import type { HookFunction, HookFunctionWithoutParams, UseAuthenticateState } from '@/types';
 
 /**
  * Hook to manage authentication.
@@ -25,6 +25,30 @@ export default function useAuthenticate(): UseAuthenticateState {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
   // callbacks
+  const authenticate = useCallback<HookFunctionWithoutParams<undefined, BaseError>>(
+    (options) => {
+      (async () => {
+        if (!katavault) {
+          return options?.onError?.(new NotInitializedError('katavault not initialized'), undefined);
+        }
+
+        setIsAuthenticating(true);
+
+        try {
+          await katavault.authenticate();
+
+          onUpdate?.();
+          setIsAuthenticated(katavault.isAuthenticated());
+          options?.onSuccess?.(undefined, undefined);
+        } catch (error) {
+          return options?.onError?.(error, undefined);
+        } finally {
+          setIsAuthenticating(false);
+        }
+      })();
+    },
+    [katavault, setIsAuthenticated, setIsAuthenticating]
+  );
   const authenticateWithPasskey = useCallback<HookFunction<AuthenticateWithPasskeyParameters, undefined, BaseError>>(
     (params, options) => {
       (async () => {
@@ -37,11 +61,8 @@ export default function useAuthenticate(): UseAuthenticateState {
         try {
           await katavault.authenticateWithPasskey(params);
 
-          if (onUpdate) {
-            onUpdate();
-          }
-
-          setIsAuthenticated(true);
+          onUpdate?.();
+          setIsAuthenticated(katavault.isAuthenticated());
           options?.onSuccess?.(undefined, params);
         } catch (error) {
           return options?.onError?.(error, params);
@@ -64,11 +85,8 @@ export default function useAuthenticate(): UseAuthenticateState {
         try {
           await katavault.authenticateWithPassword(params);
 
-          if (onUpdate) {
-            onUpdate();
-          }
-
-          setIsAuthenticated(true);
+          onUpdate?.();
+          setIsAuthenticated(katavault.isAuthenticated());
           options?.onSuccess?.(undefined, params);
         } catch (error) {
           return options?.onError?.(error, params);
@@ -90,6 +108,7 @@ export default function useAuthenticate(): UseAuthenticateState {
   }, [katavault, timestamp]);
 
   return {
+    authenticate,
     authenticateWithPasskey,
     authenticateWithPassword,
     isAuthenticated,

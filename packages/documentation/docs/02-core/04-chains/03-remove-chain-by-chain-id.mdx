@@ -1,0 +1,54 @@
+---
+id: remove-chain-by-chain-id
+sidebar_label: removeChainByChainID
+slug: /core/chains/remove-chain-by-chain-id
+title: removeChainByChainID
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
+
+# removeChainByChainID
+
+> Removes a chain from the list of supported chains based on the <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Algorand, Voi],
+    });
+
+    katavault.removeChainByChainID('algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k');
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### chainID
+
+* Type: `string`
+
+The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID of the chain to be removed.

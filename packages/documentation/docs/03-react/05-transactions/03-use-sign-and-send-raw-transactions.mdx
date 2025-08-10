@@ -1,0 +1,172 @@
+---
+id: use-sign-and-send-raw-transactions
+sidebar_label: useSignAndSendRawTransactions
+slug: /react/transactions/use-sign-and-send-raw-transactions
+title: useSignAndSendRawTransactions
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useSignAndSendRawTransactions
+
+> Hook to sign and send an array of raw transactions using the appropriate account and chain.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="sign-and-send-raw-transactions"
+  values={[
+    { label: 'SignAndSendRawTransactions.tsx', value: 'sign-and-send-raw-transactions' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="sign-and-send-raw-transactions">
+
+    ```typescript
+    import { useAccounts, useSignAndSendRawTransactions } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
+
+    function SignAndSendRawTransactions() {
+      const accounts = useAccounts();
+      const signAndSendRawTransactions = useSignAndSendRawTransactions();
+      const handleOnSignAndSendRawTransactionsClick = useCallback((key: string) => () => {
+        signRawTransactions([
+          {
+            accountKey: key,
+            chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+            transaction: [36, 9, 22, ...], // the raw transaction data
+          }
+        ], {
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: ([result]) => {
+            if (result.error || !result.success) {
+              console.error(result.error ?? 'failed to sign or send transaction');
+
+              return;
+            }
+
+            console.log(`transaction ${result.transactionID} submitted successfully`);
+          },
+        });
+      }, [signAndSendRawTransactions]);
+
+      return (
+        <div>
+          {accounts.map(({ key, name }) => (
+            <div>
+              <p>Key: {key}</p>
+              <p>Name: {name ?? '-'}</p>
+              <button onClick={handleOnSignAndSendRawTransactionsClick(key)}>Sign</button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import { SignAndSendRawTransactions } from './SignAndSendRawTransactions';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <SignAndSendRawTransactions />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`(params: SignRawTransactionParameters[], options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### options.onError
+
+Type: `(error: BaseError, params: SignRawTransactionParameters[]) => void | Promise<void>`
+
+This will be invoked if there was an error.
+
+#### options.onSuccess
+
+Type: `(result: SendRawTransactionResult[], params: SignRawTransactionParameters[]) => void | Promise<void>`
+
+This will be invoked with an array of results that will contain whether the transaction signed and submitted was successfully, the transaction ID and an error if the transaction signing or submission was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list indices.
+
+## See also
+
+* [signAndSendRawTransactions](02-core/05-transactions/03-sign-and-send-raw-transactions.mdx)

@@ -1,0 +1,55 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+$footer-height: 3.125rem; // 50px
+$default-padding: map.get(variables.$spacing, "sm");
+
+.container {
+  @include mixins.base-account-card-container-styles;
+}
+
+.content {
+  min-height: variables.$account-card-min-height;
+  min-width: variables.$account-card-min-width;
+}
+
+.footer {
+  &__button {
+    height: $footer-height;
+    padding: 0 $default-padding;
+
+    &--closed {
+      border-bottom-left-radius: map.get(variables.$border-radius, "md");
+      border-bottom-right-radius: map.get(variables.$border-radius, "md");
+    }
+  }
+
+  &__content {
+    padding: $default-padding;
+  }
+}
+
+.header {
+  min-height: calc(#{variables.$account-card-min-height} - #{$footer-height});
+  padding-left: $default-padding;
+  padding-right: $default-padding;
+  padding-top: $default-padding;
+}
+
+.chain-icon {
+  border-radius: map.get(variables.$border-radius, "full");
+  height: 1.5rem; // 32px
+  width: 1.5rem; // 32px
+}
+
+.connector-icon {
+  border-radius: map.get(variables.$border-radius, "full");
+  height: 1.5rem; // 32px
+  width: 1.5rem; // 32px
+}
+
+.origin-icon {
+  height: 0.75rem; // 12px
+  width: 0.75rem; // 12px
+}

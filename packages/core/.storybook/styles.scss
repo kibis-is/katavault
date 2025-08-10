@@ -1,0 +1,9 @@
+@use "@/ui/styles/palette";
+
+body {
+  background-color: palette.background-color("light");
+
+  &[data-color-mode="dark"] {
+    background-color: palette.background-color("dark");
+  }
+}

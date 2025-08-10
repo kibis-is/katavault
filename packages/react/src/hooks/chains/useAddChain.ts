@@ -1,4 +1,4 @@
-import type { Chain, ChainWithNetworkParameters } from '@kibisis/chains';
+import type { ChainConstructor } from '@kibisis/chains';
 import { BaseError } from '@kibisis/katavault-core';
 import { useContext } from 'react';
 
@@ -12,10 +12,10 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunction } from '@/types';
 
 /**
- * Hook to add a chain.
- * @returns {HookFunction<Chain, ChainWithNetworkParameters, BaseError>} A function that can be used to add a new chain.
+ * Hook to add a chain to the vault.
+ * @returns {HookFunction<ChainConstructor, undefined, BaseError>} A function that can be used to add a new chain.
  */
-export default function useAddChain(): HookFunction<Chain, ChainWithNetworkParameters, BaseError> {
+export default function useAddChain(): HookFunction<ChainConstructor, undefined, BaseError> {
   // contexts
   const { onUpdate, katavault } = useContext(KatavaultContext);
 
@@ -26,13 +26,11 @@ export default function useAddChain(): HookFunction<Chain, ChainWithNetworkParam
       }
 
       try {
-        const result = await katavault.addChain(params);
+        await katavault.addChain(params);
 
-        if (onUpdate) {
-          onUpdate();
-        }
+        onUpdate?.();
 
-        options?.onSuccess?.(result, params);
+        return options?.onSuccess?.(undefined, params);
       } catch (error) {
         return options?.onError?.(error, params);
       }

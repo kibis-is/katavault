@@ -1,10 +1,11 @@
-import type { ChainWithNetworkParameters } from '@kibisis/chains';
+import type { Chain } from '@kibisis/chains';
 
 // types
 import type { ClientInformation, CommonParameters } from '@/types';
 
 interface KatavaultParameters extends CommonParameters {
-  chains: ChainWithNetworkParameters[];
+  chains: Chain[];
+  debug?: boolean;
   clientInformation: ClientInformation;
 }
 

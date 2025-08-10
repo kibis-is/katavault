@@ -1,0 +1,23 @@
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+.container {
+  background-color: palette.border-color("light");
+  border-radius: map.get(variables.$border-radius, "full");
+  height: 3px;
+  margin: 7px 0;
+  position: relative;
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    background-color: palette.border-color("dark");
+  }
+}
+
+.track {
+  border-color: inherit;
+  border-radius: map.get(variables.$border-radius, "full");
+  height: inherit;
+  transition: width 0.5s ease-in-out, background 0.25s;
+}

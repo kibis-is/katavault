@@ -1,4 +1,4 @@
-import type { ChainWithNetworkParameters } from '@kibisis/chains';
+import type { Chain } from '@kibisis/chains';
 import { useContext, useEffect, useState } from 'react';
 
 // contexts
@@ -6,11 +6,11 @@ import { KatavaultContext } from '@/contexts';
 
 /**
  * Hook for getting the supported chains.
- * @returns {ChainWithNetworkParameters[]} The list of supported chains stored in the wallet.
+ * @returns {Chain[]} The list of supported chains stored in the vault.
  */
-export default function useChains(): ChainWithNetworkParameters[] {
+export default function useChains(): Chain[] {
   const { katavault, timestamp } = useContext(KatavaultContext);
-  const [chains, setChains] = useState<ChainWithNetworkParameters[]>([]);
+  const [chains, setChains] = useState<Chain[]>([]);
 
   // on update, get the chains
   useEffect(() => {

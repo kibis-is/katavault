@@ -1,0 +1,75 @@
+@use "@/ui/styles/media";
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+$content-size: 7rem; // 112px
+$icon-size: 2.5rem; // 32px
+
+.button {
+  @include mixins.button-transition;
+  background-color: transparent;
+  border-color: palette.border-color("light");
+  border-radius: map.get(variables.$border-radius, "md");
+  border-style: solid;
+  border-width: 1px;
+  cursor: pointer;
+  display: flex;
+  height: auto;
+  margin: 0;
+  min-width: variables.$button-min-width;
+  padding: map.get(variables.$spacing, "sm");
+  width: 100%;
+
+  @include media.tablet-and-up {
+    width: auto;
+  }
+
+  &[data-color-mode="dark"] {
+    border-color: palette.border-color("dark");
+  }
+
+  &:focus {
+    border-color: palette.focus-border-color("light");
+    outline: none;
+
+    &[data-color-mode="dark"] {
+      border-color: palette.focus-border-color("dark");
+    }
+  }
+
+  &:hover {
+    background-color: palette.ghost-button-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: palette.ghost-button-background-color("dark");
+    }
+  }
+}
+
+.content {
+  min-height: 2.5rem;
+  width: 100%;
+
+  @include media.tablet-and-up {
+    height: $content-size;
+    width: $content-size;
+  }
+}
+
+.host {
+  @include media.tablet-and-up {
+    max-width: $content-size;
+  }
+}
+
+.icon {
+  border-radius: map.get(variables.$border-radius, "full");
+  width: $icon-size;
+
+  @include media.tablet-and-up {
+    height: $icon-size;
+    width: auto;
+  }
+}

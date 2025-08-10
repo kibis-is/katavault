@@ -1,0 +1,154 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+@mixin disabled-button-styles {
+  background-color: map.get(palette.$gray-palette, 300);
+  border-color: map.get(palette.$gray-palette, 300);
+  color: map.get(palette.$gray-palette, 600);
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.button {
+  @include mixins.button-transition;
+  align-items: center;
+  appearance: none;
+  background-color: palette.button-background-color("light");
+  border-color: palette.button-background-color("light");
+  border-style: solid;
+  border-radius: map.get(variables.$border-radius, "full");
+  border-width: 1px;
+  color: palette.button-font-color("light");
+  cursor: pointer;
+  display: inline-flex;
+  font-family: variables.$font-family;
+  font-size: 1rem; // 16px
+  font-style: normal;
+  font-weight: 600;
+  height: 3rem;
+  justify-content: center;
+  line-height: 1.2;
+  min-width: variables.$button-min-width;
+  padding-inline-end: 1.5rem; // 24px
+  padding-inline-start: 1.5rem; // 24px
+  text-align: center;
+
+  &[data-color-mode="dark"] {
+    background-color: palette.button-background-color("dark");
+    border-color: palette.button-background-color("dark");
+    color: palette.button-font-color("dark");
+  }
+
+  &:hover {
+    background-color: palette.button-hover-background-color("light");
+    border-color: palette.button-hover-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: palette.button-hover-background-color("dark");
+      border-color: palette.button-hover-background-color("dark");
+    }
+  }
+
+  &--full-width {
+    width: 100%;
+  }
+
+  &--disabled {
+    @include disabled-button-styles;
+
+    &[data-color-mode="dark"] {
+      @include disabled-button-styles;
+    }
+
+    &:hover {
+      @include disabled-button-styles;
+
+      &[data-color-mode="dark"] {
+        @include disabled-button-styles;
+      }
+    }
+  }
+
+  &--secondary {
+    background-color: transparent;
+    color: palette.button-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: transparent;
+      color: palette.button-background-color("dark");
+    }
+
+    &:hover {
+      background-color: palette.ghost-button-background-color("light");
+      border-color: palette.button-background-color("light");
+      color: palette.button-background-color("light");
+
+      &[data-color-mode="dark"] {
+        background-color: palette.ghost-button-background-color("dark");
+        border-color: palette.button-background-color("dark");
+        color: palette.button-background-color("dark");
+      }
+    }
+  }
+
+  /* sizes */
+
+  &--xs {
+    font-size: 0.625rem; // 10px
+    height: 1.5rem;
+    line-height: 0.75;
+    padding-inline-end: 0.625rem; // 10px
+    padding-inline-start: 0.625rem; // 10px
+  }
+
+  &--sm {
+    font-size: 0.75rem; // 12px
+    height: 2rem;
+    line-height: 1;
+    padding-inline-end: 0.75rem; // 12px
+    padding-inline-start: 0.75rem; // 12px
+  }
+
+  &--lg {
+    font-size: 1.5rem; // 16px
+    height: 4rem;
+    line-height: 2;
+    padding-inline-end: 1.5rem; // 24px
+    padding-inline-start: 1.5rem; // 24px
+  }
+
+  &--xl {
+    font-size: 2rem; // 18px
+    height: 5rem;
+    line-height: 2.5;
+    padding-inline-end: 2rem; // 24px
+    padding-inline-start: 2rem; // 24px
+  }
+}
+
+.icon {
+  height: 1.5rem;
+  width: 1.5rem;
+
+  &--xs {
+    height: 0.75rem;
+    width: 0.75rem;
+  }
+
+  &--sm {
+    height: 1rem;
+    width: 1rem;
+  }
+
+  &--lg {
+    height: 2rem;
+    width: 2rem;
+  }
+
+  &--xl {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+}

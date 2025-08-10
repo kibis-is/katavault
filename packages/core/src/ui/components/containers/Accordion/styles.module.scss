@@ -1,0 +1,59 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+$icon-size: 1rem; // 16px
+
+.container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-in-out;
+}
+
+.header {
+  @include mixins.button-transition;
+  align-items: center;
+  background-color: transparent;
+  border-color: transparent ;
+  border-style: solid;
+  border-width: 1px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: map.get(variables.$spacing, "sm");
+  width: 100%;
+
+  &:focus {
+    border-color: palette.focus-border-color("light");
+    outline: none;
+
+    &[data-color-mode="dark"] {
+      border-color: palette.focus-border-color("dark");
+    }
+  }
+
+  &:hover {
+    background-color: palette.ghost-button-background-color("light");
+
+    &[data-color-mode="dark"] {
+      background-color: palette.ghost-button-background-color("dark");
+    }
+  }
+}
+
+.icon {
+  height: $icon-size;
+  transition: transform 300ms ease;
+  width: $icon-size;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}

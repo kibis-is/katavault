@@ -1,0 +1,67 @@
+{
+  "name": "sandbox",
+  "version": "1.0.0",
+  "description": "The Katavault Sandbox is a React app that explores the features of Katavault from the perspective of a dApp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kibis-is/katavault"
+  },
+  "author": {
+    "name": "Kieran O'Neill",
+    "email": "hello@kieranoneill.com",
+    "url": "https://github.com/kieranroneill"
+  },
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && vite build --config vite.config.ts",
+    "build:dependencies": "./scripts/prebuild.sh",
+    "clean": "shx rm -rf dist && shx rm -rf tsconfig.*.tsbuildinfo",
+    "dev": "pnpm build:dependencies && vite dev --config vite.config.ts",
+    "lint": "eslint .",
+    "prettier": "prettier --write \"**/*.{cjs,js,json,mjs,ts,tsx}\"",
+    "test": "exit 0"
+  },
+  "devDependencies": {
+    "@chakra-ui/color-mode": "^2.2.0",
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "^18.x",
+    "@types/react-dom": "18.x",
+    "@types/react-helmet": "^6.1.11",
+    "@vitejs/plugin-react": "^4.3.4",
+    "chalk": "catalog:",
+    "concurrently": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "globals": "catalog:",
+    "prettier": "catalog:",
+    "shx": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.24.0",
+    "@emotion/react": "^11.14.0",
+    "@kibisis/chains": "catalog:",
+    "@kibisis/encoding": "catalog:",
+    "@kibisis/katavault-core": "workspace:",
+    "@kibisis/katavault-react": "workspace:",
+    "@kibisis/react": "^1.6.0",
+    "@kibisis/utilities": "catalog:",
+    "@stablelib/random": "catalog:",
+    "algosdk": "catalog:",
+    "clsx": "^2.1.0",
+    "react": "^18.x",
+    "react-dom": "^18.x",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^5.5.0"
+  }
+}

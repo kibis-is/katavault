@@ -1,0 +1,49 @@
+@use "@/ui/styles/palette";
+@use "sass:map";
+
+.loader {
+  animation: rotation 1s linear infinite;
+  border-color: palette.$black-color;
+  border-bottom-color: map.get(palette.$gray-palette, 300);
+  border-style: solid;
+  border-width: 3px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  height: 3rem;
+  display: inline-block;
+  width: 3rem;
+
+  &[data-color-mode="dark"] {
+    border-bottom-color: map.get(palette.$white-alpha-palette, 400);
+  }
+
+  &__xs {
+    border-width: 1px;
+    height: 1rem;
+    width: 1rem;
+  }
+
+  &__sm {
+    border-width: 2px;
+    height: 2rem;
+    width: 2rem;
+  }
+
+  &__md {
+    border-width: 3px;
+    height: 3rem;
+    width: 3rem;
+  }
+
+  &__lg {
+    border-width: 5px;
+    height: 5rem;
+    width: 5rem;
+  }
+
+  &__xl {
+    border-width: 8px;
+    height: 8rem;
+    width: 8rem;
+  }
+}

@@ -1,0 +1,44 @@
+@use "palette";
+@use "sass:map";
+
+/* account card */
+$account-card-min-height: 9rem; // 144px
+$account-card-min-width: 18.75rem; // 300px
+
+/* borders */
+$border-radius: (
+  xs: 6px,
+  sm: 10px,
+  md: 14px,
+  lg: 18px,
+  xl: 24px,
+  full: 9999px,
+);
+
+/* breakpoints */
+$tablet-width: 768px;
+$desktop-width: 1024px;
+
+/* buttons */
+$button-min-width: 3rem; // 48px
+
+/* fonts */
+$font-family: "Nunito", sans-serif;
+$font-size: 0.875rem; // 14px
+
+/* inputs */
+$input-height: 3rem;
+$input-padding: 1rem;
+
+/* modals */
+$modal-z-index: 9999;
+
+/* spacing */
+$spacing: (
+  xs: 0.325rem,
+  sm: 0.75rem,
+  md: 1.5rem,
+  lg: 2rem,
+  xl: 2.5rem,
+  xxl: 3rem,
+);

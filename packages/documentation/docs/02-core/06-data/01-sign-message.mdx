@@ -1,52 +1,66 @@
 ---
+id: sign-message
 sidebar_label: signMessage
 slug: /core/data/sign-message
+title: signMessage
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL, CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
+
 # signMessage
 
-> Signs a message or some arbitrary bytes.
+> Signs a message or some arbitrary bytes using the appropriate account and chain.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
 
 <SectionBreak />
 
 ## Usage
 
 <Tabs
-  defaultValue="main"
+  defaultValue="avm"
   values={[
-    { label: 'main.ts', value: 'main' },
+    { label: 'AVM', value: 'avm' },
   ]}>
-  <TabItem value="main">
+  <TabItem value="avm">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
-    import { createKatavault, utf8ToBytes } from '@kibisis/katavault-core';
-    import { verifyBytes } from 'algosdk';
+    import { Voi } from '@kibisis/chains';
+    import { base58, utf8 } from '@kibisis/encoding';
+    import { createKatavault } from '@kibisis/katavault-core';
+    import { encodeAddress, verifyBytes } from 'algosdk';
 
-    const address = 'SH2KEL633QIJLURBOOJTIKR5EIIYR4A2VYZC2DB6ZD4ZZL6XHYFBETEOGU';
+    const accountKey = 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo';
     const katavault = await createKatavault({
-      chains: [voi],
+      chains: [Voi],
     });
     const message = 'hello humie!';
     let signature: Uint8Array;
 
-    await katavault.authenticateWithPasskey({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
+    await katavault.authenticate();
 
     signature = await katavault.signMessage({
-      address,
+      accountKey,
+      chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
       message,
     });
 
-    console.log('verified:', verifyBytes(utf8ToBytes(message), signature, address)));
+    console.log('verified:', verifyBytes(
+      utf8.decode(message),
+      signature,
+      encodeAddress(base58.decode(accountKey)),
+    );
     /*
     verified: true
     */
@@ -61,9 +75,32 @@ import TabItem from '@theme/TabItem';
 
 ### params
 
-* Type: [`SignMessageParameters`](04-glossary/02-types.mdx#signparameters)
+* Type: [`SignMessageParameters`](04-glossary/02-types.mdx#signmessageparameters)
 
-The signer, the message and optional output encoding.
+### params.accountKey
+
+* Type: `string`
+
+The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> public key of the account that will be used for signing.
+
+### params.chainID
+
+* Type: `string`
+
+The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+
+### params.encoding
+
+* Required: **no**
+* Type: `base64` | `hex`
+
+The output encoding of the signature. If no encoding is specified, the signature will be as raw bytes (`Uint8Array`).
+
+### params.message
+
+* Type: `string` | `Uint8Array`
+
+A UTF-8 encoded message or raw bytes (`Uint8Array`) to sign.
 
 <SectionBreak />
 
@@ -75,18 +112,24 @@ A promise that resolves to the signature of the signed message.
 
 If the encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in raw bytes.
 
-:::note
-
-The signed message is prepended with "MX" for domain separation.
-
-:::
-
 ## Throws
-
-### [AccountDoesNotExistError](04-glossary/03-errors.mdx#accountdoesnotexisterror)
-
-If the specified address does not exist in the wallet.
 
 ### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
 
-If the provider has not been authenticated.
+If Katavault has not been authenticated.
+
+### [ChainNotSupportedError](04-glossary/03-errors.mdx#chainnotsupportederror)
+
+If the specified chain is not supported.
+
+### [AccountDoesNotExistError](04-glossary/03-errors.mdx#accountdoesnotexisterror)
+
+If the specified address does not exist in the vault.
+
+### [AuthenticationMethodNotSupportedError](04-glossary/03-errors.mdx#authenticationmethodnotsupportederror)
+
+If the authentication method is not supported.
+
+### [DecryptionError](04-glossary/03-errors.mdx#decryptionerror)
+
+If there was an issue with decryption, or if the key was encrypted with the incorrect credentials.

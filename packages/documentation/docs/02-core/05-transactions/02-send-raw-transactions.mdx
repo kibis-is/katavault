@@ -1,0 +1,117 @@
+---
+id: send-raw-transactions
+sidebar_label: sendRawTransactions
+slug: /core/transactions/send-raw-transactions
+title: sendRawTransactions
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
+
+# sendRawTransactions
+
+> Sends a list of raw transactions, along with their signatures, to the specified chain.
+> The corresponding array will contain whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
+> The index of the result array will match that of the supplied transaction array.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="avm"
+  values={[
+    { label: 'AVM', value: 'avm' },
+  ]}>
+  <TabItem value="avm">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault, type SendRawTransactionResult } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    let results: SendRawTransactionResult[];
+
+    await katavault.authenticate();
+
+    results = await katavault.sendRawTransactions(
+      [
+        {
+          chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+          signature: [45, 12, 65, ...], // signature acquired from signing
+          transaction: [36, 9, 22, ...], // the raw transaction data
+        },
+        // ... add other transactions
+      ]
+    );
+
+    console.log(results);
+    /*
+    [
+      {
+        error: null,
+        transactionID: 'QMPHIV2FNEK5635OUJAUZPRONBFM7S7XLGJ2KKHZLZPZJDI6WFKQ',
+        success: true,
+      }
+    ]
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### params
+
+* Type: [`SendRawTransactionParameters[]`](04-glossary/02-types.mdx#sendrawtransactionparameters)
+
+### params[].chainID
+
+* Type: `string`
+
+The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+
+### params[].signature
+
+* Type: `Uint8Array`
+
+The signature of the signed transaction. This will be different for different chains.
+
+### params[].transaction
+
+* Type: `Uint8Array`
+
+The raw transaction data. This will be different for different chains.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<SendRawTransactionResult[]>`](04-glossary/02-types.mdx#sendrawtransactionresult)
+
+A promise that resolves to an array of results that will contain whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list indices.
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.

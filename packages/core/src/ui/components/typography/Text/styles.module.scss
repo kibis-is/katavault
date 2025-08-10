@@ -1,0 +1,57 @@
+@use "@/ui/styles/mixins";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+
+.text {
+  @include mixins.reset-text-styles;
+  color: palette.default-font-color("light");
+  font-family: variables.$font-family;
+  font-size: variables.$font-size;
+  font-style: normal;
+  line-height: 1.5rem; // 24px
+  text-align: center;
+
+  &[data-color-mode="dark"] {
+    color: palette.default-font-color("dark");
+  }
+
+  &--bold {
+    font-weight: 600;
+  }
+
+  &--full-width {
+    width: 100%;
+  }
+
+  &--left {
+    text-align: left;
+  }
+
+  &--right {
+    text-align: right;
+  }
+
+  &--xs {
+    font-size: 0.625rem; // 10px
+    line-height: 1rem; // 16px
+  }
+
+  &--sm {
+    font-size: 0.75rem; // 12px
+    line-height: 1.25rem; // 20px
+  }
+
+  &--lg {
+    font-size: 1rem; // 16px
+  }
+
+  &--xl {
+    font-size: 1.125rem; // 18px
+  }
+
+  &--truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

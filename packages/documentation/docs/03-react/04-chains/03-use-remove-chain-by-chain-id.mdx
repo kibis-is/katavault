@@ -1,0 +1,125 @@
+---
+id: use-remove-chain-by-chain-id
+sidebar_label: useRemoveChainByChainID
+slug: /react/chains/use-remove-chain-by-chain-id
+title: useRemoveChainByChainID
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
+
+# useRemoveChainByChainID
+
+> Hook to remove a chain by a <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="chains"
+  values={[
+    { label: 'Chains.tsx', value: 'chains' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="chains">
+
+    ```typescript
+    import { useChains, useRemoveChainByChainID } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
+
+    function Chains() {
+      const chains = useChains();
+      const removeChainByChainID = useRemoveChainByChainID();
+      const handleOnRemoveChainByChainIDClick = useCallback((chainID: string) => () => {
+        removeChainByChainID(chainID, {
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: () => {
+            console.log(`removed chain ${chainID}`);
+          },
+        });
+      }, [removeChainByChainID]);
+
+      return (
+        <div>
+          {chains.map((chain) => (
+            <div>
+              <p>Name: {chain.displayName()}</p>
+              <p>Chain ID: {chain.chainID()}</p>
+              <button onClick={handleOnRemoveChainByChainIDClick(chain.chainID())}>Remove</button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Chains } from './Chains';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <Chains />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`(params: string, options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### options.onError
+
+Type: `(error: BaseError, params: string) => void | Promise<void>`
+
+This will be invoked if there was an error.
+
+#### options.onSuccess
+
+Type: `(result: undefined, params: string) => void | Promise<void>`
+
+This will be invoked if the chain removal was successful.
+
+## See also
+
+* [removeChainByChainID](02-core/04-chains/03-remove-chain-by-chain-id.mdx)

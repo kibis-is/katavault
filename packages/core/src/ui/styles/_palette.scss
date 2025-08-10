@@ -1,0 +1,114 @@
+@use "sass:map";
+@use "functions";
+
+$black-color: #000000;
+
+$gray-palette: (
+  50: #F7FAFC,
+  100: #EDF2F7,
+  200: #E2E8F0,
+  300: #CBD5E0,
+  400: #A0AEC0,
+  500: #718096,
+  600: #4A5568,
+  700: #2D3748,
+  800: #1A202C,
+  900: #171923,
+);
+
+$primary-dark-palette: (
+  50: #F6E9FF,
+  100: #F2DEFF,
+  200: #EED3FF,
+  300: #E9C8FF,
+  400: #E5BDFF,
+  500: #E0B0FF, // mauve
+  600: #C875FF,
+  700: #AF37FF,
+  800: #9500F8,
+  900: #6F00BA,
+);
+
+$primary-light-palette: (
+  50: #F59CFD,
+  100: #F16AFD,
+  200: #EC39FC,
+  300: #E707FB,
+  400: #BC03CD,
+  500: #8D029B, // mauveine
+  600: #7B0285,
+  700: #66026F,
+  800: #520159,
+  900: #3D0143,
+);
+
+$red-palette: (
+  50: #fef2f2,
+  100: #fee2e2,
+  200: #fecaca,
+  300: #fca5a5,
+  400: #f87171,
+  500: #ef4444,
+  600: #dc2626,
+  700: #991919,
+  800: #511111,
+  900: #300c0c,
+  950: #1f0808,
+);
+
+$white-alpha-palette: (
+  50: rgba(255, 255, 255, 0.04),
+  100: rgba(255, 255, 255, 0.06),
+  200: rgba(255, 255, 255, 0.08),
+  300: rgba(255, 255, 255, 0.16),
+  400: rgba(255, 255, 255, 0.24),
+  500: rgba(255, 255, 255, 0.36),
+  600: rgba(255, 255, 255, 0.48),
+  700: rgba(255, 255, 255, 0.64),
+  800: rgba(255, 255, 255, 0.80),
+  900: rgba(255, 255, 255, 0.92),
+);
+
+$white-color: #FFFFFF;
+
+/* background colors */
+
+@function background-color($theme: "light") {
+  @return functions.get-color-value($theme, $white-color, #1A202C);
+}
+@function button-background-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($primary-light-palette, 500), map.get($primary-dark-palette, 500));
+}
+@function button-hover-background-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($primary-light-palette, 600), map.get($primary-dark-palette, 600));
+}
+@function ghost-button-background-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($gray-palette, 100), map.get($white-alpha-palette, 100));
+}
+
+/* border colors */
+
+@function border-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($gray-palette, 300), map.get($white-alpha-palette, 400));
+}
+@function focus-border-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($primary-light-palette, 500), map.get($primary-dark-palette, 500));
+}
+
+/* font colors */
+
+@function button-font-color($theme: "light") {
+  @return functions.get-color-value($theme, $white-color, map.get($gray-palette, 800));
+}
+@function default-font-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($gray-palette, 600), map.get($white-alpha-palette, 800));
+}
+@function link-font-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($primary-light-palette, 500), map.get($primary-dark-palette, 500));
+}
+@function link-active-font-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($primary-light-palette, 600), map.get($primary-dark-palette, 600));
+}
+@function sub-font-color($theme: "light") {
+  @return functions.get-color-value($theme, map.get($gray-palette, 500), map.get($white-alpha-palette, 700));
+}

@@ -1,8 +1,10 @@
 ---
 sidebar_label: Installation
 slug: /react/installation
+title: Installation
 ---
 
+<!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
 # Installation
@@ -16,7 +18,7 @@ import SectionBreak from '@site/src/components/SectionBreak';
 Install the required packages.
 
 ```bash npm2yarn
-npm install algosdk@3.x react@18.x @kibisis/katavault-core @kibisis/katavault-react
+npm install react@18.x @kibisis/katavault-core @kibisis/katavault-react
 ```
 
 <SectionBreak />
@@ -27,7 +29,6 @@ If you're not using a package manager, you can install it via an ESM-compatible 
 
 ```html
 <script type="module">
-  import 'https://esm.sh/algosdk';
   import 'https://esm.sh/react';
   import 'https://esm.sh/@kibisis/katavault-core';
   import { KatavaultProvider } from 'https://esm.sh/@kibisis/katavault-react';

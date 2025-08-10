@@ -1,0 +1,76 @@
+---
+id: holding-accounts
+sidebar_label: holdingAccounts
+slug: /core/accounts/holding-accounts
+title: holdingAccounts
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# holdingAccounts
+
+> Gets the holding accounts of the vault. If no holding accounts exist, a new one is created from the saved credentials.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    let accounts: Account[];
+
+    await katavault.authenticate();
+
+    accounts = await katavault.holdingAccounts();
+
+    console.log(accounts);
+    /*
+    [
+      {
+        key: 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo',
+        name: 'My Holdings',
+      },
+    ]
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<[Account, ...Account[]]>`](04-glossary/02-types.mdx#account)
+
+A promise that resolves to the holding accounts stored in the vault.
+
+<SectionBreak />
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.

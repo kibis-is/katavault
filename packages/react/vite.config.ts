@@ -2,10 +2,10 @@ import { defineConfig, mergeConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
 // configs
-import commonConfig from './vite.common.config';
+import defaultConfig from './vite.default.config';
 
 export default mergeConfig(
-  commonConfig,
+  defaultConfig,
   defineConfig({
     build: {
       lib: {

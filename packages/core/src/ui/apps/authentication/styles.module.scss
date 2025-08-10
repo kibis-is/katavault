@@ -1,0 +1,16 @@
+@use "@/ui/styles/palette";
+
+.divider {
+  background-color: palette.border-color("light");
+  height: 1px;
+  width: 100%;
+
+  &[data-color-mode="dark"] {
+    background-color: palette.border-color("dark");
+  }
+}
+
+.passkey-icon {
+  height: 6rem; // 96px
+  width: 6rem; // 96px
+}

@@ -12,6 +12,7 @@ jobs:
     outputs:
       core: ${{ steps.filter.outputs.core }}
       react: ${{ steps.filter.outputs.react }}
+      sandbox: ${{ steps.filter.outputs.sandbox }}
     steps:
       - name: "📥 Filter"
         uses: dorny/paths-filter@v3
@@ -22,6 +23,8 @@ jobs:
               - 'packages/core/**'
             react:
               - 'packages/react/**'
+            sandbox:
+              - 'packages/sandbox/**'
 
   validate_pr_title:
     name: "Validate PR Title"
@@ -50,18 +53,26 @@ jobs:
   # package specific
   ##
 
-  lint_build_test_core:
+  core:
     name: "Lint, Build & Test - @kibisis/katavault-core"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.core == 'true' }}
-    uses: ./.github/workflows/lint_build_test.yml
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
     with:
       package_name: "@kibisis/katavault-core"
 
-  lint_build_test_react:
+  react:
     name: "Lint, Build & Test - @kibisis/katavault-react"
     needs: [changed_files, validate_pr_title]
     if: ${{ needs.changed_files.outputs.react == 'true' }}
-    uses: ./.github/workflows/lint_build_test.yml
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
     with:
       package_name: "@kibisis/katavault-react"
+
+  sandbox:
+    name: "Lint, Build & Test - sandbox"
+    needs: [changed_files, validate_pr_title]
+    if: ${{ needs.changed_files.outputs.sandbox == 'true' }}
+    uses: ./.github/workflows/workflow_call_lint_build_test.yml
+    with:
+      package_name: "sandbox"

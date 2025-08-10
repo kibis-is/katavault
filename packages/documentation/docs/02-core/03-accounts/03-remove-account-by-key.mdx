@@ -1,0 +1,69 @@
+---
+id: remove-account-by-key
+sidebar_label: removeAccountByKey
+slug: /core/accounts/remove-account-by-key
+title: removeAccountByKey
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL } from '@site/src/constants';
+
+# removeAccountByKey
+
+> Removes the account from the vault for the specified key if it exists.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.authenticate();
+    await katavault.removeAccountByKey('CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a');
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### key
+
+* Type: `string`
+
+The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> encoded public key of the account to remove from the vault.
+
+<SectionBreak />
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.

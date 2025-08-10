@@ -1,0 +1,129 @@
+---
+id: use-holding-accounts
+sidebar_label: useHoldingAccounts
+slug: /react/accounts/use-holding-accounts
+title: useHoldingAccounts
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useHoldingAccounts
+
+> Hook for getting the list of holding accounts stored in the vault.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="accounts"
+  values={[
+    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="accounts">
+
+    ```typescript
+    import { useHoldingAccounts } from '@kibisis/katavault-react';
+
+    function Accounts() {
+      const accounts = useHoldingAccounts();
+
+      return accounts.map(({ key, name }) => (
+        <div>
+          <p>Key: {key}</p>
+          <p>Name: {name ?? '-'}</p>
+        </div>
+      ));
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Accounts } from './Accounts';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <Accounts />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+[`Account[]`](04-glossary/02-types.mdx#account)
+
+The list of the holding accounts stored in the vault.
+
+## See also
+
+* [holdingAccounts](02-core/03-accounts/02-holding-accounts.mdx)

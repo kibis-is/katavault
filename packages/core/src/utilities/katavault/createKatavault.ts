@@ -1,4 +1,5 @@
-import { type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
+import type { Chain } from '@kibisis/chains';
+import { createLogger } from '@kibisis/utilities';
 
 // facades
 import { Katavault } from '@/facades';
@@ -7,7 +8,7 @@ import { Katavault } from '@/facades';
 import type { CreateKatavaultParameters } from '@/types';
 
 // utilities
-import { createLogger, documentTitle, faviconURL } from '@/utilities';
+import { documentTitle, faviconURL } from '@/utilities';
 
 /**
  * Creates an instance of Katavault.
@@ -21,13 +22,13 @@ export default async function createKatavault({
 }: CreateKatavaultParameters): Promise<Katavault> {
   const __logPrefix = 'createKatavault';
   const logger = createLogger(debug ? 'debug' : 'error');
-  let _chains: ChainWithNetworkParameters[] = [];
-  let _chain: ChainWithNetworkParameters;
+  let _chain: Chain;
+  let _chains: Chain[] = [];
 
   // for each chain get the network parameters
   for (const chain of chains) {
     try {
-      _chain = await networkParametersFromChain(chain);
+      _chain = await chain.initialize();
 
       _chains.push(_chain);
     } catch (error) {
@@ -42,6 +43,7 @@ export default async function createKatavault({
       icon: client?.icon || faviconURL() || undefined,
       name: client?.name ?? documentTitle(),
     },
+    debug,
     logger,
   });
 }

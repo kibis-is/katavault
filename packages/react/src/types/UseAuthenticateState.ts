@@ -6,8 +6,10 @@ import {
 
 // types
 import type HookFunction from './HookFunction';
+import type HookFunctionWithoutParams from './HookFunctionWithoutParams';
 
 interface UseAuthenticateState {
+  authenticate: HookFunctionWithoutParams<undefined, BaseError>;
   authenticateWithPasskey: HookFunction<AuthenticateWithPasskeyParameters, undefined, BaseError>;
   authenticateWithPassword: HookFunction<AuthenticateWithPasswordParameters, undefined, BaseError>;
   isAuthenticated: boolean;

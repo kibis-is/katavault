@@ -1,0 +1,61 @@
+// decorators
+import { PasskeyStore } from '@/decorators';
+
+// types
+import type { AuthenticateWithPasskeyParameters, CommonParameters, WithClientInformation, WithVault } from '@/types';
+
+/**
+ * Authenticates with a passkey.
+ * @param {CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>} params - The client
+ * infromation, the user information and an initialized vault.
+ * @param {ClientInformation} params.clientInformation - The client information.
+ * @param {ILogger} params.logger - A logger for logging.
+ * @param {UserInformation} params.user - The user information.
+ * @param {Vault} params.vault - An initialized vault.
+ * @returns {Promise<PasskeyStore>} A promise that resolves to an initialized passkey store.
+ * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
+ * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
+ * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+ * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
+ * @public
+ */
+export default async function authenticateWithPasskey({
+  clientInformation,
+  logger,
+  user,
+  vault,
+}: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>): Promise<PasskeyStore> {
+  const __logPrefix = `utilities#authenticateWithPasskey`;
+  const store = new PasskeyStore({
+    logger,
+    vault,
+  });
+  let keyMaterial: Uint8Array;
+  let passkey = await store.passkey();
+
+  // if there is no passkey register a new one
+  if (!passkey) {
+    logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
+
+    passkey = await PasskeyStore.register({
+      client: clientInformation,
+      logger,
+      user,
+    });
+
+    await store.setPasskey(passkey);
+  }
+
+  logger.debug(`${__logPrefix}: authenticating new credential "${passkey.credentialID}"`);
+
+  keyMaterial = await PasskeyStore.authenticate({
+    logger,
+    ...passkey,
+  });
+
+  store.setKeyMaterial(keyMaterial);
+
+  logger.debug(`${__logPrefix}: authenticated new credential "${passkey.credentialID}"`);
+
+  return store;
+}

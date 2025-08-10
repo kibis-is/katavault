@@ -1,85 +1,100 @@
-import { type Chain, type ChainWithNetworkParameters, networkParametersFromChain } from '@kibisis/chains';
-import { ed25519 } from '@noble/curves/ed25519';
-import { concatBytes } from '@noble/hashes/utils';
-import { type IDBPDatabase, openDB } from 'idb';
+import { Chain, ChainConstructor } from '@kibisis/chains';
+import { base58, base64, hex } from '@kibisis/encoding';
+
+// _base
+import { BaseClass } from '@/_base';
 
 // constants
 import {
   IDB_ACCOUNTS_STORE_NAME,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
-  SIGN_MESSAGE_PREFIX,
+  IDB_SETTINGS_STORE_NAME,
 } from '@/constants';
 
 // decorators
-import { AccountStore, PasskeyStore, PasswordStore } from '@/decorators';
+import { AccountStore, CredentialID } from '@/decorators';
 
 // enums
-import { AuthenticationMethod } from '@/enums';
+import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
 import {
   AccountDoesNotExistError,
-  FailedToFetchNetworkError,
-  InvalidAccountError,
-  InvalidPasswordError,
+  ChainNotSupportedError,
+  FailedToFetchChainInformationError,
   NotAuthenticatedError,
 } from '@/errors';
+
+// facades
+import AppManager from './AppManager';
+
+// strategies
+import { SignContext, TransactionContext } from '@/strategies';
 
 // types
 import type {
   Account,
-  AccountStoreItemWithPasskey,
-  AccountStoreItemWithPassword,
-  AddAccountParameters,
   AuthenticateWithPasskeyParameters,
   AuthenticateWithPasswordParameters,
   AuthenticationStore,
   ClientInformation,
-  ImportAccountWithMnemonicParameters,
-  ImportAccountWithPrivateKeyParameters,
-  InitializeVaultParameters,
+  ConnectedAccountStoreItem,
+  EphemeralAccount,
+  EphemeralAccountStoreItem,
   KatavaultParameters,
-  Logger,
   PasskeyStoreSchema,
-  SetAccountNameByAddressParameters,
+  RenderVaultAppParameters,
+  SendRawTransactionParameters,
+  SendRawTransactionResult,
+  SetAccountNameByKeyParameters,
   SignMessageParameters,
-  UserInformation,
-  VaultSchema,
+  SignRawTransactionParameters,
+  SignRawTransactionResult,
+  Vault,
+  WithAccountStoreItem,
+  WithChain,
   WithEncoding,
+  WithIndex,
 } from '@/types';
 
 // utilities
 import {
-  addressFromPrivateKey,
-  bytesToBase64,
-  bytesToHex,
-  createVaultName,
-  generatePrivateKey,
-  hexToBytes,
-  isValidMnemonic,
-  privateKeyFromMnemonic,
+  authenticateWithPasskey,
+  authenticateWithPassword,
+  initializeVault,
   privateKeyFromPasswordCredentials,
-  utf8ToBytes,
+  publicKeyFromPrivateKey,
+  usernameFromVault,
 } from '@/utilities';
-import { encode as encodeUtf8 } from '@stablelib/utf8';
 
-export default class Katavault {
-  // public static variables
+export default class Katavault extends BaseClass {
+  /**
+   * public static properties
+   */
   public static readonly displayName = 'Katavault';
-  // private variables
-  private _accountStore: AccountStore;
+  /**
+   * private properties
+   */
+  private _accountsStore: AccountStore | null = null;
+  private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
-  private _chains: ChainWithNetworkParameters[];
+  private _chains: Chain[];
+  private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
-  private readonly _logger: Logger;
-  private _user: UserInformation | null = null;
-  private _vault: IDBPDatabase<VaultSchema>;
+  private readonly _signContext: SignContext;
+  private readonly _transactionContext: TransactionContext;
+  private _vault: Vault | null = null;
 
-  public constructor({ chains, clientInformation, logger }: KatavaultParameters) {
+  public constructor({ chains, clientInformation, debug = false, ...commonParams }: KatavaultParameters) {
+    super(commonParams);
+
     this._chains = chains;
     this._clientInformation = clientInformation;
-    this._logger = logger;
+    this._debug = debug;
+    this._appManager = new AppManager(commonParams);
+    this._signContext = new SignContext(commonParams);
+    this._transactionContext = new TransactionContext(commonParams);
   }
 
   /**
@@ -87,146 +102,162 @@ export default class Katavault {
    */
 
   /**
-   * Adds the account to the provider.
-   * @param {AddAccountParameters} params - The account to be added.
-   * @returns {Promise<Account>} A promise that resolves to the added account.
+   * Generates a credential account in the wallet. The credential account is an account derived from the user's
+   * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
+   * of the username, password and hostname.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @returns {Promise<Account>} A promise that resolves to the generated credential account.
    * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @private
    */
-  private async _addAccount({ name, privateKey }: AddAccountParameters): Promise<Account> {
-    const address = addressFromPrivateKey(privateKey);
+  private async _generateCredentialAccountIfNoneExists(): Promise<EphemeralAccount> {
+    const __logPrefix = `${Katavault.displayName}#_generateCredentialAccountIfNoneExists`;
+    let account: EphemeralAccountStoreItem | null;
+    let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
+    let _credentialID: CredentialID;
     let encryptedKeyData: Uint8Array;
+    let key: string;
+    let keyMaterial: Uint8Array | null;
     let passkey: PasskeyStoreSchema | null;
+    let password: string | null;
+    let privateKey: Uint8Array;
+    let username: string;
 
-    switch (this._authenticationStore?.__type) {
-      case AuthenticationMethod.Passkey:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-        passkey = await this._authenticationStore.store.passkey();
-
-        if (!passkey) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        await this._accountStore.upsert([
-          {
-            address,
-            credentialID: passkey.credentialID,
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      case AuthenticationMethod.Password:
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
-        await this._accountStore.upsert([
-          {
-            address,
-            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        break;
-      default:
-        throw new NotAuthenticatedError('not authenticated');
-    }
-
-    return {
-      address,
-      name,
-    };
-  }
-
-  /**
-   * Gets the decrypted account private key by address.
-   * @param {string} address - The address of the account to get the private key from.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted private key or null if the private key
-   * could.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @throws {DecryptionError} If there was an issue with decryption or the credentials were not found.
-   * @private
-   */
-  private async _decryptedAccountKeyByAddress(address: string): Promise<Uint8Array | null> {
-    const __logPrefix = `${Katavault.displayName}#_decryptedAccountKeyByAddress`;
-    const account = await this._accountStore.accountByAddress(address);
-    let credentialID: string | null;
-    let passkey: PasskeyStoreSchema | null;
-    let passwordHash: string | null;
-
-    if (!this.isAuthenticated()) {
+    if (!this._accountsStore || !this._authenticationStore || !this._vault) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    if (!account) {
-      this._logger.debug(`${__logPrefix}: account "${address}" not found`);
-
-      return null;
-    }
+    username = usernameFromVault(this._vault);
+    accounts = await this._accountsStore.accounts();
 
     switch (this._authenticationStore?.__type) {
-      case AuthenticationMethod.Passkey:
-        credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
+      case AuthenticationMethodEnum.Passkey:
+        keyMaterial = this._authenticationStore.store.keyMaterial();
         passkey = await this._authenticationStore.store.passkey();
 
-        // check that the account is encrypted using the correct credential
-        if (!credentialID || !passkey || credentialID !== passkey.credentialID) {
-          this._logger.debug(
-            `${__logPrefix}: account "${address}" found, but not encrypted using the supplied passkey`
-          );
-
-          return null;
+        if (!keyMaterial || !passkey) {
+          throw new NotAuthenticatedError('not authenticated');
         }
 
-        return await this._authenticationStore.store.decryptBytes(hexToBytes(account.keyData));
-      case AuthenticationMethod.Password:
-        passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
+        _credentialID = CredentialID.create({
+          method: AuthenticationMethodEnum.Passkey,
+          passkeyCredentialID: passkey.credentialID,
+        });
+        key = base58.encode(publicKeyFromPrivateKey(keyMaterial));
 
-        // check if the account was encrypted using the correct password
-        if (!passwordHash || passwordHash !== bytesToHex(this._authenticationStore.store.hash())) {
+        // check if the credential account exists
+        account =
+          (accounts.find(
+            (value) =>
+              value.__type === AccountTypeEnum.Ephemeral &&
+              value.credentialID === _credentialID.toString() &&
+              value.key === key
+          ) as EphemeralAccountStoreItem | undefined) ?? null;
+
+        if (account) {
           this._logger.debug(
-            `${__logPrefix}: account "${address}" found, but not encrypted using the supplied password`
+            `${__logPrefix}: credential account "${key}" for user "${username}" using "${this._authenticationStore.__type}" already exists`
           );
 
-          return null;
+          return {
+            __type: account.__type,
+            key: account.key,
+            name: account.name,
+            origin: account.origin,
+          };
         }
 
-        return await this._authenticationStore.store.decryptBytes(hexToBytes(account.keyData));
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
+        account = {
+          __type: AccountTypeEnum.Ephemeral,
+          credentialID: _credentialID.toString(),
+          key,
+          keyData: base58.encode(encryptedKeyData),
+          name: username,
+          origin: EphemeralAccountOriginEnum.Credential,
+        };
+
+        await this._accountsStore.upsert([account]);
+
+        this._logger.debug(
+          `${__logPrefix}: created credential account "${key}" for user "${username}" using "${this._authenticationStore.__type}"`
+        );
+
+        return {
+          __type: account.__type,
+          key: account.key,
+          name: account.name,
+          origin: account.origin,
+        };
+      case AuthenticationMethodEnum.Password:
+        password = this._authenticationStore.store.password();
+
+        if (!password) {
+          throw new NotAuthenticatedError('not authenticated');
+        }
+
+        _credentialID = CredentialID.create({
+          method: AuthenticationMethodEnum.Password,
+          password,
+        });
+        privateKey = await privateKeyFromPasswordCredentials({
+          hostname: this._clientInformation.hostname,
+          password,
+          username,
+        });
+        key = base58.encode(publicKeyFromPrivateKey(privateKey));
+
+        // check if the credential account exists
+        account =
+          (accounts.find(
+            (value) =>
+              value.__type === AccountTypeEnum.Ephemeral &&
+              value.credentialID === _credentialID.toString() &&
+              value.key === key
+          ) as EphemeralAccountStoreItem | undefined) ?? null;
+
+        // if a credential account already exists, return it
+        if (account) {
+          this._logger.debug(
+            `${__logPrefix}: credential account "${key}" for user "${username}" using "${this._authenticationStore.__type}" already exists`
+          );
+
+          return {
+            __type: account.__type,
+            key: account.key,
+            name: account.name,
+            origin: account.origin,
+          };
+        }
+
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
+        account = {
+          __type: AccountTypeEnum.Ephemeral,
+          credentialID: _credentialID.toString(),
+          key,
+          keyData: base58.encode(encryptedKeyData),
+          name: username,
+          origin: EphemeralAccountOriginEnum.Credential,
+        };
+
+        await this._accountsStore.upsert([account]);
+
+        this._logger.debug(
+          `${__logPrefix}: created credential account "${key}" for user "${username}" using "${this._authenticationStore.__type}"`
+        );
+
+        return {
+          __type: account.__type,
+          key: account.key,
+          name: account.name,
+          origin: account.origin,
+        };
       default:
         throw new NotAuthenticatedError('not authenticated');
     }
-  }
-
-  /**
-   * Initializes the vault connection.
-   * @param {InitializeVaultParameters} params - The user information to identify the vault.
-   * @returns {Promise<IDBPDatabase<VaultSchema>>} A promise that resolves to the initialized vault.
-   * @private
-   * @static
-   */
-  private static async _initializeVault({
-    logger,
-    user,
-  }: InitializeVaultParameters): Promise<IDBPDatabase<VaultSchema>> {
-    const __logPrefix = `${Katavault.displayName}#_initializeVault`;
-    const name = createVaultName(user.username);
-
-    return await openDB<VaultSchema>(name, undefined, {
-      upgrade: (_db, oldVersion, newVersion) => {
-        // we are creating a new database
-        if (oldVersion <= 0 && newVersion && newVersion > 0) {
-          // create the stores
-          _db.createObjectStore(IDB_ACCOUNTS_STORE_NAME);
-          _db.createObjectStore(IDB_PASSKEY_STORE_NAME);
-          _db.createObjectStore(IDB_PASSWORD_STORE_NAME);
-
-          logger.debug(`${__logPrefix}: created new vault "${name}"`);
-        }
-      },
-    });
   }
 
   /**
@@ -234,100 +265,99 @@ export default class Katavault {
    */
 
   /**
-   * Gets a list of accounts within the wallet.
+   * Gets a list of accounts within the vault.
    *
    * **NOTE:** Requires authentication.
-   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the wallet.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   *
+   * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the vault.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
   public async accounts(): Promise<Account[]> {
-    const items = await this._accountStore.accounts();
+    let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
 
-    if (!this.isAuthenticated()) {
+    if (!this.isAuthenticated() || !this._accountsStore) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    let results: Account[] = [];
+    accounts = await this._accountsStore.accounts();
 
-    for (const account of items) {
-      let credentialID: string | null;
-      let passkey: PasskeyStoreSchema | null;
-      let passwordHash: string | null;
-
-      switch (this._authenticationStore?.__type) {
-        case AuthenticationMethod.Passkey:
-          credentialID = (account as AccountStoreItemWithPasskey).credentialID ?? null;
-          passkey = await this._authenticationStore.store.passkey();
-
-          if (credentialID && passkey && credentialID === passkey.credentialID) {
-            results.push({
-              address: account.address,
-              name: account.name,
-            });
-          }
-
-          break;
-        case AuthenticationMethod.Password:
-          passwordHash = (account as AccountStoreItemWithPassword).passwordHash ?? null;
-
-          // check if the account was encrypted using the correct password
-          if (passwordHash && passwordHash === bytesToHex(this._authenticationStore.store.hash())) {
-            results.push({
-              address: account.address,
-              name: account.name,
-            });
-          }
-
-          break;
-        default:
-          break;
-      }
-    }
-
-    return results;
+    return accounts.map(({ __type, key, name }) => ({
+      __type,
+      key,
+      name,
+    }));
   }
 
   /**
    * Adds the new chain to the list of supported chains if it does not already exist, otherwise it updates the existing
-   * chain by the genesis hash.
-   * @param {Chain} chain - The chain to be added.
-   * @throws {FailedToFetchNetworkError} If the chain's network parameters could not be fetched.
+   * chain by the CAIP-002 chain ID.
+   *
+   * @param {ChainConstructor} chain - The chain to be added.
+   * @throws {FailedToFetchChainInformationError} If the chain failed to fetch the chain information.
    * @public
    */
-  public async addChain(chain: Chain): Promise<ChainWithNetworkParameters> {
+  public async addChain(chain: ChainConstructor): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#addChain`;
+    let _chain: Chain;
     let index: number;
-    let _chain: ChainWithNetworkParameters;
-    let _error: string;
 
     try {
-      _chain = await networkParametersFromChain(chain);
-      index = this._chains.findIndex(({ genesisHash }) => genesisHash === _chain.genesisHash);
-
-      // if the chain already exists, update the chain
-      if (index >= 0) {
-        this._chains[index] = _chain;
-
-        return _chain;
-      }
-
-      // otherwise, add the chain
-      this._chains.push(_chain);
-
-      return _chain;
+      _chain = await chain.initialize();
     } catch (error) {
-      _error = `failed to add chain "${chain.displayName}"`;
+      this._logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
 
-      this._logger.error(`${__logPrefix}: ${_error} - `, error);
-
-      throw new FailedToFetchNetworkError(_error);
+      throw new FailedToFetchChainInformationError(error.message);
     }
+
+    index = this._chains.findIndex((value) => value.chainID() === _chain.chainID());
+
+    // if the chain already exists, update the chain
+    if (index >= 0) {
+      this._chains[index] = _chain;
+
+      return;
+    }
+
+    // otherwise, add the chain
+    this._chains.push(_chain);
+
+    return;
+  }
+
+  /**
+   * Opens up a modal to allow the user to choose how to authenticate.
+   *
+   * @throws {DecryptionError} If the stored challenge failed to be decrypted.
+   * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
+   * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
+   * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+   * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
+   * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
+   * @throws {UserCanceledUIRequestError} If the user canceled the request.
+   * @public
+   */
+  public async authenticate(): Promise<void> {
+    const { authenticationStore, vault } = await this._appManager.renderAuthenticationApp({
+      clientInformation: this._clientInformation,
+      debug: this._debug,
+    });
+
+    this._accountsStore = new AccountStore({
+      logger: this._logger,
+      vault,
+    });
+    this._authenticationStore = authenticationStore;
+    this._vault = vault;
+
+    await this._generateCredentialAccountIfNoneExists();
   }
 
   /**
    * Authenticates with a passkey.
+   *
    * @param {AuthenticateWithPasskeyParameters} params - The user information.
+   * @param {UserInformation} params.user - The user information.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
@@ -335,114 +365,70 @@ export default class Katavault {
    * @public
    */
   public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPasskey`;
-    const vault = await Katavault._initializeVault({
+    const vault = await initializeVault({
       logger: this._logger,
-      user,
+      username: user.username,
     });
-    const store = new PasskeyStore({
-      logger: this._logger,
-      vault,
-    });
-    let keyMaterial: Uint8Array;
-    let passkey = await store.passkey();
 
-    // if there is no passkey register a new one
-    if (!passkey) {
-      this._logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
-
-      passkey = await PasskeyStore.register({
-        client: this._clientInformation,
+    this._authenticationStore = {
+      __type: AuthenticationMethodEnum.Passkey,
+      store: await authenticateWithPasskey({
+        clientInformation: this._clientInformation,
         logger: this._logger,
         user,
-      });
-
-      await store.setPasskey(passkey);
-    }
-
-    this._logger.debug(`${__logPrefix}: authenticating new credential "${passkey.credentialID}"`);
-
-    keyMaterial = await PasskeyStore.authenticate({
-      logger: this._logger,
-      ...passkey,
-    });
-
-    store.setKeyMaterial(keyMaterial);
-
-    this._accountStore = new AccountStore({
+        vault,
+      }),
+    };
+    this._accountsStore = new AccountStore({
       logger: this._logger,
       vault,
     });
-    this._authenticationStore = {
-      __type: AuthenticationMethod.Passkey,
-      store,
-    };
-    this._user = user;
     this._vault = vault;
+
+    await this._generateCredentialAccountIfNoneExists();
   }
 
   /**
    * Authenticates with the supplied password.
+   *
    * @param {AuthenticateWithPasswordParameters} params - The password and user information.
+   * @param {string} params.password - The password.
+   * @param {UserInformation} params.user - The user information.
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
    * @public
    */
   public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#authenticateWithPassword`;
-    const vault = await Katavault._initializeVault({
+    const vault = await initializeVault({
       logger: this._logger,
-      user,
+      username: user.username,
     });
-    const store = new PasswordStore({
-      logger: this._logger,
-      vault,
-    });
-    let encryptedChallenge = await store.challenge();
-    let isVerified: boolean;
 
-    // set the password
-    store.setPassword(password);
-
-    // if there is no stored challenge, encrypt a new one into the store.
-    if (!encryptedChallenge) {
-      this._logger.debug(`${__logPrefix}: initializing new password store`);
-
-      encryptedChallenge = bytesToHex(await store.encryptBytes(encodeUtf8(PasswordStore.challenge)));
-
-      await store.setChallenge(encryptedChallenge);
-      await store.setLastUsedAt();
-    }
-
-    // if stored challenge exists, verify the supplied password
-    if (encryptedChallenge) {
-      this._logger.debug(`${__logPrefix}: password store exists`);
-
-      isVerified = await store.verify();
-
-      if (!isVerified) {
-        throw new InvalidPasswordError('incorrect password');
-      }
-    }
-
-    this._accountStore = new AccountStore({
-      logger: this._logger,
-      vault,
-    });
     this._authenticationStore = {
-      __type: AuthenticationMethod.Password,
-      store,
+      __type: AuthenticationMethodEnum.Password,
+      store: await authenticateWithPassword({
+        logger: this._logger,
+        password,
+        user,
+        vault,
+      }),
     };
-    this._user = user;
+    this._accountsStore = new AccountStore({
+      logger: this._logger,
+      vault,
+    });
     this._vault = vault;
+
+    await this._generateCredentialAccountIfNoneExists();
   }
 
   /**
    * Gets the supported chains.
-   * @returns {ChainWithNetworkParameters[]} The supported chains.
+   *
+   * @returns {Chain[]} The supported chains.
    * @public
    */
-  public chains(): ChainWithNetworkParameters[] {
+  public chains(): Chain[] {
     return this._chains;
   }
 
@@ -450,7 +436,8 @@ export default class Katavault {
    * Deletes all accounts and settings.
    *
    * **NOTE:** Requires authentication.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   *
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
   public async clear(): Promise<void> {
@@ -459,209 +446,202 @@ export default class Katavault {
     }
 
     this._authenticationStore = null;
-    await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
-    await this._vault.clear(IDB_PASSKEY_STORE_NAME);
-    await this._vault.clear(IDB_PASSWORD_STORE_NAME);
-  }
 
-  /**
-   * Generates a new account in the wallet.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
-   * @returns {Promise<Account>} A promise that resolves to the created account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  public async generateAccount(name?: string): Promise<Account> {
-    return await this._addAccount({
-      name,
-      privateKey: generatePrivateKey(),
-    });
-  }
-
-  /**
-   * Generates a credential account in the wallet. The credential account is an account derived from the user's
-   * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
-   * of the username, password and hostname.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {string} name - [optional] An optional name for the account. Defaults to undefined.
-   * @returns {Promise<Account>} A promise that resolves to the generated credential account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  public async generateCredentialAccount(name?: string): Promise<Account> {
-    let address: string;
-    let encryptedKeyData: Uint8Array;
-    let keyMaterial: Uint8Array | null;
-    let passkey: PasskeyStoreSchema | null;
-    let password: string | null;
-    let privateKey: Uint8Array;
-
-    switch (this._authenticationStore?.__type) {
-      case AuthenticationMethod.Passkey:
-        keyMaterial = this._authenticationStore.store.keyMaterial();
-        passkey = await this._authenticationStore.store.passkey();
-
-        if (!keyMaterial || !passkey) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        address = addressFromPrivateKey(keyMaterial);
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
-
-        await this._accountStore.upsert([
-          {
-            address,
-            credentialID: passkey.credentialID,
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        return {
-          address,
-          name,
-        };
-      case AuthenticationMethod.Password:
-        password = this._authenticationStore.store.password();
-
-        if (!password || !this._user) {
-          throw new NotAuthenticatedError('not authenticated');
-        }
-
-        privateKey = await privateKeyFromPasswordCredentials({
-          hostname: this._clientInformation.hostname,
-          password,
-          username: this._user.username,
-        });
-        address = addressFromPrivateKey(privateKey);
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
-
-        await this._accountStore.upsert([
-          {
-            address,
-            passwordHash: bytesToHex(this._authenticationStore.store.hash()),
-            keyData: bytesToHex(encryptedKeyData),
-            name,
-          },
-        ]);
-
-        return {
-          address,
-          name,
-        };
-      default:
-        throw new NotAuthenticatedError('not authenticated');
+    if (this._vault) {
+      await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
+      await this._vault.clear(IDB_PASSKEY_STORE_NAME);
+      await this._vault.clear(IDB_PASSWORD_STORE_NAME);
+      await this._vault.clear(IDB_SETTINGS_STORE_NAME);
     }
   }
 
   /**
-   * Imports an account from a 25-word mnemonic.
+   * Gets the holding accounts of the vault. If no holding accounts exist, a new one is created from the saved
+   * credentials.
    *
    * **NOTE:** Requires authentication.
-   * @param {ImportAccountWithPrivateKeyParameters} params - The 25-word mnemonic of the account to be imported and an
-   * optional name for the account.
-   * @returns {Promise<Account>} A promise that resolves to the imported account.
-   * @throws {InvalidAccountError} If the supplied mnemonic is not valid.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
+   *
+   * @returns {Promise<[Account, ...Account[]]>} A promise that resolves to the holding accounts stored in the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {EncryptionError} If the account's private key failed to be encrypted.
    * @public
    */
-  public async importAccountFromMnemonic({ mnemonic, name }: ImportAccountWithMnemonicParameters): Promise<Account> {
-    const formattedMnemonic = mnemonic
-      .trim()
-      .split(/[\s,]+/) // split on whitespace and commas
-      .join(' '); // join back together with whitespace
+  public async holdingAccounts(): Promise<[Account, ...Account[]]> {
+    const accounts = await this.accounts();
+    let holdingAccounts = accounts.filter(({ __type }) => __type === AccountTypeEnum.Ephemeral);
 
-    if (isValidMnemonic(formattedMnemonic)) {
-      throw new InvalidAccountError('invalid mnemonic');
+    if (holdingAccounts.length > 0) {
+      return holdingAccounts as [Account, ...Account[]];
     }
 
-    return await this._addAccount({
-      name,
-      privateKey: privateKeyFromMnemonic(formattedMnemonic),
-    });
-  }
-
-  /**
-   * Imports an account from a private key.
-   *
-   * **NOTE:** Requires authentication.
-   * @param {ImportAccountWithPrivateKeyParameters} params - The private key of the account to be imported and an
-   * optional name for the account.
-   * @returns {Promise<Account>} A promise that resolves to the imported account.
-   * @throws {EncryptionError} If the account's private key failed to be encrypted.
-   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
-   * @public
-   */
-  public async importAccountFromPrivateKey({
-    name,
-    privateKey,
-  }: ImportAccountWithPrivateKeyParameters): Promise<Account> {
-    return await this._addAccount({
-      name,
-      privateKey,
-    });
+    // if there are no holding accounts, create a new one from the credentials
+    return [await this._generateCredentialAccountIfNoneExists()];
   }
 
   /**
    * Checks if Katavault is authenticated.
+   *
    * @returns {boolean} True if Katavault is authenticated, false otherwise.
-   * @private
+   * @public
    */
   public isAuthenticated(): boolean {
     return !!this._authenticationStore;
   }
 
   /**
-   * Removes the account from the provider for the specified address if it exists.
+   * Opens the vault application.
    *
    * **NOTE:** Requires authentication.
-   * @param {string} address - The address of the account to remove from the wallet.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
+   *
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
-  public async removeAccount(address: string): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#removeAccount`;
-    let results: string[];
+  public openVault(): void {
+    let params: RenderVaultAppParameters;
 
-    if (!this.isAuthenticated()) {
+    if (!this._authenticationStore || !this._vault) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    results = await this._accountStore.remove([address]);
+    params = {
+      authenticationStore: this._authenticationStore,
+      chains: this._chains,
+      vault: this._vault,
+    };
+
+    // open wallet app
+    (async () => {
+      await this._appManager.renderVaultApp({
+        ...params,
+        clientInformation: this._clientInformation,
+        debug: this._debug,
+      });
+    })();
+  }
+
+  /**
+   * Removes the account from the vault for the specified key if it exists.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @param {string} key - The base58 encoded public key of the account to remove from the vault.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @public
+   */
+  public async removeAccountByKey(key: string): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#removeAccountByKey`;
+    let results: string[];
+
+    if (!this.isAuthenticated() || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    results = await (
+      this._accountsStore ??
+      new AccountStore({
+        logger: this._logger,
+        vault: this._vault,
+      })
+    ).remove([key]);
 
     this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
   }
 
   /**
-   * Removes a chain from the list of supported chains based on the provided genesis hash.
-   * @param {string} genesisHash - The base64 encoded genesis hash of the chain to be removed.
+   * Removes a chain from the list of supported chains based on the CAIP-002 chain ID.
+   *
+   * @param {string} chainID - The CAIP-002 chain ID of the chain to be removed.
    * @public
    */
-  public removeChainByGenesisHash(genesisHash: string): void {
-    this._chains = this._chains.filter(({ genesisHash: _genesisHash }) => _genesisHash !== genesisHash);
+  public removeChainByChainID(chainID: string): void {
+    this._chains = this._chains.filter((chain) => chain.chainID() !== chainID);
   }
 
   /**
-   * Updates the name of the account.
-   * @param {SetAccountNameByAddressParameters} params - The address and name to set.
-   * @returns {Promise<Account>} A promise that resolves to the updated account.
-   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
+   * Sends a list of raw transactions, along with their signatures, to the specified chain. The corresponding array will
+   * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
+   * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
+   *
+   * @param {SendRawTransactionParameters[]} parameters - An array containing the chain ID, the raw transaction and
+   * the signature of the signed transaction.
+   * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
+   * Each element's index in the result list corresponds to the supplied parameter list indices.
    * @public
    */
-  public async setAccountNameByAddress({ address, name }: SetAccountNameByAddressParameters): Promise<Account> {
-    const account = await this._accountStore.accountByAddress(address);
+  public async sendRawTransactions(parameters: SendRawTransactionParameters[]): Promise<SendRawTransactionResult[]> {
+    const __logPrefix = `${Katavault.displayName}#sendRawTransactions`;
+    const results = Array.from<SendRawTransactionParameters, SendRawTransactionResult>(
+      { length: parameters.length },
+      () => ({
+        error: null,
+        success: false,
+        transactionID: null,
+      })
+    );
+    let chain: Chain | null;
 
-    if (!account) {
-      throw new AccountDoesNotExistError(`account "${address}" does not exist`);
+    for (let i = 0; i < parameters.length; i++) {
+      const { chainID, signature, transaction } = parameters[i];
+
+      chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+      if (!chain) {
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported`);
+
+        results[i] = {
+          error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+          success: false,
+          transactionID: null,
+        };
+
+        continue;
+      }
+
+      results[i] = await this._transactionContext.sendRawTransaction({
+        chain,
+        signature,
+        transaction,
+      });
     }
 
-    await this._accountStore.upsert([
+    return results;
+  }
+
+  /**
+   * Updates the name of an account by its key.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @param {SetAccountNameByKeyParameters} params - The key of the account and the new name to set.
+   * @param {string} params.key - The base58 encoded public key of the account.
+   * @param {string} params.name - The new name for the account.
+   * @returns {Promise<Account>} A promise that resolves to the updated account.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {AccountDoesNotExistError} If the specified key does not exist in the vault.
+   * @public
+   */
+  public async setAccountNameByKey({ key, name }: SetAccountNameByKeyParameters): Promise<Account> {
+    let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
+    let accountsStore: AccountStore;
+
+    if (!this.isAuthenticated() || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    accountsStore =
+      this._accountsStore ??
+      new AccountStore({
+        logger: this._logger,
+        vault: this._vault,
+      });
+    account = await accountsStore.accountByKey(key);
+
+    if (!account) {
+      throw new AccountDoesNotExistError(`account "${key}" does not exist`);
+    }
+
+    await accountsStore.upsert([
       {
         ...account,
         name,
@@ -669,49 +649,249 @@ export default class Katavault {
     ]);
 
     return {
-      address,
+      __type: account.__type,
+      key,
       name,
     };
+  }
+
+  /**
+   * Signs and sends an array of raw transactions using the appropriate account and chain. The corresponding array will
+   * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
+   * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
+   * ID and the raw transaction to be signed.
+   * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction signed and submitted was successfully, the transaction ID and an error if the transaction signing or submission was unsuccessful.
+   * Each element's index in the result list corresponds to the supplied parameter list indices.
+   * @throws {NotAuthenticatedError} If the user is not authenticated.
+   * @public
+   */
+  public async signAndSendRawTransactions(
+    parameters: SignRawTransactionParameters[]
+  ): Promise<SendRawTransactionResult[]> {
+    const __logPrefix = `${Katavault.displayName}#signAndSendRawTransactions`;
+    let signatures: SignRawTransactionResult[];
+
+    if (!this.isAuthenticated() || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    signatures = await this.signRawTransactions(parameters);
+
+    return await Promise.all(
+      signatures.map(async ({ error, success, signature }, index) => {
+        let chain: Chain | null;
+
+        if (error || !signature || !success) {
+          return {
+            error,
+            success,
+            transactionID: null,
+          };
+        }
+
+        const { chainID, transaction } = parameters[index];
+
+        chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+        if (!chain) {
+          this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${index}", not supported`);
+
+          return {
+            error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+            success: false,
+            transactionID: null,
+          };
+        }
+
+        return await this._transactionContext.sendRawTransaction({
+          chain,
+          signature,
+          transaction,
+        });
+      })
+    );
   }
 
   public async signMessage(parameters: WithEncoding<SignMessageParameters>): Promise<string>;
   public async signMessage(parameters: Omit<SignMessageParameters, 'encoding'>): Promise<Uint8Array>;
   /**
-   * Signs a message or some arbitrary bytes.
+   * Signs a message or some arbitrary bytes using the appropriate account and chain.
    *
    * **NOTE:** Requires authentication.
-   * **NOTE:** The message is prepended with "MX" for domain separation.
-   * @param {SignMessageParameters} params - The signer, the message and optional output encoding.
+   *
+   * @param {SignMessageParameters} params - The input parameters.
+   * @param {string} params.accountKey - The base58 public key of the account that will be used for signing.
+   * @param {string} params.chainID - The CAIP-002 chain ID.
+   * @param {Encoding} [params.encoding] - The output encoding of the signature. If no encoding is specified, the
+   * signature will be as raw bytes (Uint8Array).
+   * @param {string | Uint8Array} params.message - A UTF-8 encoded message or raw bytes to sign.
    * @returns {Promise<string | Uint8Array>} A promise that resolves to the signature of the signed message. If the
-   * encoding parameter was specified, the signature will be encoded in that format, otherwise signature will be in raw
-   * bytes.
-   * @throws {NotAuthenticatedError} If the Katavault has not been authenticated.
-   * @throws {AccountDoesNotExistError} If the specified address does not exist in the wallet.
-   * @see {@link https://algorand.github.io/js-algorand-sdk/functions/signBytes.html}
+   * encoding parameter was specified, the signature will be encoded in that format, otherwise the signature will be in
+   * raw bytes.
+   * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
+   * @throws {ChainNotSupportedError} If the specified chain is not supported.
+   * @throws {AccountDoesNotExistError} If the specified address does not exist in the vault.
+   * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
+   * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
+   * credentials.
    * @public
    */
-  public async signMessage({ address, encoding, message }: SignMessageParameters): Promise<string | Uint8Array> {
-    const privateKey = await this._decryptedAccountKeyByAddress(address);
+  public async signMessage({
+    accountKey,
+    chainID,
+    encoding,
+    message,
+  }: SignMessageParameters): Promise<string | Uint8Array> {
+    let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
+    let chain: Chain | null;
     let signature: Uint8Array;
-    let toSign: Uint8Array;
 
-    if (!privateKey) {
-      throw new AccountDoesNotExistError(`account "${address}" does not exist`);
+    if (!this._authenticationStore || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
     }
 
-    toSign = concatBytes(
-      utf8ToBytes(SIGN_MESSAGE_PREFIX), // "MX" prefix
-      typeof message === 'string' ? utf8ToBytes(message) : message
-    );
-    signature = ed25519.sign(toSign, privateKey);
+    chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
 
+    if (!chain) {
+      throw new ChainNotSupportedError(`chain "${chainID}" not supported`);
+    }
+
+    account = await (
+      this._accountsStore ??
+      new AccountStore({
+        logger: this._logger,
+        vault: this._vault,
+      })
+    ).accountByKey(accountKey);
+
+    if (!account) {
+      throw new AccountDoesNotExistError(`account "${accountKey}" does not exist`);
+    }
+
+    // TODO: check if connected account supports chain ID
+    // if (account.__type === AccountTypeEnum.Connected) {
+    //
+    // }
+
+    signature = await this._signContext.signMessage({
+      account:
+        account.__type === AccountTypeEnum.Ephemeral
+          ? await this._authenticationStore?.store.decryptEphemeralAccount(account)
+          : account,
+      chain,
+      message,
+    });
+
+    // encode if necessary
     switch (encoding) {
       case 'base64':
-        return bytesToBase64(signature);
+        return base64.encode(signature);
       case 'hex':
-        return bytesToHex(signature);
+        return hex.encode(signature);
       default:
         return signature;
     }
+  }
+
+  /**
+   * Signs an array of raw transactions using the appropriate account and chain. The corresponding array will
+   * contain whether the transaction signing was successful, the signature (if successful) and an error if the
+   * transaction signing was unsuccessful. The index of the result array will match that of the supplied transaction
+   * array.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
+   * ID and the raw transaction to be signed.
+   * @return {Promise<SignRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
+   * signing was unsuccessful. Each element's index in the result list corresponds to the supplied parameter list
+   * indices.
+   * @throws {NotAuthenticatedError} If the user is not authenticated.
+   * @public
+   */
+  public async signRawTransactions(parameters: SignRawTransactionParameters[]): Promise<SignRawTransactionResult[]> {
+    const __logPrefix = `${Katavault.displayName}#signRawTransactions`;
+    let account: ConnectedAccountStoreItem | EphemeralAccountStoreItem | null;
+    let chain: Chain | null;
+    let extendedParams: WithIndex<WithAccountStoreItem<WithChain<Record<'transaction', Uint8Array>>>>[];
+    let results: SignRawTransactionResult[];
+    let signedTransactions: WithIndex<SignRawTransactionResult>[];
+
+    if (!this._authenticationStore || !this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    extendedParams = [];
+    results = Array.from<SignRawTransactionParameters, SignRawTransactionResult>({ length: parameters.length }, () => ({
+      error: null,
+      signature: null,
+      success: false,
+    }));
+
+    for (let i = 0; i < parameters.length; i++) {
+      const { accountKey, chainID, transaction } = parameters[i];
+
+      chain = this._chains.find((chain) => chain.chainID() === chainID) ?? null;
+
+      if (!chain) {
+        this._logger.warn(`${__logPrefix}: chain "${chainID}", at transaction index "${i}", not supported`);
+
+        results[i] = {
+          error: new ChainNotSupportedError(`chain "${chainID}" not supported`),
+          success: false,
+          signature: null,
+        };
+
+        continue;
+      }
+
+      account = await (
+        this._accountsStore ??
+        new AccountStore({
+          logger: this._logger,
+          vault: this._vault,
+        })
+      ).accountByKey(accountKey);
+
+      if (!account) {
+        this._logger.warn(`account "${accountKey}", at transaction index "${i}", does not exist`);
+
+        results[i] = {
+          error: new AccountDoesNotExistError(`account "${accountKey}" does not exist`),
+          success: false,
+          signature: null,
+        };
+
+        continue;
+      }
+
+      // TODO: check if connected account supports chain ID
+      // if (account.__type === AccountTypeEnum.Connected) {
+      //
+      // }
+
+      extendedParams.push({
+        account:
+          account.__type === AccountTypeEnum.Ephemeral
+            ? await this._authenticationStore.store.decryptEphemeralAccount(account)
+            : account,
+        chain,
+        index: i,
+        transaction,
+      });
+    }
+
+    signedTransactions = await this._transactionContext.signRawTransactions(extendedParams);
+
+    // add the signed transaction results to the result array by the passed index
+    signedTransactions.forEach(({ index, ...result }) => (results[index] = result));
+
+    return results;
   }
 }

@@ -1,0 +1,64 @@
+@use "@/ui/styles/media";
+@use "@/ui/styles/palette";
+@use "@/ui/styles/variables";
+@use "sass:map";
+
+.container {
+  align-items: flex-end;
+  bottom: 0;
+  display: flex;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: variables.$modal-z-index - 1; // set below all other modals
+
+  @include media.tablet-and-up {
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+.modal {
+  align-items: center;
+  animation: slideUp 300ms ease forwards;
+  background-color: palette.background-color("light");
+  border-radius: map.get(variables.$border-radius, md) map.get(variables.$border-radius, md) 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  z-index: 0;
+
+  @include media.tablet-and-up {
+    animation-name: slideFromLeft;
+    border-radius: map.get(variables.$border-radius, md) 0 0 map.get(variables.$border-radius, md);
+    max-width: 350px;
+  }
+
+  &[data-color-mode="dark"] {
+    background-color: palette.background-color("dark");
+  }
+
+  &--close {
+    animation-name: slideDown;
+
+    @include media.tablet-and-up {
+      animation-name: slideToRight;
+    }
+  }
+}
+
+.overlay {
+  align-items: center;
+  background-color: palette.$black-color;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  opacity: 0.4;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}

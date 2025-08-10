@@ -1,8 +1,7 @@
-// types
-import type { Logger } from '@/types';
+import type { ILogger } from '@kibisis/utilities';
 
 interface CommonParameters {
-  logger: Logger;
+  logger: ILogger;
 }
 
 export default CommonParameters;
