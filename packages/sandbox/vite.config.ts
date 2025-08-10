@@ -1,3 +1,4 @@
+import favicons from '@peterek/vite-plugin-favicons';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
@@ -21,7 +22,7 @@ export default defineConfig({
     __APP_TITLE__: JSON.stringify('Katavault Sandbox'),
     __VERSION__: JSON.stringify(version),
   },
-  plugins: [react(), tsconfigPaths()],
+  plugins: [favicons(resolve(__dirname, 'favicon.svg')), react(), tsconfigPaths()],
   resolve: {
     alias: {
       // resolutions needed for sass, typescript resolutions handled by the vite-tsconfig-paths plugin

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@chakra-ui/color-mode": "^2.2.0",
     "@eslint/js": "catalog:",
+    "@peterek/vite-plugin-favicons": "^2.1.0",
     "@types/node": "catalog:",
     "@types/react": "^18.x",
     "@types/react-dom": "18.x",
