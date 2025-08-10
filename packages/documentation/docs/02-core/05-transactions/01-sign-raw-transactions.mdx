@@ -1,0 +1,129 @@
+---
+sidebar_label: signRawTransactions
+slug: /core/data/sign-raw-transactions
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { BASE_58_SPECIFICATION_URL, CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
+
+# signRawTransactions
+
+> Signs an array of raw transactions using the appropriate account and chain.
+> The corresponding array will contain whether the transaction signing was successful, the signature (if successful) and an error if the transaction signing was unsuccessful.
+> The index of the result array will match that of the supplied transaction array.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="avm"
+  values={[
+    { label: 'AVM', value: 'avm' },
+  ]}>
+  <TabItem value="avm">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { base58 } from '@kibisis/encoding';
+    import { createKatavault, type SignRawTransactionResult } from '@kibisis/katavault-core';
+    import { encodeAddress, makePaymentTxnWithSuggestedParamsFromObject } from 'algosdk';
+
+    const accountKey = 'FJ4XvAApLhdvYFd2umNSsb87KE6rpuXQcfptb8WZ9Feo';
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    const transaction = makePaymentTxnWithSuggestedParamsFromObject({
+      amount: BigInt(1000),
+      receiver: encodeAddress(base58.decode(accountKey)),
+      sender: encodeAddress(base58.decode(accountKey)),
+    });
+    let results: SignRawTransactionResult[];
+
+    await katavault.authenticateWithPasskey({
+      user: {
+        name: 'Kibi',
+        username: 'kibi@kibis.is',
+      },
+    });
+
+    results = await katavault.signRawTransactions(
+      [
+        {
+          accountKey,
+          chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+          transaction: transaction.toByte(), // the raw transaction data is required
+        },
+        // ... add other transactions
+      ]
+    );
+
+    console.log(results);
+    /*
+    [
+      {
+        error: null,
+        signature: [45, 12, 65, ...],
+        success: true,
+      }
+    ]
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### params
+
+* Type: [`SignRawTransactionParameters[]`](04-glossary/02-types.mdx#signrawtransactionparameters)
+
+### params[].accountKey
+
+* Type: `string`
+
+The <a href={BASE_58_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">base58</a> public key of the account that will be used for signing.
+
+### params[].chainID
+
+* Type: `string`
+
+The <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
+
+### params[].transaction
+
+* Type: `Uint8Array`
+
+The raw transaction data. This will be different for different chains.
+
+<SectionBreak />
+
+## Returns
+
+[`Promise<SignRawTransactionResult[]>`](04-glossary/02-types.mdx#signrawtransactionresult)
+
+A promise that resolves to an array of results that will contain whether the transaction was signed successfully, the signature (if successful) and an error if the transaction signing was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list
+indices.
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.

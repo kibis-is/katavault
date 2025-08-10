@@ -127,7 +127,7 @@ import { BASE_58_SPECIFICATION_URL, CAIP_002_SPECIFICATION_URL, KIBISIS_CHAINS_N
 |-----------|---------------------------------|----------|---------|---------------------------------------------------------------------------------------|
 | error     | [`BaseError`][errors] \| `null` | yes      | `null`  | If the transaction signing was unsuccessful, the exact error will be available.       |
 | success   | `boolean`                       | yes      | -       | Whether the transaction signing was successful.                                       |
-| signature | `Uint8Array`                    | yes      | -       | The signature of the signed transaction. This will be different for different chains. |
+| signature | `Uint8Array`                    | yes      | -       | The signature of the signed transaction data or null if the signing was unsuccessful. |
 
 <SectionBreak />
 

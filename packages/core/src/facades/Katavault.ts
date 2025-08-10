@@ -567,9 +567,6 @@ export default class Katavault extends BaseClass {
    * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
    * whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
    * Each element's index in the result list corresponds to the supplied parameter list indices.
-   * @throws {FailedToFetchChainInformationError} If the chain information cannot be fetched.
-   * @throws {FailedToSendTransactionError} If the transaction failed to be submitted to the network, or the network
-   * rejected the transaction.
    * @public
    */
   public async sendRawTransactions(parameters: SendRawTransactionParameters[]): Promise<SendRawTransactionResult[]> {
@@ -667,10 +664,9 @@ export default class Katavault extends BaseClass {
    *
    * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
    * ID and the raw transaction to be signed.
-   * @return {Promise<SignRawTransactionResult[]>} A promise that resolves to an array of results that will contain
-   * whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
-   * signing was unsuccessful. Each element's index in the result list corresponds to the supplied parameter list
-   * indices.
+   * @return {Promise<SendRawTransactionResult[]>} A promise that resolves to an array of results that will contain
+   * whether the transaction signed and submitted was successfully, the transaction ID and an error if the transaction signing or submission was unsuccessful.
+   * Each element's index in the result list corresponds to the supplied parameter list indices.
    * @throws {NotAuthenticatedError} If the user is not authenticated.
    * @public
    */
