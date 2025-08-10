@@ -3,9 +3,11 @@ sidebar_label: useChains
 slug: /react/data/use-chains
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
 # useChains
 
@@ -20,7 +22,6 @@ import TabItem from '@theme/TabItem';
   values={[
     { label: 'Chains.tsx', value: 'chains' },
     { label: 'App.tsx', value: 'app' },
-    { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
   <TabItem value="chains">
@@ -31,10 +32,10 @@ import TabItem from '@theme/TabItem';
     function Chains() {
       const chains = useChains();
 
-      return chains.map(({ displayName, genesisID }) => (
+      return chains.map((chain) => (
         <div>
-          <p>Name: {displayName}</p>
-          <p>ID: {genesisID}</p>
+          <p>Name: {chain.displayName()}</p>
+          <p>Chain ID: {chain.chainID()}</p>
         </div>
       ));
     }
@@ -46,13 +47,11 @@ import TabItem from '@theme/TabItem';
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
     import { Chains } from './Chains';
-    import { AuthScript } from './AuthScript';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
-          <AuthScript />
           <Chains />
         </KatavaultProvider>
       );
@@ -60,46 +59,14 @@ import TabItem from '@theme/TabItem';
     ```
 
   </TabItem>
-  <TabItem value="auth">
-
-    ```typescript
-    import { useAuthenticate } from '@kibisis/katavault-react';
-    import { useEffect } from 'react';
-
-    export function AuthScript() {
-      const {
-        authenticateWithPasskey,
-        isAuthenticated,
-      } = useAuthenticate();
-
-      useEffect(() => {
-        authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
-          onError: (error) => console.error(error),
-          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
-        });
-      }, []);
-      useEffect(() => {
-        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
-      }, [isAuthenticated]);
-
-      return null;
-    }
-    ```
-
-  </TabItem>
   <TabItem value="config">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      chains: [voi],
+      chains: [Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -115,9 +82,9 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`ChainWithNetworkParameters[]`
+`Chain[]`
 
-The list of supported chains stored in the wallet.
+The list of supported chains stored in the vault.
 
 ## See also
 

@@ -3,13 +3,21 @@ sidebar_label: useSignMessage
 slug: /react/data/use-sign-message
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
 # useSignMessage
 
-> Hook to sign a message.
+> Hook to sign a message or some arbitrary bytes using the appropriate account and chain.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
 
 <SectionBreak />
 
@@ -27,13 +35,15 @@ import TabItem from '@theme/TabItem';
 
     ```typescript
     import { useAccounts, useSignMessage } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
 
     function SignMessage() {
       const accounts = useAccounts();
       const signMessage = useSignMessage();
-      const handleOnSignMessageClick = (address: string) => () => {
+      const handleOnSignMessageClick = useCallback((key: string) => () => {
         signMessage({
-          address,
+          accountKey: key,
+          chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
           encoding: 'hex',
           message: 'hello humie!',
         }, {
@@ -44,15 +54,15 @@ import TabItem from '@theme/TabItem';
             console.log(`signed message with signature: ${result}`);
           },
         });
-      };
+      }, [signMessage]);
 
       return (
         <div>
-          {accounts.map(({ address, name }) => (
+          {accounts.map(({ key, name }) => (
             <div>
-              <p>Address: {address}</p>
+              <p>Key: {key}</p>
               <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnSignMessageClick(address)}>Remove</button>
+              <button onClick={handleOnSignMessageClick(key)}>Sign</button>
             </div>
           ))}
         </div>
@@ -88,17 +98,12 @@ import TabItem from '@theme/TabItem';
 
     export function AuthScript() {
       const {
-        authenticateWithPasskey,
+        authenticate,
         isAuthenticated,
       } = useAuthenticate();
 
       useEffect(() => {
         authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -115,11 +120,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      chains: [voi],
+      chains: [Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -135,25 +140,25 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: SignParameters, options?: { onError, onSuccess }) => void`
+`(params: SignMessageParameters, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: SignParameters) => void | Promimse<void>`
+`(error: BaseError, params: SignMessageParameters) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: string | Uint8Array, params: SignParameters) => void | Promimse<void>`
+`(result: string | Uint8Array, params: SignMessageParameters) => void | Promimse<void>`
 
 This will be invoked with the signature as the result if the message signing was successful.
 
 :::note
 
-If the `params.encoding` are used, the result will be a string in the specified encoding. Otherwise, the raw signature bytes will be returned.
+If the `params.encoding` is used, the result will be a string in the specified encoding. Otherwise, the raw signature bytes (`Uint8Array`) will be returned.
 
 :::
 

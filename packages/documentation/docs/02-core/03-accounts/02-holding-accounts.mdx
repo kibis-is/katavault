@@ -3,9 +3,11 @@ sidebar_label: holdingAccounts
 slug: /core/accounts/holding-accounts
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
 # holdingAccounts
 
@@ -37,12 +39,7 @@ Authentication is **REQUIRED**.
     });
     let accounts: Account[];
 
-    await katavault.authenticateWithPasskey({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
+    await katavault.authenticate();
 
     accounts = await katavault.holdingAccounts();
 

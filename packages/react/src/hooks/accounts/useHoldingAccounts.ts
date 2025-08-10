@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { KatavaultContext } from '@/contexts';
 
 /**
- * Hook for getting the holding accounts.
+ * Hook for getting the list of holding accounts stored in the vault.
  *
  * **NOTE:** Requires authentication.
  *

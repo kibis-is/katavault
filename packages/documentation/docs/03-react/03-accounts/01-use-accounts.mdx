@@ -3,13 +3,21 @@ sidebar_label: useAccounts
 slug: /react/accounts/use-accounts
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
 # useAccounts
 
-> Hook for getting the list of accounts stored in the wallet.
+> Hook for getting the list of accounts stored in the vault.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
 
 <SectionBreak />
 
@@ -31,9 +39,9 @@ import TabItem from '@theme/TabItem';
     function Accounts() {
       const accounts = useAccounts();
 
-      return accounts.map(({ address, name }) => (
+      return accounts.map(({ key, name }) => (
         <div>
-          <p>Address: {address}</p>
+          <p>Key: {key}</p>
           <p>Name: {name ?? '-'}</p>
         </div>
       ));
@@ -68,17 +76,12 @@ import TabItem from '@theme/TabItem';
 
     export function AuthScript() {
       const {
-        authenticateWithPasskey,
+        authenticate,
         isAuthenticated,
       } = useAuthenticate();
 
       useEffect(() => {
-        authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
+        authenticate({
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -95,11 +98,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      chains: [voi],
+      chains: [Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -117,7 +120,7 @@ import TabItem from '@theme/TabItem';
 
 [`Account[]`](04-glossary/02-types.mdx#account)
 
-The list of accounts stored in the wallet.
+The list of accounts stored in the vault.
 
 ## See also
 

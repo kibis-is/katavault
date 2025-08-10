@@ -52,12 +52,7 @@ Authentication is **REQUIRED**.
     });
     let results: SendRawTransactionResult[];
 
-    await katavault.authenticateWithPasskey({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
+    await katavault.authenticate();
 
     results = await katavault.signAndSendRawTransactions(
       [

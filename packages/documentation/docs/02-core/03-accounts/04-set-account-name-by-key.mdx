@@ -41,12 +41,7 @@ Authentication is **REQUIRED**.
       chains: [Voi],
     });
 
-    await katavault.authenticateWithPasskey({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
+    await katavault.authenticate();
     await katavault.setAccountNameByKey({
       key: 'CZepAkxcz4KEruVyrURwGFh8SEkKLFL8nASuXmS2Zu3a',
       name: 'New name',

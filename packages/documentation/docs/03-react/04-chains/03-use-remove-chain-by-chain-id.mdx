@@ -1,6 +1,6 @@
 ---
-sidebar_label: useAddChain
-slug: /react/chains/use-add-chain
+sidebar_label: useRemoveChainByChainID
+slug: /react/chains/use-remove-chain-by-chain-id
 ---
 
 import Tabs from '@theme/Tabs';
@@ -9,9 +9,12 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useAddChain
+<!-- constants -->
+import { CAIP_002_SPECIFICATION_URL } from '@site/src/constants';
 
-> Hook to add a chain to the vault.
+# useRemoveChainByChainID
+
+> Hook to remove a chain by a <a href={CAIP_002_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">CAIP-002</a> chain ID.
 
 <SectionBreak />
 
@@ -27,23 +30,22 @@ import SectionBreak from '@site/src/components/SectionBreak';
   <TabItem value="chains">
 
     ```typescript
-    import { Algorand, Chain } from '@kibisis/chains';
-    import { useAddChain, useChains } from '@kibisis/katavault-react';
+    import { useChains, useRemoveChainByChainID } from '@kibisis/katavault-react';
     import { useCallback } from 'react';
 
     function Chains() {
       const chains = useChains();
-      const addChain = useAddChain();
-      const handleOnAddAlgorandClick = useCallback(() => {
-        addChain(Algorand, {
+      const removeChainByChainID = useRemoveChainByChainID();
+      const handleOnRemoveChainByChainIDClick = useCallback((chainID: string) => () => {
+        removeChainByChainID(chainID, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: (result: Chain) => {
-            console.log(`added new chain ${result.chainID()}`);
+          onSuccess: () => {
+            console.log(`removed chain ${chainID}`);
           },
         });
-      }, [addChain]);
+      }, [removeChainByChainID]);
 
       return (
         <div>
@@ -51,10 +53,9 @@ import SectionBreak from '@site/src/components/SectionBreak';
             <div>
               <p>Name: {chain.displayName()}</p>
               <p>Chain ID: {chain.chainID()}</p>
+              <button onClick={handleOnRemoveChainByChainIDClick(chain.chainID())}>Remove</button>
             </div>
-          )}
-
-          <button onClick={handleOnAddAlgorandClick}>Add Algorand</button>
+          ))}
         </div>
       );
     }
@@ -101,22 +102,22 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 ## Returns
 
-`(params?: ChainConstructor, options?: { onError, onSuccess }) => void`
+`(params: string, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params?: Chain) => void | Promimse<void>`
+`(error: BaseError, params: string) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: Chain, params?: Chain) => void | Promimse<void>`
+`(result: undefined, params: string) => void | Promimse<void>`
 
-This will be invoked if the chain was added successfully.
+This will be invoked if the chain removal was successful.
 
 ## See also
 
-* [addChain](02-core/04-chains/02-add-chain.mdx)
+* [removeChainByChainID](02-core/04-chains/03-remove-chain-by-chain-id.mdx)

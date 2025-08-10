@@ -31,16 +31,7 @@ import SectionBreak from '@site/src/components/SectionBreak';
     const katavault = await createKatavault({
       chains: [Voi],
     });
-    let chains: Chain[];
-
-    await katavault.authenticateWithPasskey({
-      user: {
-        name: 'Kibi',
-        username: 'kibi@kibis.is',
-      },
-    });
-
-    chains = katavault.chains();
+    const chains = katavault.chains();
 
     console.log(chains);
     /*

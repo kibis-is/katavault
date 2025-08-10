@@ -12,7 +12,7 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunction } from '@/types';
 
 /**
- * Hook to add a supported chain to the vault.
+ * Hook to add a chain to the vault.
  * @returns {HookFunction<ChainConstructor, undefined, BaseError>} A function that can be used to add a new chain.
  */
 export default function useAddChain(): HookFunction<ChainConstructor, undefined, BaseError> {

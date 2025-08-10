@@ -1,15 +1,23 @@
 ---
-sidebar_label: useImportAccountWithMnemonic
-slug: /react/accounts/use-import-account-with-mnemonic
+sidebar_label: useSetAccountNameByKey
+slug: /core/accounts/use-set-account-name-by-key
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useImportAccountWithMnemonic
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
-> Hook to import an account with a 25-word mnemonic seed phrase.
+# useSetAccountNameByKey
+
+> Hook to set the name for an account by its key.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
 
 <SectionBreak />
 
@@ -26,35 +34,35 @@ import TabItem from '@theme/TabItem';
   <TabItem value="accounts">
 
     ```typescript
-    import { useAccounts, useImportAccountWithMnemonic } from '@kibisis/katavault-react';
+    import { useAccounts, useSetAccountNameByKey } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
 
     function Accounts() {
       const accounts = useAccounts();
-      const importAccountWithMnemonic = useImportAccountWithMnemonic();
-      const handleOnAddAccountClick = useCallback(() => {
-        importAccountWithMnemonic({
-          mnemonic: 'under detect dog...',
-          name: 'Personal',
+      const setAccountNameByKey = useSetAccountNameByKey();
+      const handleOnUpdateAccountByKeyClick = useCallback((key: string) => () => {
+        setAccountNameByAddress({
+          key,
+          name: 'New name',
         }, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: (result: Account) => {
-            console.log(`added new account ${account.address}`);
+          onSuccess: ({ name }) => {
+            console.log(`updated account ${key} with name ${name}`);
           },
         });
-      }, [importAccountWithMnemonic]);
+      }, [setAccountNameBykey]);
 
       return (
         <div>
-          {accounts.map(({ address, name }) => (
+          {accounts.map(({ key, name }) => (
             <div>
-              <p>Address: {address}</p>
+              <p>Key: {key}</p>
               <p>Name: {name ?? '-'}</p>
+              <button onClick={handleOnUpdateAccountByKeyClick(key)}>Update</button>
             </div>
           ))}
-
-          <button onClick={handleOnAddAccountClick}>Import account</button>
         </div>
       );
     }
@@ -88,17 +96,12 @@ import TabItem from '@theme/TabItem';
 
     export function AuthScript() {
       const {
-        authenticateWithPasskey,
+        authenticate,
         isAuthenticated,
       } = useAuthenticate();
 
       useEffect(() => {
-        authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
+        authenticate({
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -115,11 +118,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      chains: [voi],
+      chains: [Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -135,22 +138,22 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: ImportAccountWithMnemonicParameters, options?: { onError, onSuccess }) => void`
+`(params: SetAccountNameByKeyParameters, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### onError
 
-`(error: BaseError, params: ImportAccountWithMnemonicParameters) => void | Promimse<void>`
+`(error: BaseError, params: SetAccountNameByKeyParameters) => void | Promimse<void>`
 
 This will be invoked if there was an error.
 
 #### onSuccess
 
-`(result: Account, params: ImportAccountWithMnemonicParameters) => void | Promimse<void>`
+`(result: Account, params: SetAccountNameByKeyParameters) => void | Promimse<void>`
 
-This will be invoked if the account import was successful.
+This will be invoked if the account update was successful and will return the updated account.
 
 ## See also
 
-* [importAccountWithMnemonic](02-core/03-accounts/04-import-account-with-mnemonic.mdx)
+* [setAccountNameByKey](02-core/03-accounts/04-set-account-name-by-key.mdx)

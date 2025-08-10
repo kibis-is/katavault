@@ -1,15 +1,23 @@
 ---
-sidebar_label: useRemoveAccount
-slug: /react/accounts/use-remove-account
+sidebar_label: useHoldingAccounts
+slug: /react/accounts/use-holding-accounts
 ---
 
-import SectionBreak from '@site/src/components/SectionBreak';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# useRemoveAccount
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
 
-> Hook to remove an account.
+# useHoldingAccounts
+
+> Hook for getting the list of holding accounts stored in the vault.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
 
 <SectionBreak />
 
@@ -26,33 +34,17 @@ import TabItem from '@theme/TabItem';
   <TabItem value="accounts">
 
     ```typescript
-    import { useAccounts, useRemoveAccount } from '@kibisis/katavault-react';
+    import { useHoldingAccounts } from '@kibisis/katavault-react';
 
     function Accounts() {
-      const accounts = useAccounts();
-      const removeAccount = useRemoveAccount();
-      const handleOnRemoveAccountClick = useCallback((address: string) => () => {
-        removeAccount(address, {
-          onError: (error) => {
-            console.error(error);
-          },
-          onSuccess: () => {
-            console.log(`removed account ${address}`);
-          },
-        });
-      }, [removeAccount]);
+      const accounts = useHoldingAccounts();
 
-      return (
+      return accounts.map(({ key, name }) => (
         <div>
-          {accounts.map(({ address, name }) => (
-            <div>
-              <p>Address: {address}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnRemoveAccountClick(address)}>Remove</button>
-            </div>
-          ))}
+          <p>Key: {key}</p>
+          <p>Name: {name ?? '-'}</p>
         </div>
-      );
+      ));
     }
     ```
 
@@ -84,17 +76,12 @@ import TabItem from '@theme/TabItem';
 
     export function AuthScript() {
       const {
-        authenticateWithPasskey,
+        authenticate,
         isAuthenticated,
       } = useAuthenticate();
 
       useEffect(() => {
-        authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
-        }, {
+        authenticate({
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
         });
@@ -111,11 +98,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="config">
 
     ```typescript
-    import { voi } from '@kibisis/chains';
+    import { Voi } from '@kibisis/chains';
     import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 
     const config: CreateKatavaultParameters = {
-      chains: [voi],
+      chains: [Voi],
       client: {
         name: 'Awesome App!!',
       },
@@ -131,22 +118,10 @@ import TabItem from '@theme/TabItem';
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+[`Account[]`](04-glossary/02-types.mdx#account)
 
-The function can be called with callbacks that are invoked on error/success.
-
-#### onError
-
-`(error: BaseError, params: string) => void | Promimse<void>`
-
-This will be invoked if there was an error.
-
-#### onSuccess
-
-`(result: undefined, params: string) => void | Promimse<void>`
-
-This will be invoked if the account removal was successful.
+The list of the holding accounts stored in the vault.
 
 ## See also
 
-* [removeAccount](02-core/03-accounts/06-remove-account.mdx)
+* [holdingAccounts](02-core/03-accounts/02-holding-accounts.mdx)
