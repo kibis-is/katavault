@@ -1,3 +1,10 @@
+# [@kibisis/katavault-react-v1.2.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.1.0...@kibisis/katavault-react-v1.2.0) (2025-08-10)
+
+
+### Features
+
+* adds vault ui ([#10](https://github.com/kibis-is/katavault/issues/10)) ([d7e60a1](https://github.com/kibis-is/katavault/commit/d7e60a114f722cd5fb66938169972f6512fcedea))
+
 # [@kibisis/katavault-react-v1.1.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.0.0...@kibisis/katavault-react-v1.1.0) (2025-05-21)
 
 
