@@ -1,5 +1,6 @@
 import { AVMChain, AVMNode } from '@kibisis/chains';
 import { Algodv2, decodeUnsignedTransaction, Transaction, waitForConfirmation } from 'algosdk';
+import type { Account } from 'algosdk/dist/types/client/v2/algod';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -37,6 +38,27 @@ export default class AVMAdapter extends BaseClass {
   /**
    * public methods
    */
+
+  /**
+   * Retrieves account information for the provided address using the Algod client.
+   *
+   * @param {string} address - The address for which information is to be fetched.
+   * @return {Promise<Account>} A promise that resolves to the account information.
+   * @throws {FailedToFetchChainInformationError} Throws an error if the default algod node cannot be retrieved.
+   * @public
+   * @async
+   */
+  public async accountInformation(address: string): Promise<Account> {
+    const algod = this.algod();
+
+    if (!algod) {
+      throw new FailedToFetchChainInformationError(
+        `failed to get default algod node for chain "${this._chain.chainID()}"`
+      );
+    }
+
+    return await algod.accountInformation(address).do();
+  }
 
   public algod(): Algodv2 | null {
     const node = this._defaultNode();

@@ -38,6 +38,7 @@ import type {
   AuthenticateWithPasskeyParameters,
   AuthenticateWithPasswordParameters,
   AuthenticationStore,
+  Balance,
   ClientInformation,
   ConnectedAccountStoreItem,
   EphemeralAccount,
@@ -117,6 +118,7 @@ export default class Katavault extends BaseClass {
     const __logPrefix = `${Katavault.displayName}#_generateCredentialAccountIfNoneExists`;
     let account: EphemeralAccountStoreItem | null;
     let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
+    let balances: Record<string, Balance>;
     let _credentialID: CredentialID;
     let encryptedKeyData: Uint8Array;
     let key: string;
@@ -132,6 +134,17 @@ export default class Katavault extends BaseClass {
 
     username = usernameFromVault(this._vault);
     accounts = await this._accountsStore.accounts();
+    balances = this._chains.reduce(
+      (acc, currentValue) => ({
+        ...acc,
+        [currentValue.chainID()]: {
+          amount: BigInt(0),
+          block: BigInt(0),
+          lastUpdatedAt: BigInt(0),
+        },
+      }),
+      {}
+    );
 
     switch (this._authenticationStore?.__type) {
       case AuthenticationMethodEnum.Passkey:
@@ -164,6 +177,7 @@ export default class Katavault extends BaseClass {
 
           return {
             __type: account.__type,
+            balances: account.balances,
             key: account.key,
             name: account.name,
             origin: account.origin,
@@ -173,6 +187,7 @@ export default class Katavault extends BaseClass {
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
         account = {
           __type: AccountTypeEnum.Ephemeral,
+          balances,
           credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
@@ -188,6 +203,7 @@ export default class Katavault extends BaseClass {
 
         return {
           __type: account.__type,
+          balances: account.balances,
           key: account.key,
           name: account.name,
           origin: account.origin,
@@ -227,6 +243,7 @@ export default class Katavault extends BaseClass {
 
           return {
             __type: account.__type,
+            balances: account.balances,
             key: account.key,
             name: account.name,
             origin: account.origin,
@@ -236,6 +253,7 @@ export default class Katavault extends BaseClass {
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
         account = {
           __type: AccountTypeEnum.Ephemeral,
+          balances,
           credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
@@ -251,6 +269,7 @@ export default class Katavault extends BaseClass {
 
         return {
           __type: account.__type,
+          balances: account.balances,
           key: account.key,
           name: account.name,
           origin: account.origin,

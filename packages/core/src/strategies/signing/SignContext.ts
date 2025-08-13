@@ -35,12 +35,14 @@ export default class SignContext extends BaseClass {
   /**
    * Delegates the sign message to the respective strategy. The delegated strategy will handle any connections to
    * external wallets, or if the account is ephemeral, it will sign the message using the chain's standardized method.
+   *
    * @param {WithAccountStoreItem<WithChain<Record<'message', string | Uint8Array>>>} params - The input parameters.
    * @param {ConnectedAccountStoreItem | EphemeralAccountStoreItem} params.account - The account to use to sign.
-   * @param {Chain} params.chain - The chain to use to sign.
+   * @param {Chain} params.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} chain ID to use to sign.
    * @param {string | Uint8Array} params.message - A UTF-8 encoded message or raw bytes to sign.
    * @returns {Promise<Uint8Array>} A promise that resolves to the signature of the signed message.
    * @throws {AccountDoesNotExistError} If the account type is invalid.
+   * @throws {ChainNotSupportedError} If the chain is not supported.
    * @throws {FailedToSignError} If the account type is connected and failed to sign the message.
    * @public
    */

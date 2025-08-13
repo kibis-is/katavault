@@ -8,9 +8,11 @@ import { BaseClass } from '@/_base';
 // enums
 import { AccountTypeEnum } from '@/enums';
 
+// errors
+import { AccountDoesNotExistError, FailedToSignError } from '@/errors';
+
 // types
 import type { AVMSignMessageParameters, CommonParameters, WithAccountStoreItem } from '@/types';
-import { AccountDoesNotExistError, FailedToSignError } from '@/errors';
 
 export default class AVMSignStrategy extends BaseClass {
   /**
