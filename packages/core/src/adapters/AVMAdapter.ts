@@ -1,6 +1,6 @@
 import { AVMChain, AVMNode } from '@kibisis/chains';
 import { Algodv2, decodeUnsignedTransaction, Transaction, waitForConfirmation } from 'algosdk';
-import type { Account } from 'algosdk/dist/types/client/v2/algod';
+import { Account } from 'algosdk/dist/types/client/v2/algod/models/types';
 
 // _base
 import { BaseClass } from '@/_base';

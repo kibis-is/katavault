@@ -6,6 +6,7 @@ export * from './common';
 export * from './client';
 export * from './connectors';
 export * from './cryptography';
+export * from './currencies';
 export * from './data';
 export * from './encoding';
 export * from './katavault';

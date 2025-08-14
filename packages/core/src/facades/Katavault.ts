@@ -6,6 +6,7 @@ import { BaseClass } from '@/_base';
 
 // constants
 import {
+  BALANCES_UPDATE_TIMEOUT,
   IDB_ACCOUNTS_STORE_NAME,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
@@ -26,11 +27,14 @@ import {
   NotAuthenticatedError,
 } from '@/errors';
 
+// events
+import { AccountsUpdatedEvent } from '@/events';
+
 // facades
 import AppManager from './AppManager';
 
 // strategies
-import { SignContext, TransactionContext } from '@/strategies';
+import { BalancesContext, SignContext, TransactionContext } from '@/strategies';
 
 // types
 import type {
@@ -80,6 +84,8 @@ export default class Katavault extends BaseClass {
   private _accountsStore: AccountStore | null = null;
   private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
+  private readonly _balancesContext: BalancesContext;
+  private _pollingBalanceID: number | null = null;
   private _chains: Chain[];
   private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
@@ -96,11 +102,44 @@ export default class Katavault extends BaseClass {
     this._appManager = new AppManager(commonParams);
     this._signContext = new SignContext(commonParams);
     this._transactionContext = new TransactionContext(commonParams);
+
+    this._startPollingBalances();
   }
 
   /**
    * private methods
    */
+
+  private async _updateBalances(): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#_updateBalances`;
+    let account: EphemeralAccountStoreItem;
+    let accounts: EphemeralAccountStoreItem[];
+
+    if (!this._accountsStore) {
+      return;
+    }
+
+    accounts = (await this._accountsStore.accounts()).filter(
+      ({ __type }) => __type === AccountTypeEnum.Ephemeral
+    ) as EphemeralAccountStoreItem[];
+
+    for (const chain of this._chains) {
+      for (let i = 0; i < accounts.length; i++) {
+        account = accounts[i];
+
+        try {
+          accounts[i].balances[chain.chainID()] = await this._balancesContext.balance({
+            account,
+            chain,
+          });
+        } catch (error) {
+          this._logger.error(`${__logPrefix}:`, error);
+        }
+      }
+    }
+
+    window.dispatchEvent(new AccountsUpdatedEvent());
+  }
 
   /**
    * Generates a credential account in the wallet. The credential account is an account derived from the user's
@@ -276,6 +315,16 @@ export default class Katavault extends BaseClass {
         };
       default:
         throw new NotAuthenticatedError('not authenticated');
+    }
+  }
+
+  private _startPollingBalances(): void {
+    this._pollingBalanceID = window.setInterval(this._updateBalances.bind(this), BALANCES_UPDATE_TIMEOUT);
+  }
+
+  private _stopPollingBalances(): void {
+    if (this._pollingBalanceID) {
+      window.clearInterval(this._pollingBalanceID);
     }
   }
 

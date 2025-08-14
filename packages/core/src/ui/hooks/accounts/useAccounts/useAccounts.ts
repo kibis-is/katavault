@@ -1,24 +1,33 @@
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 // contexts
 import { AccountsContext } from '@/ui/contexts';
+
+// enums
+import { EventEnum } from '@/enums';
 
 // types
 import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/types';
 
 export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[] {
-  const { state, timestamp } = useContext(AccountsContext);
+  // contexts
+  const store = useContext(AccountsContext);
+  // states
   const [accounts, setAccounts] = useState<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>([]);
-
-  useEffect(() => {
-    if (!state) {
+  // callbacks
+  const listener = useCallback(async () => {
+    if (!store) {
       return;
     }
 
-    (async () => {
-      setAccounts(await state.accounts());
-    })();
-  }, [timestamp]);
+    setAccounts(await store.accounts());
+  }, [setAccounts, store]);
+
+  useEffect(() => {
+    window.addEventListener(EventEnum.AccountsUpdated, listener);
+
+    return () => window.removeEventListener(EventEnum.AccountsUpdated, listener);
+  }, []);
 
   return accounts;
 }
