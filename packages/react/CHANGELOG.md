@@ -1,3 +1,10 @@
+# [@kibisis/katavault-react-v1.3.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.2.0...@kibisis/katavault-react-v1.3.0) (2025-08-15)
+
+
+### Features
+
+* **core:** adds account balances ([#11](https://github.com/kibis-is/katavault/issues/11)) ([47f079b](https://github.com/kibis-is/katavault/commit/47f079b71279f730034d9ddd53204cf7263ad1fc))
+
 # [@kibisis/katavault-react-v1.2.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.1.0...@kibisis/katavault-react-v1.2.0) (2025-08-10)
 
 
