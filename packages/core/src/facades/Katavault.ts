@@ -1,4 +1,4 @@
-import { Chain, ChainConstructor } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain, type ChainConstructor } from '@kibisis/chains';
 import { base58, base64, hex } from '@kibisis/encoding';
 
 // _base
@@ -23,6 +23,7 @@ import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum }
 // errors
 import {
   AccountDoesNotExistError,
+  BaseError,
   ChainNotSupportedError,
   FailedToFetchChainInformationError,
   NotAuthenticatedError,
@@ -390,8 +391,19 @@ export default class Katavault extends BaseClass {
     let index: number;
 
     try {
-      _chain = await chain.initialize();
+      switch (chain.namespace) {
+        case CAIP002Namespace.Algorand:
+        case CAIP002Namespace.AVM:
+          _chain = await chain.initialize();
+          break;
+        default:
+          throw new ChainNotSupportedError(`chain "${chain.namespace}" not supported`);
+      }
     } catch (error) {
+      if ((error as BaseError).isKatavaultError) {
+        throw error;
+      }
+
       this._logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
 
       throw new FailedToFetchChainInformationError(error.message);

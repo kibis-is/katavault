@@ -1,12 +1,12 @@
-import { Chain } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain } from '@kibisis/chains';
 
 // types
 import type { EphemeralAccountStoreItem, WithOptionalDelay } from '@/types';
 
-interface Parameters {
+interface Parameters<Namespace = CAIP002Namespace> {
   account: EphemeralAccountStoreItem;
-  chain: Chain;
+  chain: Chain<Namespace>;
 }
-type BalanceParameters = WithOptionalDelay<Parameters>;
+type BalanceParameters<Namespace = CAIP002Namespace> = WithOptionalDelay<Parameters<Namespace>>;
 
 export default BalanceParameters;

@@ -10,8 +10,8 @@ catalogs:
       specifier: ^9.16.0
       version: 9.22.0
     '@kibisis/chains':
-      specifier: ^2.5.0
-      version: 2.5.0
+      specifier: ^2.5.2
+      version: 2.5.2
     '@kibisis/encoding':
       specifier: ^1.0.1
       version: 1.0.1
@@ -130,7 +130,7 @@ importers:
         version: 1.1.0
       '@kibisis/chains':
         specifier: 'catalog:'
-        version: 2.5.0
+        version: 2.5.2
       '@kibisis/encoding':
         specifier: 'catalog:'
         version: 1.0.1
@@ -348,7 +348,7 @@ importers:
     dependencies:
       '@kibisis/chains':
         specifier: 'catalog:'
-        version: 2.5.0
+        version: 2.5.2
     devDependencies:
       '@eslint/js':
         specifier: 'catalog:'
@@ -430,7 +430,7 @@ importers:
         version: 11.14.0(@types/react@18.3.19)(react@18.3.1)
       '@kibisis/chains':
         specifier: 'catalog:'
-        version: 2.5.0
+        version: 2.5.2
       '@kibisis/encoding':
         specifier: 'catalog:'
         version: 1.0.1
@@ -2076,8 +2076,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kibisis/chains@2.5.0':
-    resolution: {integrity: sha512-uEwiKwZwJW9MDtLuqy138Lt5IKMXkkLlVFEmWrxTH44Tcmi4V3l7knwOY04JiKVsxTBD1QQXTUPwR2sxhq52Ww==}
+  '@kibisis/chains@2.5.2':
+    resolution: {integrity: sha512-TcEfRkhtmHukvjSmobH0OWVlv9B1UKFLQYQvY9xuNeOTa6jZCHBypozZIagb3q/FHvk27YZE/53lSDB347L2QQ==}
 
   '@kibisis/encoding@1.0.1':
     resolution: {integrity: sha512-MqiHgF2DRUzpJIFua6zl15uUGzVdfbvUhYY6YLJvg8GVokSEBeOmZQRVEeAaBdPI1SWfK/LbA/A5IOMJYVO5jg==}
@@ -10921,7 +10921,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kibisis/chains@2.5.0':
+  '@kibisis/chains@2.5.2':
     dependencies:
       '@kibisis/encoding': 1.0.1
       '@stablelib/uuid': 2.0.1

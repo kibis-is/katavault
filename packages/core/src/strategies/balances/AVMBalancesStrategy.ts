@@ -1,3 +1,4 @@
+import { CAIP002Namespace } from '@kibisis/chains';
 import { base58 } from '@kibisis/encoding';
 
 // _base
@@ -20,7 +21,7 @@ export default class AVMBalancesStrategy extends BaseClass {
   /**
    * Sends a raw transaction to the specified AVM chain and waits for it to be confirmed after a maximum of 4 rounds.
    *
-   * @param {BalanceParameters} parameters - The input parameters.
+   * @param {BalanceParameters<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>} parameters - The input parameters.
    * @param {EphemeralAccountStoreItem} parameters.account - The account to get the balance for.
    * @param {AVMChain} parameters.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} AVM chain ID.
    * @param {number} [parameters.delay] - An optional delay to apply before sending request. Defaults to 0.
@@ -28,7 +29,11 @@ export default class AVMBalancesStrategy extends BaseClass {
    * @throws {FailedToFetchChainInformationError} If the default Algod node information cannot be fetched.
    * @public
    */
-  public async balance({ account, chain, delay = 0 }: BalanceParameters): Promise<Balance> {
+  public async balance({
+    account,
+    chain,
+    delay = 0,
+  }: BalanceParameters<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>): Promise<Balance> {
     return new Promise<Balance>((resolve, reject) => {
       window.setTimeout(async () => {
         const adapter = new AVMAdapter({

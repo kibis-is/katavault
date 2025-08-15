@@ -1,4 +1,4 @@
-import { CAIP002Namespace, Chain } from '@kibisis/chains';
+import { CAIP002Namespace } from '@kibisis/chains';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -10,13 +10,7 @@ import { ChainNotSupportedError } from '@/errors';
 import AVMBalancesStrategy from './AVMBalancesStrategy';
 
 // types
-import type {
-  Balance,
-  BalanceParameters,
-  CommonParameters,
-  EphemeralAccountStoreItem,
-  WithAccountStoreItem,
-} from '@/types';
+import type { BalanceParameters, Balance, CommonParameters } from '@/types';
 
 export default class BalancesContext extends BaseClass {
   /**
@@ -54,7 +48,9 @@ export default class BalancesContext extends BaseClass {
     switch (parameters.chain.namespace()) {
       case CAIP002Namespace.Algorand:
       case CAIP002Namespace.AVM:
-        return await this._avmBalancesStrategy.balance(parameters);
+        return await this._avmBalancesStrategy.balance(
+          parameters as BalanceParameters<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>
+        );
       default:
         throw new ChainNotSupportedError(`namespace "${parameters.chain.namespace()}" not supported`);
     }
