@@ -1,5 +1,5 @@
 import type { ColorMode } from '@chakra-ui/color-mode';
-import { Voi } from '@kibisis/chains';
+import { AlgorandTestnet, VoiTestnet } from '@kibisis/chains';
 import { CreateKatavaultParameters } from '@kibisis/katavault-core';
 import { KatavaultProvider } from '@kibisis/katavault-react';
 import { KibisisAppProvider } from '@kibisis/react';
@@ -20,7 +20,7 @@ const App: FC<Props> = ({ logger }) => {
   // memos
   const config = useMemo<CreateKatavaultParameters>(
     () => ({
-      chains: [Voi],
+      chains: [VoiTestnet, AlgorandTestnet],
       debug: true,
     }),
     []

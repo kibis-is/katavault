@@ -1,4 +1,4 @@
-import type { Chain } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain } from '@kibisis/chains';
 import { createLogger } from '@kibisis/utilities';
 
 // facades
@@ -12,7 +12,11 @@ import { documentTitle, faviconURL } from '@/utilities';
 
 /**
  * Creates an instance of Katavault.
- * @param {CreateKatavaultParameters} params - The client information and optional debug mode.
+ *
+ * @param {CreateKatavaultParameters} parameters - The input parameters.
+ * @param {boolean} [parameters.debug] - Whether to log debug messages. Defaults to `false`.
+ * @param {[ChainConstructor, ...ChainConstructor[]]} parameters.chains - A collection of chains.
+ * @param {Omit<ClientInformation, 'host'>} [parameters.client] - The client's name and the icon URL.
  * @returns {Promise<Katavault>} A promise that resolves to an initialized instance of Katavault.
  */
 export default async function createKatavault({
@@ -28,9 +32,19 @@ export default async function createKatavault({
   // for each chain get the network parameters
   for (const chain of chains) {
     try {
-      _chain = await chain.initialize();
+      switch (chain.namespace) {
+        case CAIP002Namespace.Algorand:
+        case CAIP002Namespace.AVM:
+          _chain = await chain.initialize();
 
-      _chains.push(_chain);
+          _chains.push(_chain);
+
+          break;
+        default:
+          logger.error(`${__logPrefix}: chain "${chain.namespace}" not supported`);
+
+          break;
+      }
     } catch (error) {
       logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
     }

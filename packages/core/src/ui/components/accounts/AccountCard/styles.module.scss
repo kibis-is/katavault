@@ -2,8 +2,9 @@
 @use "@/ui/styles/variables";
 @use "sass:map";
 
-$footer-height: 3.125rem; // 50px
 $default-padding: map.get(variables.$spacing, "sm");
+$footer-height: 3.125rem; // 50px
+$icon-size: 1.5rem; // 24px
 
 .container {
   @include mixins.base-account-card-container-styles;
@@ -37,16 +38,12 @@ $default-padding: map.get(variables.$spacing, "sm");
   padding-top: $default-padding;
 }
 
-.chain-icon {
+.circular-icon {
   border-radius: map.get(variables.$border-radius, "full");
-  height: 1.5rem; // 32px
-  width: 1.5rem; // 32px
-}
-
-.connector-icon {
-  border-radius: map.get(variables.$border-radius, "full");
-  height: 1.5rem; // 32px
-  width: 1.5rem; // 32px
+  max-height: $icon-size;
+  max-width: $icon-size;
+  min-height: $icon-size;
+  min-width: $icon-size;
 }
 
 .origin-icon {

@@ -36,8 +36,9 @@ export default class AppManager {
   private _closeApp(type: AppTypeEnum): void {
     const rootElement = window.document.getElementById(this._rootElementID(type));
 
-    // if there is a root element, remove it
+    // if there is a root element, unmount the app and remove the element
     if (rootElement) {
+      render(null, rootElement);
       rootElement.remove();
     }
   }

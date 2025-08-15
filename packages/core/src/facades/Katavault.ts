@@ -1,4 +1,4 @@
-import { Chain, ChainConstructor } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain, type ChainConstructor } from '@kibisis/chains';
 import { base58, base64, hex } from '@kibisis/encoding';
 
 // _base
@@ -6,6 +6,8 @@ import { BaseClass } from '@/_base';
 
 // constants
 import {
+  BALANCE_FETCH_DELAY,
+  BALANCES_UPDATE_TIMEOUT,
   IDB_ACCOUNTS_STORE_NAME,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
@@ -21,16 +23,20 @@ import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum }
 // errors
 import {
   AccountDoesNotExistError,
+  BaseError,
   ChainNotSupportedError,
   FailedToFetchChainInformationError,
   NotAuthenticatedError,
 } from '@/errors';
 
+// events
+import { AccountsUpdatedEvent } from '@/events';
+
 // facades
 import AppManager from './AppManager';
 
 // strategies
-import { SignContext, TransactionContext } from '@/strategies';
+import { BalancesContext, SignContext, TransactionContext } from '@/strategies';
 
 // types
 import type {
@@ -38,6 +44,7 @@ import type {
   AuthenticateWithPasskeyParameters,
   AuthenticateWithPasswordParameters,
   AuthenticationStore,
+  Balance,
   ClientInformation,
   ConnectedAccountStoreItem,
   EphemeralAccount,
@@ -79,6 +86,8 @@ export default class Katavault extends BaseClass {
   private _accountsStore: AccountStore | null = null;
   private readonly _appManager: AppManager;
   private _authenticationStore: AuthenticationStore | null = null;
+  private readonly _balancesContext: BalancesContext;
+  private _pollingBalanceID: number | null = null;
   private _chains: Chain[];
   private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
@@ -93,6 +102,7 @@ export default class Katavault extends BaseClass {
     this._clientInformation = clientInformation;
     this._debug = debug;
     this._appManager = new AppManager(commonParams);
+    this._balancesContext = new BalancesContext(commonParams);
     this._signContext = new SignContext(commonParams);
     this._transactionContext = new TransactionContext(commonParams);
   }
@@ -100,6 +110,56 @@ export default class Katavault extends BaseClass {
   /**
    * private methods
    */
+
+  /**
+   * Updates the balances for all the ephemeral accounts for each chain. A small delay is added between each fetch on
+   * the same chain to avoid rate limits.
+   *
+   * On completion, a `kv:ev:accounts_updated` is sent to let the app know the application has been updated.
+   *
+   * @private
+   * @async
+   */
+  private async _updateBalances(): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#_updateBalances`;
+    let account: EphemeralAccountStoreItem;
+    let accounts: EphemeralAccountStoreItem[];
+    let username: string;
+
+    if (!this._vault || !this._accountsStore) {
+      return;
+    }
+
+    accounts = (await this._accountsStore.accounts()).filter(
+      ({ __type }) => __type === AccountTypeEnum.Ephemeral
+    ) as EphemeralAccountStoreItem[];
+
+    for (const chain of this._chains) {
+      for (let i = 0; i < accounts.length; i++) {
+        account = accounts[i];
+
+        try {
+          accounts[i].balances[chain.chainID()] = await this._balancesContext.balance({
+            account,
+            chain,
+            delay: i > 0 ? 0 : BALANCE_FETCH_DELAY, // for accounts on the same network, add a small delay to avoid rate limits
+          });
+        } catch (error) {
+          this._logger.error(`${__logPrefix}:`, error);
+        }
+      }
+    }
+
+    // save to the vault store
+    await this._accountsStore.upsert(accounts);
+
+    username = usernameFromVault(this._vault);
+
+    this._logger.debug(`${__logPrefix}: updated balances for user "${username}"`);
+
+    // emit an event for this user
+    window.dispatchEvent(new AccountsUpdatedEvent(username));
+  }
 
   /**
    * Generates a credential account in the wallet. The credential account is an account derived from the user's
@@ -117,6 +177,7 @@ export default class Katavault extends BaseClass {
     const __logPrefix = `${Katavault.displayName}#_generateCredentialAccountIfNoneExists`;
     let account: EphemeralAccountStoreItem | null;
     let accounts: (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[];
+    let balances: Record<string, Balance>;
     let _credentialID: CredentialID;
     let encryptedKeyData: Uint8Array;
     let key: string;
@@ -132,6 +193,17 @@ export default class Katavault extends BaseClass {
 
     username = usernameFromVault(this._vault);
     accounts = await this._accountsStore.accounts();
+    balances = this._chains.reduce<Record<string, Balance>>(
+      (acc, currentValue) => ({
+        ...acc,
+        [currentValue.chainID()]: {
+          amount: '0',
+          block: '0',
+          lastUpdatedAt: '0',
+        },
+      }),
+      {}
+    );
 
     switch (this._authenticationStore?.__type) {
       case AuthenticationMethodEnum.Passkey:
@@ -164,6 +236,7 @@ export default class Katavault extends BaseClass {
 
           return {
             __type: account.__type,
+            balances: account.balances,
             key: account.key,
             name: account.name,
             origin: account.origin,
@@ -173,6 +246,7 @@ export default class Katavault extends BaseClass {
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
         account = {
           __type: AccountTypeEnum.Ephemeral,
+          balances,
           credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
@@ -188,6 +262,7 @@ export default class Katavault extends BaseClass {
 
         return {
           __type: account.__type,
+          balances: account.balances,
           key: account.key,
           name: account.name,
           origin: account.origin,
@@ -227,6 +302,7 @@ export default class Katavault extends BaseClass {
 
           return {
             __type: account.__type,
+            balances: account.balances,
             key: account.key,
             name: account.name,
             origin: account.origin,
@@ -236,6 +312,7 @@ export default class Katavault extends BaseClass {
         encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey);
         account = {
           __type: AccountTypeEnum.Ephemeral,
+          balances,
           credentialID: _credentialID.toString(),
           key,
           keyData: base58.encode(encryptedKeyData),
@@ -251,12 +328,23 @@ export default class Katavault extends BaseClass {
 
         return {
           __type: account.__type,
+          balances: account.balances,
           key: account.key,
           name: account.name,
           origin: account.origin,
         };
       default:
         throw new NotAuthenticatedError('not authenticated');
+    }
+  }
+
+  private _startPollingBalances(): void {
+    this._pollingBalanceID = window.setInterval(this._updateBalances.bind(this), BALANCES_UPDATE_TIMEOUT);
+  }
+
+  private _stopPollingBalances(): void {
+    if (this._pollingBalanceID) {
+      window.clearInterval(this._pollingBalanceID);
     }
   }
 
@@ -303,8 +391,19 @@ export default class Katavault extends BaseClass {
     let index: number;
 
     try {
-      _chain = await chain.initialize();
+      switch (chain.namespace) {
+        case CAIP002Namespace.Algorand:
+        case CAIP002Namespace.AVM:
+          _chain = await chain.initialize();
+          break;
+        default:
+          throw new ChainNotSupportedError(`chain "${chain.namespace}" not supported`);
+      }
     } catch (error) {
+      if ((error as BaseError).isKatavaultError) {
+        throw error;
+      }
+
       this._logger.error(`${__logPrefix}: failed to add chain "${chain.displayName}" - `, error);
 
       throw new FailedToFetchChainInformationError(error.message);
@@ -351,6 +450,8 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**
@@ -386,6 +487,8 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**
@@ -420,6 +523,8 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**

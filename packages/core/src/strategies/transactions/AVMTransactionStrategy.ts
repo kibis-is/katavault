@@ -1,4 +1,5 @@
 import { concat } from '@agoralabs-sh/bytes';
+import { CAIP002Namespace, type Chain } from '@kibisis/chains';
 import { utf8 } from '@kibisis/encoding';
 import { ed25519 } from '@noble/curves/ed25519';
 
@@ -65,8 +66,8 @@ export default class AVMTransactionStrategy extends BaseClass {
   /**
    * Sends a raw transaction to the specified AVM chain and waits for it to be confirmed after a maximum of 4 rounds.
    *
-   * @param {WithChain<Record<'signature' | 'transaction', Uint8Array>>} params - The input parameters.
-   * @param {AVMChain} params.chain - The CAIP-002 AVM chain ID.
+   * @param {WithChain<Record<'signature' | 'transaction', Uint8Array>, Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>>} params - The input parameters.
+   * @param {Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>} params.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} AVM chain ID.
    * @param {Uint8Array} params.signature - The signature of the signed transaction.
    * @param {Uint8Array} params.transaction - The raw transaction data.
    * @return {Promise<string>} A promise that resolves to the transaction ID of the confirmed transaction.
@@ -79,7 +80,10 @@ export default class AVMTransactionStrategy extends BaseClass {
     chain,
     signature,
     transaction,
-  }: WithChain<Record<'signature' | 'transaction', Uint8Array>>): Promise<string> {
+  }: WithChain<
+    Record<'signature' | 'transaction', Uint8Array>,
+    Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>
+  >): Promise<string> {
     const adapter = new AVMAdapter({
       chain,
       logger: this._logger,

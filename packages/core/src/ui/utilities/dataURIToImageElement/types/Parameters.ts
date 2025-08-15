@@ -1,5 +1,6 @@
 interface Parameters {
   className?: string;
+  color?: string;
   dataURI: string;
   key?: string;
   title?: string;
