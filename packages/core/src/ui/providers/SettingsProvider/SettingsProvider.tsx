@@ -1,6 +1,6 @@
 import type { FunctionComponent } from 'preact';
 import type { PropsWithChildren } from 'preact/compat';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 // contexts
 import { SettingsContext } from '@/ui/contexts';
@@ -13,24 +13,14 @@ import type { Props } from './types';
 
 const SettingsProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, settingsStore }) => {
   // states
-  const [timestamp, setTimestamp] = useState<number>(0);
-  const [state, setState] = useState<SettingsStore>(settingsStore);
-  // callbacks
-  const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
+  const [value, setValue] = useState<SettingsStore>(settingsStore);
 
   useEffect(() => {
-    setState(settingsStore);
-    onUpdate();
+    setValue(settingsStore);
   }, [settingsStore]);
 
   return (
-    <SettingsContext.Provider
-      value={{
-        onUpdate,
-        state,
-        timestamp,
-      }}
-    >
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

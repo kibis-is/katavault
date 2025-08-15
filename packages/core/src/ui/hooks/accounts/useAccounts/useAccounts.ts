@@ -17,15 +17,15 @@ export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAcc
   const store = useContext(AccountsContext);
   const username = useContext(UserContext);
   // states
-  const [accounts, setAccounts] = useState<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>([]);
+  const [value, setValue] = useState<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>([]);
   // callbacks
   const fetchAccounts = useCallback(async () => {
     if (!store) {
       return;
     }
 
-    setAccounts(await store.accounts());
-  }, [setAccounts, username, store]);
+    setValue(await store.accounts());
+  }, [setValue, store]);
   const listener = useCallback(
     async (event: AccountsUpdatedEvent) => {
       // if this event is not for this specific user, ignore it
@@ -47,5 +47,5 @@ export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAcc
     return () => window.removeEventListener(EventEnum.AccountsUpdated, listener);
   }, [listener]);
 
-  return accounts;
+  return value;
 }
