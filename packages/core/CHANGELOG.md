@@ -1,3 +1,10 @@
+# [@kibisis/katavault-core-v1.4.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.3.0...@kibisis/katavault-core-v1.4.0) (2025-08-15)
+
+
+### Features
+
+* use events for settings ([#12](https://github.com/kibis-is/katavault/issues/12)) ([209ab34](https://github.com/kibis-is/katavault/commit/209ab34aab18c58b307534f6fecebaf2b79f657f))
+
 # [@kibisis/katavault-core-v1.3.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.2.0...@kibisis/katavault-core-v1.3.0) (2025-08-15)
 
 
