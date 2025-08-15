@@ -97,7 +97,7 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
           title={(
             <HStack align="center" fullWidth={true} spacing="xs">
               <Text colorMode={colorMode} fullWidth={true} textAlign="left">
-                {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.accounts') : translate('headings.connections')}
+                {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.networks') : translate('headings.connections')}
               </Text>
 
               <Text colorMode={colorMode} fullWidth={true} textAlign="right">

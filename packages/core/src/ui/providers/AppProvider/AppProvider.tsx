@@ -7,9 +7,8 @@ import { AppContext } from '@/ui/contexts';
 
 // types
 import type { AppContextState } from '@/ui/types';
-import type { Props } from './types';
 
-const AppProvider: FunctionComponent<PropsWithChildren<Props>> = ({ children, clientInformation, i18n, logger }) => {
+const AppProvider: FunctionComponent<PropsWithChildren<AppContextState>> = ({ children, clientInformation, i18n, logger }) => {
   // states
   const [timestamp, setTimestamp] = useState<number>(0);
   const [state, setState] = useState<AppContextState>({

@@ -1,4 +1,3 @@
-import { AVMChain } from '@kibisis/chains';
 import { base58 } from '@kibisis/encoding';
 
 // _base
@@ -11,7 +10,7 @@ import { AVMAdapter } from '@/adapters';
 import { AVMAddress } from '@/decorators';
 
 // types
-import type { Balance, EphemeralAccountStoreItem, WithAccountStoreItem } from '@/types';
+import type { Balance, BalanceParameters } from '@/types';
 
 export default class AVMBalancesStrategy extends BaseClass {
   /**
@@ -21,29 +20,36 @@ export default class AVMBalancesStrategy extends BaseClass {
   /**
    * Sends a raw transaction to the specified AVM chain and waits for it to be confirmed after a maximum of 4 rounds.
    *
-   * @param {WithAccountStoreItem<Record<'chain', AVMChain>, EphemeralAccountStoreItem>} params - The input parameters.
-   * @param {EphemeralAccountStoreItem} params.account - The account to get the balance for.
-   * @param {AVMChain} params.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} AVM chain ID.
+   * @param {BalanceParameters} parameters - The input parameters.
+   * @param {EphemeralAccountStoreItem} parameters.account - The account to get the balance for.
+   * @param {AVMChain} parameters.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} AVM chain ID.
+   * @param {number} [parameters.delay] - An optional delay to apply before sending request. Defaults to 0.
    * @return {Promise<Balance>} A promise that resolves to the transaction ID of the confirmed transaction.
    * @throws {FailedToFetchChainInformationError} If the default Algod node information cannot be fetched.
    * @public
    */
-  public async balance({
-    account,
-    chain,
-  }: WithAccountStoreItem<Record<'chain', AVMChain>, EphemeralAccountStoreItem>): Promise<Balance> {
-    const adapter = new AVMAdapter({
-      chain,
-      logger: this._logger,
-    });
-    const { amount, round: block } = await adapter.accountInformation(
-      AVMAddress.fromPublicKey(base58.decode(account.key)).address()
-    );
+  public async balance({ account, chain, delay = 0 }: BalanceParameters): Promise<Balance> {
+    return new Promise<Balance>((resolve, reject) => {
+      window.setTimeout(async () => {
+        const adapter = new AVMAdapter({
+          chain,
+          logger: this._logger,
+        });
 
-    return {
-      amount: String(amount),
-      block: String(block),
-      lastUpdatedAt: new Date().getTime().toString(),
-    };
+        try {
+          const { amount, round: block } = await adapter.accountInformation(
+            AVMAddress.fromPublicKey(base58.decode(account.key)).address()
+          );
+
+          return resolve({
+            amount: String(amount),
+            block: String(block),
+            lastUpdatedAt: new Date().getTime().toString(),
+          });
+        } catch (error) {
+          return reject(error);
+        }
+      }, delay);
+    });
   }
 }

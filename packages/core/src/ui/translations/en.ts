@@ -36,12 +36,12 @@ export default {
     },
   },
   headings: {
-    accounts: 'Accounts',
     connectAnAccount: 'Connect an account ',
     connectedAccounts: 'Connected accounts',
     connections: 'Connections',
     finishCreatingANewAccount: 'Finish creating a new account',
     holdingAccounts: 'Holding accounts',
+    networks: 'Networks',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     transferFunds: 'Transfer funds',
     welcomeBack: 'Welcome back!',

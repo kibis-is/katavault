@@ -5,7 +5,7 @@ import { EventEnum } from '@/enums';
 import BaseEvent from './BaseEvent';
 
 export default class AccountsUpdatedEvent extends BaseEvent {
-  public constructor() {
-    super(EventEnum.AccountsUpdated);
+  public constructor(username: string) {
+    super(EventEnum.AccountsUpdated, username);
   }
 }

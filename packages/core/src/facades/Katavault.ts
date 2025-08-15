@@ -6,6 +6,7 @@ import { BaseClass } from '@/_base';
 
 // constants
 import {
+  BALANCE_FETCH_DELAY,
   BALANCES_UPDATE_TIMEOUT,
   IDB_ACCOUNTS_STORE_NAME,
   IDB_PASSKEY_STORE_NAME,
@@ -103,20 +104,28 @@ export default class Katavault extends BaseClass {
     this._balancesContext = new BalancesContext(commonParams);
     this._signContext = new SignContext(commonParams);
     this._transactionContext = new TransactionContext(commonParams);
-
-    this._startPollingBalances();
   }
 
   /**
    * private methods
    */
 
+  /**
+   * Updates the balances for all the ephemeral accounts for each chain. A small delay is added between each fetch on
+   * the same chain to avoid rate limits.
+   *
+   * On completion, a `kv:ev:accounts_updated` is sent to let the app know the application has been updated.
+   *
+   * @private
+   * @async
+   */
   private async _updateBalances(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#_updateBalances`;
     let account: EphemeralAccountStoreItem;
     let accounts: EphemeralAccountStoreItem[];
+    let username: string;
 
-    if (!this._accountsStore) {
+    if (!this._vault || !this._accountsStore) {
       return;
     }
 
@@ -132,6 +141,7 @@ export default class Katavault extends BaseClass {
           accounts[i].balances[chain.chainID()] = await this._balancesContext.balance({
             account,
             chain,
+            delay: i > 0 ? 0 : BALANCE_FETCH_DELAY, // for accounts on the same network, add a small delay to avoid rate limits
           });
         } catch (error) {
           this._logger.error(`${__logPrefix}:`, error);
@@ -139,11 +149,15 @@ export default class Katavault extends BaseClass {
       }
     }
 
+    // save to the vault store
     await this._accountsStore.upsert(accounts);
 
-    this._logger.debug(`${__logPrefix}: updated balances`);
+    username = usernameFromVault(this._vault);
 
-    window.dispatchEvent(new AccountsUpdatedEvent());
+    this._logger.debug(`${__logPrefix}: updated balances for user "${username}"`);
+
+    // emit an event for this user
+    window.dispatchEvent(new AccountsUpdatedEvent(username));
   }
 
   /**
@@ -425,6 +439,7 @@ export default class Katavault extends BaseClass {
 
     await this._generateCredentialAccountIfNoneExists();
     await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**
@@ -461,6 +476,7 @@ export default class Katavault extends BaseClass {
 
     await this._generateCredentialAccountIfNoneExists();
     await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**
@@ -496,6 +512,7 @@ export default class Katavault extends BaseClass {
 
     await this._generateCredentialAccountIfNoneExists();
     await this._updateBalances();
+    this._startPollingBalances();
   }
 
   /**

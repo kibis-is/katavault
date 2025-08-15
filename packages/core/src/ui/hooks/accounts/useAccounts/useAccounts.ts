@@ -1,10 +1,13 @@
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 
 // contexts
-import { AccountsContext } from '@/ui/contexts';
+import { AccountsContext, UserContext } from '@/ui/contexts';
 
 // enums
 import { EventEnum } from '@/enums';
+
+// events
+import { AccountsUpdatedEvent } from '@/events';
 
 // types
 import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/types';
@@ -12,6 +15,7 @@ import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/typ
 export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAccountStoreItem)[] {
   // contexts
   const store = useContext(AccountsContext);
+  const username = useContext(UserContext);
   // states
   const [accounts, setAccounts] = useState<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>([]);
   // callbacks
@@ -21,20 +25,27 @@ export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAcc
     }
 
     setAccounts(await store.accounts());
-  }, [setAccounts, store]);
+  }, [setAccounts, username, store]);
+  const listener = useCallback(
+    async (event: AccountsUpdatedEvent) => {
+      // if this event is not for this specific user, ignore it
+      if (!username || username !== event.detail.username) {
+        return;
+      }
+
+      await fetchAccounts();
+    },
+    [fetchAccounts, username]
+  );
 
   useEffect(() => {
-    if (!store) {
-      return;
-    }
-
     (async () => await fetchAccounts())();
   }, []);
   useEffect(() => {
-    window.addEventListener(EventEnum.AccountsUpdated, fetchAccounts);
+    window.addEventListener(EventEnum.AccountsUpdated, listener);
 
-    return () => window.removeEventListener(EventEnum.AccountsUpdated, fetchAccounts);
-  }, []);
+    return () => window.removeEventListener(EventEnum.AccountsUpdated, listener);
+  }, [listener]);
 
   return accounts;
 }

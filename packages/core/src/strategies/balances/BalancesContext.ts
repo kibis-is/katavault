@@ -10,7 +10,13 @@ import { ChainNotSupportedError } from '@/errors';
 import AVMBalancesStrategy from './AVMBalancesStrategy';
 
 // types
-import type { Balance, CommonParameters, EphemeralAccountStoreItem, WithAccountStoreItem } from '@/types';
+import type {
+  Balance,
+  BalanceParameters,
+  CommonParameters,
+  EphemeralAccountStoreItem,
+  WithAccountStoreItem,
+} from '@/types';
 
 export default class BalancesContext extends BaseClass {
   /**
@@ -35,27 +41,22 @@ export default class BalancesContext extends BaseClass {
   /**
    * Delegates the fetching of the balance to the respective strategy.
    *
-   * @param {WithAccountStoreItem<Record<'chain', Chain>, EphemeralAccountStoreItem>} params - The input parameters.
-   * @param {EphemeralAccountStoreItem} params.account - The account to get the balance for.
-   * @param {Chain} params.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} chain ID to fetch the
+   * @param {BalanceParameters} parameters - The input parameters.
+   * @param {EphemeralAccountStoreItem} parameters.account - The account to get the balance for.
+   * @param {Chain} parameters.chain - The [CAIP-002]{@link https://chainagnostic.org/CAIPs/caip-2} chain ID to fetch the
    * balance from.
+   * @param {number} [parameters.delay] - An optional delay to apply before sending request.
    * @returns {Promise<Balance>} A promise that resolves to account's balance information.
    * @throws {ChainNotSupportedError} If the chain is not supported.
    * @public
    */
-  public async balance({
-    account,
-    chain,
-  }: WithAccountStoreItem<Record<'chain', Chain>, EphemeralAccountStoreItem>): Promise<Balance> {
-    switch (chain.namespace()) {
+  public async balance(parameters: BalanceParameters): Promise<Balance> {
+    switch (parameters.chain.namespace()) {
       case CAIP002Namespace.Algorand:
       case CAIP002Namespace.AVM:
-        return await this._avmBalancesStrategy.balance({
-          account,
-          chain,
-        });
+        return await this._avmBalancesStrategy.balance(parameters);
       default:
-        throw new ChainNotSupportedError(`namespace "${chain.namespace()}" not supported`);
+        throw new ChainNotSupportedError(`namespace "${parameters.chain.namespace()}" not supported`);
     }
   }
 }
