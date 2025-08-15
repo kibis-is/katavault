@@ -1,6 +1,6 @@
 import { AVMChain, AVMNode } from '@kibisis/chains';
 import { Algodv2, decodeUnsignedTransaction, Transaction, waitForConfirmation } from 'algosdk';
-import { Account } from 'algosdk/dist/types/client/v2/algod/models/types';
+import { modelsv2 } from 'algosdk';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -32,7 +32,7 @@ export default class AVMAdapter extends BaseClass {
    */
 
   private _defaultNode(): AVMNode | null {
-    return this._chain.networkConfiguration().algods.nodes[this._chain.networkConfiguration().algods.default] ?? null;
+    return this._chain.transports().algods.nodes[this._chain.transports().algods.default] ?? null;
   }
 
   /**
@@ -48,7 +48,7 @@ export default class AVMAdapter extends BaseClass {
    * @public
    * @async
    */
-  public async accountInformation(address: string): Promise<Account> {
+  public async accountInformation(address: string): Promise<modelsv2.Account> {
     const algod = this.algod();
 
     if (!algod) {

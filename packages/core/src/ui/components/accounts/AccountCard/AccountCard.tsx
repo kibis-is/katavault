@@ -95,11 +95,15 @@ const AccountCard: FunctionComponent<Props> = ({ account, chains, colorMode }) =
           onClick={handleOnFooterClick}
           open={isFooterOpen}
           title={(
-            <Text colorMode={colorMode} fullWidth={true} textAlign="left">
-              {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.assets') : translate('headings.connections', {
-                count: account.connections.length,
-              })}
-            </Text>
+            <HStack align="center" fullWidth={true} spacing="xs">
+              <Text colorMode={colorMode} fullWidth={true} textAlign="left">
+                {account.__type === AccountTypeEnum.Ephemeral ? translate('headings.accounts') : translate('headings.connections')}
+              </Text>
+
+              <Text colorMode={colorMode} fullWidth={true} textAlign="right">
+                {`(${account.__type === AccountTypeEnum.Ephemeral ? chains.length : account.connections.length})`}
+              </Text>
+            </HStack>
           )}
         />
       </VStack>

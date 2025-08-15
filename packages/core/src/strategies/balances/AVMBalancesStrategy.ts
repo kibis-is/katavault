@@ -41,9 +41,9 @@ export default class AVMBalancesStrategy extends BaseClass {
     );
 
     return {
-      amount,
-      block,
-      lastUpdatedAt: BigInt(new Date().getTime()),
+      amount: String(amount),
+      block: String(block),
+      lastUpdatedAt: new Date().getTime().toString(),
     };
   }
 }

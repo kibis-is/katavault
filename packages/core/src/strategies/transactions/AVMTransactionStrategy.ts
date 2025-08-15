@@ -22,6 +22,7 @@ import type {
   WithChain,
   WithIndex,
 } from '@/types';
+import { AVMChain } from '@kibisis/chains';
 
 export default class AVMTransactionStrategy extends BaseClass {
   /**
@@ -79,7 +80,7 @@ export default class AVMTransactionStrategy extends BaseClass {
     chain,
     signature,
     transaction,
-  }: WithChain<Record<'signature' | 'transaction', Uint8Array>>): Promise<string> {
+  }: WithChain<Record<'signature' | 'transaction', Uint8Array>, AVMChain>): Promise<string> {
     const adapter = new AVMAdapter({
       chain,
       logger: this._logger,

@@ -36,10 +36,10 @@ export default {
     },
   },
   headings: {
-    assets: 'Assets',
+    accounts: 'Accounts',
     connectAnAccount: 'Connect an account ',
     connectedAccounts: 'Connected accounts',
-    connections: 'Connections ({{count}})',
+    connections: 'Connections',
     finishCreatingANewAccount: 'Finish creating a new account',
     holdingAccounts: 'Holding accounts',
     signInOrCreateANewAccount: 'Sign in or create a new account',

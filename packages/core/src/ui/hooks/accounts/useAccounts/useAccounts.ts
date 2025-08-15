@@ -15,7 +15,7 @@ export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAcc
   // states
   const [accounts, setAccounts] = useState<(ConnectedAccountStoreItem | EphemeralAccountStoreItem)[]>([]);
   // callbacks
-  const listener = useCallback(async () => {
+  const fetchAccounts = useCallback(async () => {
     if (!store) {
       return;
     }
@@ -24,9 +24,16 @@ export default function useAccounts(): (ConnectedAccountStoreItem | EphemeralAcc
   }, [setAccounts, store]);
 
   useEffect(() => {
-    window.addEventListener(EventEnum.AccountsUpdated, listener);
+    if (!store) {
+      return;
+    }
 
-    return () => window.removeEventListener(EventEnum.AccountsUpdated, listener);
+    (async () => await fetchAccounts())();
+  }, []);
+  useEffect(() => {
+    window.addEventListener(EventEnum.AccountsUpdated, fetchAccounts);
+
+    return () => window.removeEventListener(EventEnum.AccountsUpdated, fetchAccounts);
   }, []);
 
   return accounts;

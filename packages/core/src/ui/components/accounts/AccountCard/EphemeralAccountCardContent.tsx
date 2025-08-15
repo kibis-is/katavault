@@ -1,10 +1,12 @@
-import { Chain } from '@kibisis/chains';
+import { type Chain } from '@kibisis/chains';
+import BigNumber from 'bignumber.js';
 import clsx from 'clsx';
 import { type FunctionComponent } from 'preact';
 import { useCallback } from 'preact/hooks';
 
 // components
 import CopyIconButton from '@/ui/components/buttons/CopyIconButton';
+import CurrencyIcon from '@/ui/components/accounts/CurrencyIcon';
 import HStack from '@/ui/components/layouts/HStack';
 import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
@@ -33,9 +35,9 @@ const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContent
   // callbacks
   const chainElement = useCallback((chain: Chain) => {
     const element = dataURIToImageElement({
-      className: clsx(styles.chainIcon),
+      className: clsx(styles.circularIcon),
       dataURI: chain.iconURI(),
-      key: chain.chainID(),
+      key: `chain-icon-${chain.chainID()}`,
       title: chain.displayName(),
     });
 
@@ -54,33 +56,50 @@ const EphemeralAccountCardContent: FunctionComponent<EphemeralAccountCardContent
           chain,
         });
         const balance = account.balances[chain.chainID()].amount ?? BigInt(0);
+        const decimals = chain.nativeCurrency().decimals;
         const balanceAsStandardUnit = toStandardUnit({
-          decimals: chain.nativeCurrency().decimals,
+          decimals,
           value: new BigNumber(balance),
         });
 
         return (
-          <HStack align="center" fullWidth={true} key={``} spacing="xs">
-            {/*icon*/}
+          <HStack align="center" fullWidth={true} key={``} spacing="sm">
+            {/*chain icon*/}
             {chainElement(chain)}
 
-            {/*address/balance*/}
-            <VStack align="center" fullWidth={true} grow={true} spacing="xs">
-              <Text colorMode={colorMode} color={defaultTextColor} size="xs" title={address}>
-                {truncateText(address, {
-                  end: 10,
-                  start: 10,
-                })}
-              </Text>
+            <VStack fullWidth={true} grow={true} justify="evenly">
+              {/*address*/}
+              <HStack align="center" fullWidth={true} justify="end">
+                <Text bold={true} colorMode={colorMode} color={defaultTextColor} size="md" title={address}>
+                  {`${chain.shortName()}:`}
+                </Text>
 
-              <Text colorMode={colorMode} color={subTextColor} size="xs" title={`${formatUnit(balanceAsStandardUnit, {
-                decimals: chain.nativeCurrency().decimals,
-                thousandSeparatedOnly: true,
-              })} ${chain.nativeCurrency().symbol.toUpperCase()}`}>
-                {formatUnit(balanceAsStandardUnit, {
-                  decimals: balanceAsStandardUnit.gt(1) ? 2 : chain.nativeCurrency().decimals,
-                })}
-              </Text>
+                <Text colorMode={colorMode} color={subTextColor} size="md" title={address}>
+                  {truncateText(address, {
+                    end: 4,
+                    start: 6,
+                  })}
+                </Text>
+              </HStack>
+
+              {/*balance*/}
+              <HStack align="center" fullWidth={true} justify="end" spacing="xs">
+                <Text bold={true} colorMode={colorMode} color={subTextColor} title={`${formatUnit(balanceAsStandardUnit, {
+                  decimals,
+                  thousandSeparatedOnly: true,
+                })} ${chain.nativeCurrency().symbol.toUpperCase()}`}>
+                  {formatUnit(balanceAsStandardUnit, {
+                    decimals: balanceAsStandardUnit.gt(1) ? 2 : decimals,
+                  })}
+                </Text>
+
+                <CurrencyIcon
+                  color={subTextColor}
+                  colorMode={colorMode}
+                  chain={chain}
+                  size="xs"
+                />
+              </HStack>
             </VStack>
 
             <CopyIconButton colorMode={colorMode} size="xs" text={address} title={translate('captions.copyAddress')} />

@@ -100,6 +100,7 @@ export default class Katavault extends BaseClass {
     this._clientInformation = clientInformation;
     this._debug = debug;
     this._appManager = new AppManager(commonParams);
+    this._balancesContext = new BalancesContext(commonParams);
     this._signContext = new SignContext(commonParams);
     this._transactionContext = new TransactionContext(commonParams);
 
@@ -138,6 +139,10 @@ export default class Katavault extends BaseClass {
       }
     }
 
+    await this._accountsStore.upsert(accounts);
+
+    this._logger.debug(`${__logPrefix}: updated balances`);
+
     window.dispatchEvent(new AccountsUpdatedEvent());
   }
 
@@ -173,13 +178,13 @@ export default class Katavault extends BaseClass {
 
     username = usernameFromVault(this._vault);
     accounts = await this._accountsStore.accounts();
-    balances = this._chains.reduce(
+    balances = this._chains.reduce<Record<string, Balance>>(
       (acc, currentValue) => ({
         ...acc,
         [currentValue.chainID()]: {
-          amount: BigInt(0),
-          block: BigInt(0),
-          lastUpdatedAt: BigInt(0),
+          amount: '0',
+          block: '0',
+          lastUpdatedAt: '0',
         },
       }),
       {}
@@ -419,6 +424,7 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
   }
 
   /**
@@ -454,6 +460,7 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
   }
 
   /**
@@ -488,6 +495,7 @@ export default class Katavault extends BaseClass {
     this._vault = vault;
 
     await this._generateCredentialAccountIfNoneExists();
+    await this._updateBalances();
   }
 
   /**
