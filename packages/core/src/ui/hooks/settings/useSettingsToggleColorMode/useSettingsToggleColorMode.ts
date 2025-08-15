@@ -1,32 +1,30 @@
 import { useContext } from 'preact/hooks';
 
 // contexts
-import { SettingsContext } from '@/ui/contexts';
+import { SettingsContext, UserContext } from '@/ui/contexts';
 
-// types
-import type { ColorMode } from '@/types';
+// events
+import { SettingsUpdatedEvent } from '@/events';
 
 export default function useSettingsToggleColorMode(): () => void {
   // contexts
-  const { onUpdate, state } = useContext(SettingsContext);
+  const store = useContext(SettingsContext);
+  const username = useContext(UserContext);
 
   return () => {
     (async () => {
-      let _colorMode: ColorMode;
-
-      if (!state) {
+      if (!store || !username) {
         return;
       }
 
-      _colorMode = (await state.settings()).colorMode;
+      const { colorMode } = await store.settings();
 
-      await state.setSettings({
-        colorMode: _colorMode === 'light' ? 'dark' : 'light',
+      await store.setSettings({
+        colorMode: colorMode === 'light' ? 'dark' : 'light',
       });
 
-      if (onUpdate) {
-        onUpdate();
-      }
+      // emit an event for this user
+      window.dispatchEvent(new SettingsUpdatedEvent(username));
     })();
   };
 }

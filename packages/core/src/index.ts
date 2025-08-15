@@ -1,6 +1,7 @@
 export * from './constants';
 export * from './decorators';
 export * from './enums';
+export * from './events';
 export * from './errors';
 export * from './facades';
 export * from './strategies';

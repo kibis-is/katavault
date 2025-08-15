@@ -650,6 +650,9 @@ export default class Katavault extends BaseClass {
     ).remove([key]);
 
     this._logger.debug(`${__logPrefix}: removed accounts [${results.map((value) => `"${value}"`).join(',')}]`);
+
+    // emit an event for this user
+    window.dispatchEvent(new AccountsUpdatedEvent(usernameFromVault(this._vault)));
   }
 
   /**
@@ -752,6 +755,9 @@ export default class Katavault extends BaseClass {
         name,
       },
     ]);
+
+    // emit an event for this user
+    window.dispatchEvent(new AccountsUpdatedEvent(usernameFromVault(this._vault)));
 
     return {
       __type: account.__type,
@@ -998,5 +1004,21 @@ export default class Katavault extends BaseClass {
     signedTransactions.forEach(({ index, ...result }) => (results[index] = result));
 
     return results;
+  }
+
+  /**
+   * Gets the username for the authenticated user or null if Katavault is not authenticated.
+   *
+   * **NOTE:** Requires authentication.
+   *
+   * @returns {string} The username of the logged in user.
+   * @throws {NotAuthenticatedError} If the user is not authenticated.
+   */
+  public username(): string {
+    if (!this._vault) {
+      throw new NotAuthenticatedError('not authenticated');
+    }
+
+    return usernameFromVault(this._vault);
   }
 }
