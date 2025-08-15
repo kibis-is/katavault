@@ -1,7 +1,7 @@
 import { useContext } from 'preact/hooks';
 
 // contexts
-import { AccountsContext, AppContext } from '@/ui/contexts';
+import { AccountsContext, UserContext } from '@/ui/contexts';
 
 // events
 import { AccountsUpdatedEvent } from '@/events';
@@ -12,18 +12,18 @@ import type { ConnectedAccountStoreItem } from '@/types';
 export default function useAddAccounts(): (accounts: ConnectedAccountStoreItem[]) => void {
   // contexts
   const store = useContext(AccountsContext);
-  const { state } = useContext(AppContext);
+  const username = useContext(UserContext);
 
   return (accounts: ConnectedAccountStoreItem[]) => {
     (async () => {
-      if (!store || !state) {
+      if (!store || !username) {
         return;
       }
 
       await store.upsert(accounts);
 
       // emit an event for this user
-      window.dispatchEvent(new AccountsUpdatedEvent(state.username));
+      window.dispatchEvent(new AccountsUpdatedEvent(username));
     })();
   };
 }
