@@ -1,3 +1,4 @@
+import preact from '@preact/preset-vite';
 import { defineConfig, mergeConfig } from 'vite';
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import dts from 'vite-plugin-dts';
@@ -33,6 +34,7 @@ export default mergeConfig(
       dts({
         tsconfigPath: 'tsconfig.build.json',
       }),
+      preact(),
     ],
   })
 );
