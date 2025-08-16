@@ -1,10 +1,8 @@
-import { hex, utf8 } from '@kibisis/encoding';
 import { openDB } from 'idb';
 
 // constants
 import {
   IDB_ACCOUNTS_STORE_NAME,
-  IDB_DB_NAME_PREFIX,
   IDB_PASSKEY_STORE_NAME,
   IDB_PASSWORD_STORE_NAME,
   IDB_SETTINGS_STORE_NAME,
@@ -12,6 +10,9 @@ import {
 
 // types
 import type { CommonParameters, InitializeVaultParameters, Vault, VaultSchema } from '@/types';
+
+// utilities
+import { default as generateVaultName } from './vaultName';
 
 /**
  * Initializes the vault connection.
@@ -27,7 +28,7 @@ export default async function initializeVault({
   username,
 }: CommonParameters & InitializeVaultParameters): Promise<Vault> {
   const __logPrefix = `initializeVault`;
-  const vaultName = `${IDB_DB_NAME_PREFIX}_${hex.encode(utf8.decode(username))}`;
+  const vaultName = generateVaultName(username);
 
   return await openDB<VaultSchema>(vaultName, undefined, {
     upgrade: (_db, oldVersion, newVersion) => {

@@ -17,7 +17,7 @@ interface TypographyProps {
   minWidth?: number | string;
   padding?: number | string;
   size?: Sizes;
-  textAlign?: 'left' | 'center' | 'right';
+  textAlign?: 'initial' | 'inherit' | 'left' | 'center' | 'justify' | 'justify-all' | 'right';
   title?: string;
   truncate?: boolean;
   width?: number | string;

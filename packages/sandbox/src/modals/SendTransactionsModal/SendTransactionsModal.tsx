@@ -1,5 +1,5 @@
 import { HStack, Icon, Separator, Spinner, Table, VStack } from '@chakra-ui/react';
-import { type AVMNode, Chain } from '@kibisis/chains';
+import { type AVMNode, CAIP002Namespace, Chain } from '@kibisis/chains';
 import { base58 } from '@kibisis/encoding';
 import { type Account } from '@kibisis/katavault-core';
 import { useChains, useHoldingAccounts, useSignAndSendRawTransactions } from '@kibisis/katavault-react';
@@ -29,7 +29,8 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
   const handleOnSendDummyTransactionClick = useCallback(async () => {
     const __logPrefix = `${SendTransactionsModal.displayName}#handleOnSendDummyTransactionClick`;
     const account: Account | null = accounts[0] ?? null;
-    const chain: Chain | null = chains[0] ?? null;
+    const chain: Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM> | null =
+      (chains[0] as Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>) ?? null;
     let algod: Algodv2;
     let node: AVMNode;
     let transaction: Transaction;
@@ -43,7 +44,7 @@ const SendTransactionsModal: FC<ModalProps> = ({ onClose, open }) => {
     }
 
     try {
-      node = chain.networkConfiguration().algods.nodes[chain.networkConfiguration().algods.default];
+      node = chain.transports().algods.nodes[chain.transports().algods.default];
       algod = new Algodv2(node.token ?? '', node.origin, node.port);
       transaction = makePaymentTxnWithSuggestedParamsFromObject({
         amount: BigInt(1),

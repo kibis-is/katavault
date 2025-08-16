@@ -27,7 +27,9 @@ export default async function authenticateWithPasskey({
 }: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>): Promise<PasskeyStore> {
   const __logPrefix = `utilities#authenticateWithPasskey`;
   const store = new PasskeyStore({
+    hostname: clientInformation.hostname,
     logger,
+    username: user.username,
     vault,
   });
   let keyMaterial: Uint8Array;

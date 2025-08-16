@@ -10,7 +10,7 @@ import type { Props } from './types';
 const meta: Meta<Props> = {
   args: {
     colorMode: 'dark',
-    score: 2,
+    score: 1,
   },
   component: StrengthMeter,
   decorators: [
@@ -45,7 +45,7 @@ export const WithHighestStrength: StoryObj<Props> = {
     theme: 'dark',
   },
 
-  render: (props, { globals }) => <StrengthMeter {...props} colorMode={globals.theme} score={5} />,
+  render: (props, { globals }) => <StrengthMeter {...props} colorMode={globals.theme} score={2} />,
 };
 
 export const WithLowestStrength: StoryObj<Props> = {

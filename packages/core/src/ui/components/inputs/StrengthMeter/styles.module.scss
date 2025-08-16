@@ -20,4 +20,32 @@
   border-radius: map.get(variables.$border-radius, "full");
   height: inherit;
   transition: width 0.5s ease-in-out, background 0.25s;
+  width: 0;
+
+  &--weak-password {
+    background: map.get(palette.$red-palette, 500);
+    width: 20%;
+
+    &[data-color-mode="dark"] {
+      background: map.get(palette.$red-palette, 400);
+    }
+  }
+
+  &--normal-password {
+    background: map.get(palette.$yellow-palette, 500);
+    width: 60%;
+
+    &[data-color-mode="dark"] {
+      background: map.get(palette.$yellow-palette, 500);
+    }
+  }
+
+  &--strong-password {
+    background: map.get(palette.$green-palette, 500);
+    width: 100%;
+
+    &[data-color-mode="dark"] {
+      background: map.get(palette.$green-palette, 400);
+    }
+  }
 }

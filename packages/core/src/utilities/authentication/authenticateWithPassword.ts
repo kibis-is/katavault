@@ -1,13 +1,16 @@
 import { base64, utf8 } from '@kibisis/encoding';
 
 // errors
-import { InvalidPasswordError } from '@/errors';
+import { InvalidPasswordError, PasswordTooWeakError } from '@/errors';
 
 // decorators
 import { PasswordStore } from '@/decorators';
 
 // types
-import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } from '@/types';
+import type { AuthenticateWithPasswordParameters, CommonParameters, WithClientInformation, WithVault } from '@/types';
+
+// utilities
+import { passwordScore } from '@/utilities';
 
 /**
  * Authenticates with the supplied password.
@@ -18,15 +21,20 @@ import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } 
  * @returns {Promise<PasswordStore>} A promise that resolves to an initialized password store.
  * @throws {DecryptionError} If the stored challenge failed to be decrypted.
  * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+ * @throws {PasswordTooWeakError} If this is a new sign-up, and the supplied password does not have enough entropy.
  */
 export default async function authenticateWithPassword({
+  clientInformation,
   logger,
   password,
+  user,
   vault,
-}: CommonParameters & WithVault<AuthenticateWithPasswordParameters>): Promise<PasswordStore> {
+}: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasswordParameters>>): Promise<PasswordStore> {
   const __logPrefix = `utilities#authenticateWithPassword`;
   const store = new PasswordStore({
+    hostname: clientInformation.hostname,
     logger,
+    username: user.username,
     vault,
   });
   let encryptedChallenge = await store.challenge();
@@ -50,7 +58,16 @@ export default async function authenticateWithPassword({
     return store;
   }
 
-  // ... otherwise, if there is no stored challenge, encrypt a new one into the store.
+  // ... otherwise, if there is no stored challenge, encrypt a new one into the store
+
+  const { score } = passwordScore(password);
+
+  logger.debug(`${__logPrefix}: password score "${score}"`);
+
+  // ensure the password has at least 128-bit entropy
+  if (score <= 0) {
+    throw new PasswordTooWeakError('password is too weak');
+  }
 
   logger.debug(`${__logPrefix}: initializing new password store`);
 

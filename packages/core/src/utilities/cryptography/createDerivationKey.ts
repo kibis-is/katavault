@@ -10,7 +10,7 @@ import type { CreateDerivationKeyParameters } from '@/types';
  * @param {CreateDerivationKeyParameters} params - The parameters for creating the derived key.
  * @param {number} params.keyLength - The byte length of the derived key.
  * @param {Uint8Array} params.salt - The salt used to derive key.
- * @param {Uint8Array} params.secret - The secret used to derive the private key.
+ * @param {Uint8Array} params.secret - The secret used to derive the private key. This is hashed using SHA-512.
  * @return {Promise<Uint8Array>} A promise that resolves to the derived key as a Uint8Array.
  */
 export default async function createDerivationKey({
