@@ -1,3 +1,13 @@
+// constants
+import {
+  ARABIC_CHARACTER_POOL_SIZE,
+  ASCII_CHARACTER_POOL_SIZE,
+  CYRILLIC_CHARACTER_POOL_SIZE,
+  EMOJI_CHARACTER_POOL_SIZE,
+  GREEK_CHARACTER_POOL_SIZE,
+  LATIN1_SUPPLEMENT_CHARACTER_POOL_SIZE,
+} from '@/constants';
+
 /**
  * Calculates the complexity score of a given password based on its entropy.
  *
@@ -9,7 +19,13 @@
  * entropy = L x log2(R)
  * ```
  *
- * The character pool is drawn from ASCII characters (95 in size) and the Unicode 15.0 emoji set (3664 in size).
+ * The character pool size is determined by whether the password contains a character from the following pools:
+ * * 95 printable ASCII characters.
+ * * 256 Arabic characters.
+ * * 256 Cyrillic characters.
+ * * 3,664 Unicode 15.0 emojis set.
+ * * 135 Greek characters.
+ * * 191 Latin-1 supplement characters.
  *
  * Score mapping based on entropy:
  * * `-1`: empty password (unscored)
@@ -21,21 +37,43 @@
  * @returns {number} The score of the password.
  */
 export default function passwordScore(password: string): number {
-  let asciiPoolSize: number;
-  let emojiPoolSize: number;
   let entropy: number;
   let graphemes: Intl.SegmentData[];
+  let poolSize: number = ASCII_CHARACTER_POOL_SIZE; // use ascii characters as the base pool size
   let segmenter: Intl.Segmenter;
 
   if (password.length <= 0) {
     return -1;
   }
 
+  // check for arabic characters
+  if (/[\u0600-\u06FF]/.test(password)) {
+    poolSize += ARABIC_CHARACTER_POOL_SIZE;
+  }
+
+  // check for cyrillic characters
+  if (/[\u0400-\u04FF]/.test(password)) {
+    poolSize += CYRILLIC_CHARACTER_POOL_SIZE;
+  }
+
+  // check for single codepoint emojis
+  if (/\p{Emoji}/u.test(password)) {
+    poolSize += EMOJI_CHARACTER_POOL_SIZE;
+  }
+
+  // check for greek characters
+  if (/[\u0370-\u03FF]/.test(password)) {
+    poolSize += GREEK_CHARACTER_POOL_SIZE;
+  }
+
+  // check for latin-1 supplement characters
+  if (/[\xA0-\xFF]/.test(password)) {
+    poolSize += LATIN1_SUPPLEMENT_CHARACTER_POOL_SIZE;
+  }
+
   segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
   graphemes = Array.from(segmenter.segment(password)); // get the grapheme clusters, i.e., the length of emoji characters, not the byte length which could be 1-4 bytes
-  asciiPoolSize = 95; // printable ascii
-  emojiPoolSize = 3664; // unicode 15.0 official emojis
-  entropy = graphemes.length * Math.log2(asciiPoolSize + emojiPoolSize); // L x log2(R)
+  entropy = graphemes.length * Math.log2(poolSize); // L x log2(R)
 
   if (entropy > 256) {
     return 2;
