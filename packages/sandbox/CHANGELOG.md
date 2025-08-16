@@ -1,3 +1,10 @@
+# [sandbox-v1.2.0](https://github.com/kibis-is/katavault/compare/sandbox-v1.1.0...sandbox-v1.2.0) (2025-08-16)
+
+
+### Features
+
+* derive credentials to allow valid secap256k1 keys ([#13](https://github.com/kibis-is/katavault/issues/13)) ([a76aa75](https://github.com/kibis-is/katavault/commit/a76aa75377a8c7980164682ef5e943b8df24a20f))
+
 # [sandbox-v1.1.0](https://github.com/kibis-is/katavault/compare/sandbox-v1.0.0...sandbox-v1.1.0) (2025-08-15)
 
 
