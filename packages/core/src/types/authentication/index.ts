@@ -8,4 +8,5 @@ export type { default as AuthenticationStoreWithPassword } from './Authenticatio
 export type { default as CredentialIDParameters } from './CredentialIDParameters';
 export type { default as CreateCredentialIDParameters } from './CreateCredentialIDParameters';
 export type { default as PasskeyStoreSchema } from './PasskeyStoreSchema';
+export type { default as PasswordScoreResult } from './PasswordScoreResult';
 export type { default as PasswordStoreSchema } from './PasswordStoreSchema';

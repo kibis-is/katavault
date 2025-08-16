@@ -8,6 +8,9 @@ import {
   LATIN1_SUPPLEMENT_CHARACTER_POOL_SIZE,
 } from '@/constants';
 
+// types
+import type { PasswordScoreResult } from '@/types';
+
 /**
  * Calculates the complexity score of a given password based on its entropy.
  *
@@ -34,16 +37,19 @@ import {
  * * `2`: high entropy (>= 256 bits)
  *
  * @param {string} password - The password to score.
- * @returns {number} The score of the password.
+ * @returns {PasswordScoreResult} The entropy and the score of the password.
  */
-export default function passwordScore(password: string): number {
+export default function passwordScore(password: string): PasswordScoreResult {
   let entropy: number;
   let graphemes: Intl.SegmentData[];
   let poolSize: number = ASCII_CHARACTER_POOL_SIZE; // use ascii characters as the base pool size
   let segmenter: Intl.Segmenter;
 
   if (password.length <= 0) {
-    return -1;
+    return {
+      entropy: 0,
+      score: -1,
+    };
   }
 
   // check for arabic characters
@@ -76,12 +82,21 @@ export default function passwordScore(password: string): number {
   entropy = graphemes.length * Math.log2(poolSize); // L x log2(R)
 
   if (entropy > 256) {
-    return 2;
+    return {
+      entropy,
+      score: 2,
+    };
   }
 
   if (entropy >= 128 && entropy < 256) {
-    return 1;
+    return {
+      entropy,
+      score: 1,
+    };
   }
 
-  return 0;
+  return {
+    entropy,
+    score: 0,
+  };
 }

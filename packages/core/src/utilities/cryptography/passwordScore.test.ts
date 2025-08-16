@@ -35,6 +35,6 @@ describe('passwordScore()', () => {
       password: 'G#7!kD8z🍀🔥🚀💎✨🌟🎉🥳👾🐉🍕🍣🍩🍦',
     },
   ])(`should return a score of "$expectedScore" for the password "$password"`, ({ expectedScore, password }) =>
-    expect(passwordScore(password)).toBe(expectedScore)
+    expect(passwordScore(password).score).toBe(expectedScore)
   );
 });

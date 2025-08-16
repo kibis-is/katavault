@@ -493,7 +493,9 @@ export default class Katavault extends BaseClass {
    * @param {UserInformation} params.user - The user information.
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+   * @throws {PasswordTooWeakError} If this is a new sign-up, and the supplied password does not have enough entropy.
    * @public
+   * @async
    */
   public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
     const vault = await initializeVault({

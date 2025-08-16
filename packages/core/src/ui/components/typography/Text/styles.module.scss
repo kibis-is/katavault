@@ -9,10 +9,36 @@
   font-size: variables.$font-size;
   font-style: normal;
   line-height: 1.5rem; // 24px
-  text-align: center;
+  text-align: inherit;
 
   &[data-color-mode="dark"] {
     color: palette.default-font-color("dark");
+  }
+
+  &__align {
+    &--center {
+      text-align: center;
+    }
+
+    &--initial {
+      text-align: initial;
+    }
+
+    &--justify {
+      text-align: justify;
+    }
+
+    &--justify-all {
+      text-align: justify-all;
+    }
+
+    &--left {
+      text-align: left;
+    }
+
+    &--right {
+      text-align: right;
+    }
   }
 
   &--bold {
@@ -21,14 +47,6 @@
 
   &--full-width {
     width: 100%;
-  }
-
-  &--left {
-    text-align: left;
-  }
-
-  &--right {
-    text-align: right;
   }
 
   &--xs {
