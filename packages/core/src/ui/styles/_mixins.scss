@@ -32,7 +32,7 @@
 }
 
 @mixin settings-card-content {
-  min-height: 3.5rem;
+  min-height: 4.125rem; // 66px
   padding: variables.$card-padding;
 }
 

@@ -4,6 +4,7 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import dts from 'vite-plugin-dts';
 
 // configs
+import { version } from './package.json';
 import defaultConfig from './vite.default.config';
 
 export default mergeConfig(
@@ -28,6 +29,9 @@ export default mergeConfig(
           api: 'modern-compiler',
         },
       },
+    },
+    define: {
+      __VERSION__: JSON.stringify(version),
     },
     plugins: [
       cssInjectedByJsPlugin(),

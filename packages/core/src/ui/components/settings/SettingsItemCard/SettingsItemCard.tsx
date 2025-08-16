@@ -18,11 +18,11 @@ import styles from './styles.module.scss';
 // types
 import type { Props } from './types';
 
-const SettingsTextCard: FunctionComponent<Props> = ({
+const SettingsItemCard: FunctionComponent<Props> = ({
   colorMode,
+  item,
   subtitle,
   title,
-  value,
 }) => {
   // hooks
   const defaultTextColor = useDefaultTextColor(colorMode);
@@ -33,28 +33,24 @@ const SettingsTextCard: FunctionComponent<Props> = ({
       <HStack align="center" className={clsx(styles.content)} fullWidth={true} spacing="xs">
         {/*title/subtitle*/}
         <VStack align="center" fullWidth={true} justify="evenly" spacing="xs">
-          <Heading color={defaultTextColor} colorMode={colorMode} fullWidth={true} size="sm" textAlign="left">
+          <Heading color={defaultTextColor} colorMode={colorMode} fullWidth={true} size="xs" textAlign="left">
             {title}
           </Heading>
 
           {subtitle && (
-            <Text color={subTextColor} colorMode={colorMode} fullWidth={true} size="sm" textAlign="left">
+            <Text color={subTextColor} colorMode={colorMode} fullWidth={true} size="xs" textAlign="left">
               {subtitle}
             </Text>
           )}
         </VStack>
 
-        {/*value*/}
-        {value && (
-          <Stack align="center" maxWidth="25%" justify="center">
-            <Text color={defaultTextColor} colorMode={colorMode} fullWidth={true} size="sm" textAlign="right">
-              {value.toString()}
-            </Text>
-          </Stack>
-        )}
+        {/*item*/}
+        <Stack align="center" maxWidth="25%" justify="center">
+          {item}
+        </Stack>
       </HStack>
     </div>
   );
 };
 
-export default SettingsTextCard;
+export default SettingsItemCard;
