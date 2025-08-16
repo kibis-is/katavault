@@ -38,13 +38,16 @@ export const WithLightColorMode: StoryObj<Props> = {
 };
 
 export const Sizes: StoryObj<Props> = {
-  render: (props) => (
+  globals: {
+    theme: 'dark',
+  },
+  render: (props, { globals }) => (
     <HStack align="center" fullWidth={true} spacing="xs">
-      <IconButton {...props} size="xs" />
-      <IconButton {...props} size="sm" />
-      <IconButton {...props} size="md" />
-      <IconButton {...props} size="lg" />
-      <IconButton {...props} size="xl" />
+      <IconButton {...props} colorMode={globals.theme} size="xs" />
+      <IconButton {...props} colorMode={globals.theme} size="sm" />
+      <IconButton {...props} colorMode={globals.theme} size="md" />
+      <IconButton {...props} colorMode={globals.theme} size="lg" />
+      <IconButton {...props} colorMode={globals.theme} size="xl" />
     </HStack>
   ),
 };

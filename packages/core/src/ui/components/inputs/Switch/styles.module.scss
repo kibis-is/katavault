@@ -1,0 +1,171 @@
+@use "@/ui/styles/palette";
+@use "sass:map";
+
+$container-padding: 2px;
+
+@function get-size($size: "md") {
+  @if $size == "xs" {
+    @return 0.75rem; // 12px
+  }
+
+  @if $size == "sm" {
+    @return 1rem; // 16px
+  }
+
+  @if $size == "lg" {
+    @return 1.5rem; // 20px
+  }
+
+  @if $size == "xl" {
+    @return 1.75rem; // 24px
+  }
+
+  @return 1.25rem; // 28px
+}
+
+@mixin container-size-styles($size: "md") {
+  border-radius: 0.75rem; // 12px
+  height: calc(#{get-size($size)} + ($container-padding * 2));
+  width: #{get-size($size) * 2};
+
+  @if $size == "xs" {
+    border-radius: 0.5rem; // 8px
+  }
+
+  @if $size == "sm" {
+    border-radius: 0.625rem; // 10px
+  }
+
+  @if $size == "lg" {
+    border-radius: 0.875rem; // 14px
+  }
+
+  @if $size == "xl" {
+    border-radius: 1rem; // 16px
+  }
+}
+
+@function get-checked-knob-position($size: "md") {
+  $knob-size: get-size($size);
+  $width: $knob-size * 2;
+
+  @return calc(#{$width - $knob-size} - #{$container-padding});
+}
+
+@mixin knob-size-styles($size: "md") {
+  height: get-size($size);
+  width: get-size($size);
+}
+
+.container {
+  @include container-size-styles("md");
+  background: map.get(palette.$gray-palette, 300);
+  display: inline-block;
+  height: calc(#{get-size("md")} + ($container-padding * 2));
+  position: relative;
+  transition: background 200ms;
+  width: #{get-size("md") * 2};
+
+  &[data-color-mode="dark"] {
+    background: map.get(palette.$white-alpha-palette, 400);
+  }
+
+  &--checked {
+    background: palette.button-background-color("light");
+    box-shadow: 0 0 2px rgba(60, 60, 67, 0.15);
+
+    &[data-color-mode="dark"] {
+      background: palette.button-background-color("dark");
+    }
+  }
+
+  &--xs {
+    @include container-size-styles("xs");
+  }
+
+  &--sm {
+    @include container-size-styles("sm");
+  }
+
+  &--lg {
+    @include container-size-styles("lg");
+  }
+
+  &--xl {
+    @include container-size-styles("xl");
+  }
+}
+
+.input {
+  display: none;
+}
+
+.label {
+  cursor: pointer;
+  display: inline-block;
+  user-select: none;
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.knob {
+  @include knob-size-styles("md");
+  background: palette.background-color("light");
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  height: get-size("md");
+  left: $container-padding;
+  position: absolute;
+  top: $container-padding;
+  transition: left 200ms;
+  width: get-size("md");
+
+  &[data-color-mode="dark"] {
+    background: palette.background-color("dark");
+  }
+
+  &__checked {
+    &--xs {
+      left: get-checked-knob-position("xs");
+    }
+
+    &--sm {
+      left: get-checked-knob-position("sm");
+    }
+
+    &--md {
+      left: get-checked-knob-position("md");
+    }
+
+    &--lg {
+      left: get-checked-knob-position("lg");
+    }
+
+    &--xl {
+      left: get-checked-knob-position("xl");
+    }
+  }
+
+  &--xs {
+    height: get-size("xs");
+    width: get-size("xs");
+  }
+
+  &--sm {
+    height: get-size("sm");
+    width: get-size("sm");
+  }
+
+  &--lg {
+    height: get-size("lg");
+    width: get-size("lg");
+  }
+
+  &--xl {
+    height: get-size("xl");
+    width: get-size("xl");
+  }
+}
