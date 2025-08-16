@@ -1,9 +1,15 @@
 ---
+id: terms
 sidebar_label: Terms
 slug: /glossary/terms
+title: Terms
 ---
 
+<!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { SHA_512_SPECIFICATION_URL, WEBAUTHN_PRF_EXTENSION_URL } from '@site/src/constants';
 
 # Terms
 
@@ -13,38 +19,60 @@ import SectionBreak from '@site/src/components/SectionBreak';
 
 ## Client
 
-An end-user application that interacts with a provider; e.g. a dApp.
-
-<SectionBreak />
-
-## Provider
-
-An application that manages private keys and performs signing operations; e.g. a wallet.
-
-<SectionBreak />
-
-## Holding account
+An end-user application that interacts with a provider; e.g., a dApp.
 
 <SectionBreak />
 
 ## Credential account
 
-In the context of Katavault, the credential account is a special account derived from the authentication credentials. The account derivation method depends on the method used to authenticate:
+In the context of Katavault, the credential account is a special account derived from authentication credentials. The account derivation method depends on the method used to authenticate:
 
 ### Passkey authentication
 
-When a passkey is used to authenticate, the account can simply be derived using the passkey encryption as the key material returned from the passkey (that is usually used for encryption) has high enough entropy to be used as a private key in an AVM account.
+When a passkey is used to authenticate, the account's private key can be derived simply by using the key material returned from the passkey's <a href={WEBAUTHN_PRF_EXTENSION_URL} rel="noopener noreferrer" target="_blank">PRF extension</a> key material.
+
+This key material will have a high enough entropy to be used as a private key.
 
 ### Password authentication
 
 Deriving a private key from a password is a bit more complicated than the passkey account.
 
-1. First, a salt is created which is the concatenation of the client hostname (i.e., "example.com") and the username.
-2. Next, a secret is created which is the concatenation of the username and password.
-3. Finally, passing the salt and secret created in the last two steps to the [scrypt](https://www.tarsnap.com/scrypt.html) key derivation function (KDF), the key is created.
+1. First, a salt is created, which is an <a href={SHA_512_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">SHA-512</a> hash of the concatenation of the client hostname (i.e., "example.com") and the username:
+```
+salt = SHA512(hostname + username)
+```
+2. Next, a secret is created, which is an <a href={SHA_512_SPECIFICATION_URL} rel="noopener noreferrer" target="_blank">SHA-512</a> hash of the concatenation of the username and the password:
+```
+secret = SHA512(username + password)
+```
+3. Finally, passing the salt and secret created in the last two steps to the <a href="https://www.tarsnap.com/scrypt.html" rel="noopener noreferrer" target="_blank">scrypt</a> key derivation function (KDF), the key is created.
 
 :::note
 
-The security of the private key rests solely on the entropy of the password. To try and achieve 128-bit entropy, it is advised to use **AT LEAST** 7 random UTF-8 characters — and don't be afraid to advise the use emojis; these are UTF-8 characters too! 😉
+The security of the private key rests solely on the entropy of the password. To try and achieve at least 128-bit entropy, it is advised to use **AT LEAST** 8 random UTF-8 characters — and don't be afraid to advise the use emojis; these are UTF-8 characters too! 😉
 
 :::
+
+<SectionBreak />
+
+## Connected account
+
+A connected account, also known as an externally owned account (EOA), is an account that will be stored on an external [provider](#provider) and whose private keys are outside Katavault.
+
+These accounts **SHOULD** be secured, and Katavault will communicate any signing operations to [provider](#provider).
+
+<SectionBreak />
+
+## Holding account
+
+A holding account within the context of Katavault is an account that has its keys stored locally in the browser; an embedded wallet. These accounts are considered "ephemeral" and are "throw away" and should generally not be used to hold a large number of assets.
+
+Their security is far weaker than an externally owned account (EOA) (see [connected account](#connected-account)), as the private key is usually derived from authentication credentials (see [credential account](#credential-account)).
+
+However, their usefulness comes from the fact that signing will not require user confirmation and is ideal for use in gaming dApps, where transaction signing must be made in quick succession without breaking user flow.
+
+<SectionBreak />
+
+## Provider
+
+An application that manages private keys and performs signing operations; e.g., a wallet.
