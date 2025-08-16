@@ -87,7 +87,6 @@
     "numbro": "^2.5.0",
     "preact": "^10.26.9",
     "scrypt-async": "^2.0.1",
-    "tweetnacl": "^1.0.3",
-    "zxcvbn": "^4.4.2"
+    "tweetnacl": "^1.0.3"
   }
 }

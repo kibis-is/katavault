@@ -19,16 +19,16 @@ import styles from './styles.module.scss';
 import type { Props } from './types';
 
 // utilities
-import { score } from './utilities';
+import { passwordScore } from '@/utilities';
 
 const NewPasswordInput: FunctionComponent<Props> = ({ colorMode, value, ...inputProps }) => {
   // states
   const [masked, setMasked] = useState<boolean>(true);
-  const [_score, setScore] = useState<number>(score(value?.toString() ?? ''));
+  const [_score, setScore] = useState<number>(passwordScore(value?.toString() ?? ''));
   // callbacks
   const handleOnMaskedClick = useCallback(() => setMasked(!masked), [masked, setMasked]);
 
-  useEffect(() => setScore(score(value?.toString() ?? '')), [value]);
+  useEffect(() => setScore(passwordScore(value?.toString() ?? '')), [value]);
 
   return (
     <VStack align="center" fullWidth={true} justify="center" spacing="sm">

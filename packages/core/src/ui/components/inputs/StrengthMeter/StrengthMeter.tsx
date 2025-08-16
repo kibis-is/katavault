@@ -27,26 +27,12 @@ const StrengthMeter: FunctionComponent<Props> = ({ colorMode, score }) => {
 
     if (score <= 1) {
       return {
-        background: 'orangered',
-        width: '40%',
-      };
-    }
-
-    if (score <= 2) {
-      return {
-        background: 'orange',
+        background: 'yellowgreen',
         width: '60%',
       };
     }
 
-    if (score <= 3) {
-      return {
-        background: 'yellowgreen',
-        width: '80%',
-      };
-    }
-
-    // 4+
+    // 2+
     return {
       background: 'green',
       width: '100%',
