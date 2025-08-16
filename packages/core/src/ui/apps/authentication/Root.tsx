@@ -149,7 +149,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
 
     setPasswordError(null);
 
-    if (!logger || !vault) {
+    if (!logger || !vault || !clientInformation) {
       return;
     }
 
@@ -159,6 +159,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
 
     try {
       store = await authenticateWithPassword({
+        clientInformation,
         logger,
         password: passwordInputProps.value,
         user: {
@@ -193,6 +194,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       setPasswordError(error);
     }
   }, [
+    clientInformation,
     colorMode,
     handleClose,
     logger,
@@ -226,7 +228,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
     let _settings: SettingsStoreSchema;
     let _vault: Vault;
 
-    if (!logger || validateUsernameInput()) {
+    if (!clientInformation || !logger || validateUsernameInput()) {
       return;
     }
 
@@ -235,11 +237,15 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       username: usernameInputProps.value,
     });
     _hasPasskeyInVault = !!(await new PasskeyStore({
+      hostname: clientInformation.hostname,
       logger,
+      username: usernameInputProps.value,
       vault: _vault,
     }).passkey());
     _hasPasswordInVault = !!(await new PasswordStore({
+      hostname: clientInformation.hostname,
       logger,
+      username: usernameInputProps.value,
       vault: _vault,
     }).challenge());
 
@@ -257,6 +263,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       onSetColorMode(_settings.colorMode);
     }
   }, [
+    clientInformation,
     logger,
     onSetColorMode,
     setHasPasskeyInVault,

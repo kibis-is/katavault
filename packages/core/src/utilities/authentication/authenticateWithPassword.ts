@@ -7,7 +7,7 @@ import { InvalidPasswordError } from '@/errors';
 import { PasswordStore } from '@/decorators';
 
 // types
-import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } from '@/types';
+import type { AuthenticateWithPasswordParameters, CommonParameters, WithClientInformation, WithVault } from '@/types';
 
 /**
  * Authenticates with the supplied password.
@@ -20,13 +20,17 @@ import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } 
  * @throws {InvalidPasswordError} If supplied password does not match the stored password.
  */
 export default async function authenticateWithPassword({
+  clientInformation,
   logger,
   password,
+  user,
   vault,
-}: CommonParameters & WithVault<AuthenticateWithPasswordParameters>): Promise<PasswordStore> {
+}: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasswordParameters>>): Promise<PasswordStore> {
   const __logPrefix = `utilities#authenticateWithPassword`;
   const store = new PasswordStore({
+    hostname: clientInformation.hostname,
     logger,
+    username: user.username,
     vault,
   });
   let encryptedChallenge = await store.challenge();

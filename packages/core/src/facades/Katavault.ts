@@ -70,7 +70,6 @@ import {
   authenticateWithPasskey,
   authenticateWithPassword,
   initializeVault,
-  privateKeyFromPasswordCredentials,
   publicKeyFromPrivateKey,
   usernameFromVault,
 } from '@/utilities';
@@ -181,7 +180,6 @@ export default class Katavault extends BaseClass {
     let _credentialID: CredentialID;
     let encryptedKeyData: Uint8Array;
     let key: string;
-    let keyMaterial: Uint8Array | null;
     let passkey: PasskeyStoreSchema | null;
     let password: string | null;
     let privateKey: Uint8Array;
@@ -207,10 +205,9 @@ export default class Katavault extends BaseClass {
 
     switch (this._authenticationStore?.__type) {
       case AuthenticationMethodEnum.Passkey:
-        keyMaterial = this._authenticationStore.store.keyMaterial();
         passkey = await this._authenticationStore.store.passkey();
 
-        if (!keyMaterial || !passkey) {
+        if (!passkey) {
           throw new NotAuthenticatedError('not authenticated');
         }
 
@@ -218,7 +215,8 @@ export default class Katavault extends BaseClass {
           method: AuthenticationMethodEnum.Passkey,
           passkeyCredentialID: passkey.credentialID,
         });
-        key = base58.encode(publicKeyFromPrivateKey(keyMaterial));
+        privateKey = await this._authenticationStore.store.derivePrivateKey();
+        key = base58.encode(publicKeyFromPrivateKey(privateKey));
 
         // check if the credential account exists
         account =
@@ -243,7 +241,7 @@ export default class Katavault extends BaseClass {
           };
         }
 
-        encryptedKeyData = await this._authenticationStore.store.encryptBytes(keyMaterial); // use the passkey material - it will contain a high enough entropy to be secure
+        encryptedKeyData = await this._authenticationStore.store.encryptBytes(privateKey); // use the passkey material - it will contain a high enough entropy to be secure
         account = {
           __type: AccountTypeEnum.Ephemeral,
           balances,
@@ -278,11 +276,7 @@ export default class Katavault extends BaseClass {
           method: AuthenticationMethodEnum.Password,
           password,
         });
-        privateKey = await privateKeyFromPasswordCredentials({
-          hostname: this._clientInformation.hostname,
-          password,
-          username,
-        });
+        privateKey = await this._authenticationStore.store.derivePrivateKey();
         key = base58.encode(publicKeyFromPrivateKey(privateKey));
 
         // check if the credential account exists
@@ -510,6 +504,7 @@ export default class Katavault extends BaseClass {
     this._authenticationStore = {
       __type: AuthenticationMethodEnum.Password,
       store: await authenticateWithPassword({
+        clientInformation: this._clientInformation,
         logger: this._logger,
         password,
         user,
