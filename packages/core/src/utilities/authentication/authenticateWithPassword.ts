@@ -39,7 +39,6 @@ export default async function authenticateWithPassword({
   });
   let encryptedChallenge = await store.challenge();
   let isVerified: boolean;
-  let score: number;
 
   // set the password
   store.setPassword(password);
@@ -61,7 +60,7 @@ export default async function authenticateWithPassword({
 
   // ... otherwise, if there is no stored challenge, encrypt a new one into the store
 
-  score = passwordScore(password);
+  const { score } = passwordScore(password);
 
   logger.debug(`${__logPrefix}: password score "${score}"`);
 

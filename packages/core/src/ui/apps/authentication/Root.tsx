@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
 import type { KeyboardEvent } from 'preact/compat';
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 
 // components
 import Button from '@/ui/components/buttons/Button';
@@ -59,7 +59,7 @@ import type { BaseAppProps } from '@/ui/types';
 import type { AppProps, RootProps } from './types';
 
 // utilities
-import { authenticateWithPasskey, authenticateWithPassword, initializeVault } from '@/utilities';
+import { authenticateWithPasskey, authenticateWithPassword, initializeVault, passwordScore } from '@/utilities';
 
 const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootProps> = ({ colorMode, onClose, onSetColorMode, onSuccess }) => {
   // hooks
@@ -88,6 +88,8 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
   const [passkeyError, setPasskeyError] = useState<BaseError | null>(null);
   const [passwordError, setPasswordError] = useState<BaseError | null>(null);
   const [vault, setVault] = useState<Vault | null>(null);
+  // memos
+  const isSignUp = useMemo(() => !hasPasskeyInVault && !hasPasswordInVault, [hasPasskeyInVault, hasPasswordInVault]);
   // callbacks
   const handleClose = useCallback(() => setOpen(false), [setOpen]);
   const handleOnAuthenticateWithPasskeyClick = useCallback(async () => {
@@ -153,7 +155,8 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       return;
     }
 
-    if (validatePasswordInput()) {
+    // if the password fails validation or this is a sign-up and the password does not have enough entropy, ignore
+    if (validatePasswordInput() || (isSignUp && passwordScore(passwordInputProps.value).score <= 0)) {
       return;
     }
 
@@ -197,6 +200,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
     clientInformation,
     colorMode,
     handleClose,
+    isSignUp,
     logger,
     onSuccess,
     passwordInputProps.value,
