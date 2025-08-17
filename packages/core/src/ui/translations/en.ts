@@ -3,6 +3,7 @@ import type { ResourceLanguage } from 'i18next';
 export default {
   buttons: {
     cancel: 'Cancel',
+    confirm: 'Confirm',
     continue: 'Continue',
     retry: 'Retry',
     signInWithPasskey: 'Sign in with a passkey',

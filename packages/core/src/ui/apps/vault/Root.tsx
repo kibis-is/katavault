@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
-import { useCallback, useMemo, useState } from 'preact/hooks';
+import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
 
 // components
 import AccountCard from '@/ui/components/accounts/AccountCard';
@@ -32,6 +32,7 @@ import PlusIcon from '@/ui/icons/PlusIcon';
 import SettingsIcon from '@/ui/icons/SettingsIcon';
 
 // modals
+import ConfirmModal from '@/ui/modals/ConfirmModal';
 import ConnectAccountModal from '@/ui/modals/ConnectAccountModal';
 import SettingsModal from '@/ui/modals/SettingsModal';
 import TransferFundsModal from '@/ui/modals/TransferFundsModal';
@@ -44,8 +45,11 @@ import type { RootProps } from './types';
 
 // utilities
 import { usernameFromVault } from '@/utilities';
+import { ConfirmModalContext } from '@/ui/contexts';
 
 const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
+  // contexts
+  const confirmModalContextState = useContext(ConfirmModalContext);
   // hooks
   const accounts = useAccounts();
   const chains = useChains();
@@ -71,6 +75,26 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
     setClosing(true);
     setTimeout(() => onClose(), 300); // allow animation to finish
   }, [closing, onClose, setClosing]);
+  const handleOnConfirmModalClose = useCallback(() => {
+    if (!confirmModalContextState) {
+      return;
+    }
+
+    const { onClose, reset } = confirmModalContextState;
+
+    onClose?.();
+    reset();
+  }, [confirmModalContextState]);
+  const handleOnConfirmModalConfirm = useCallback(() => {
+    if (!confirmModalContextState) {
+      return;
+    }
+
+    const { onConfirm, reset } = confirmModalContextState;
+
+    onConfirm?.();
+    reset();
+  }, [confirmModalContextState]);
   const handleOnConnectAccountClick = useCallback(() => setConnectAccountModalOpen(true), [setConnectAccountModalOpen]);
   const handleOnConnectAccountModalClose = useCallback(() => setConnectAccountModalOpen(false), [setConnectAccountModalOpen]);
   const handleOnOpenSettingsModalClick = useCallback(() => setSettingsModalOpen(true), [setSettingsModalOpen]);
@@ -80,15 +104,26 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
 
   return (
     <>
+      <ConfirmModal
+        colorMode={colorMode}
+        message={confirmModalContextState?.message ?? ''}
+        onClose={handleOnConfirmModalClose}
+        onConfirm={handleOnConfirmModalConfirm}
+        open={confirmModalContextState?.open ?? false}
+        title={confirmModalContextState?.title ?? ''}
+      />
       <ConnectAccountModal
+        colorMode={colorMode}
         onClose={handleOnConnectAccountModalClose}
         open={connectAccountModalOpen}
       />
       <SettingsModal
+        colorMode={colorMode}
         onClose={handleOnOpenSettingsModalClose}
         open={settingsModalOpen}
       />
       <TransferFundsModal
+        colorMode={colorMode}
         onClose={handleOnTransferFundsModalClose}
         open={transferFundsModalOpen}
       />
