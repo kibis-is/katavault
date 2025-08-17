@@ -57,8 +57,8 @@ export default {
     avm: 'AVM',
     accountID: 'Account ID',
     credentialAccount: 'Credential account',
+    darkMode: 'Dark mode',
     name: 'Name',
-    theme: 'Theme',
     version: 'Version',
   },
   placeholders: {

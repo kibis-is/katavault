@@ -10,6 +10,7 @@ import Modal from '@/ui/components/layouts/Modal';
 import SettingsItemCard from '@/ui/components/settings/SettingsItemCard';
 import SettingsSubHeading from '@/ui/components/settings/SettingsSubHeading';
 import Spacer from '@/ui/components/layouts/Spacer';
+import Switch from '@/ui/components/inputs/Switch';
 import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
 
@@ -25,9 +26,7 @@ import useTranslate from '@/ui/hooks/i18n/useTranslate';
 // icons
 import CloseIcon from '@/ui/icons/CloseIcon';
 import InfoIcon from '@/ui/icons/InfoIcon';
-import MoonIcon from '@/ui/icons/MoonIcon';
 import PaletteIcon from '@/ui/icons/PaletteIcon';
-import SunnyIcon from '@/ui/icons/SunnyIcon';
 
 // types
 import type { Props } from './types';
@@ -64,9 +63,9 @@ const SettingsModal: FunctionComponent<Props> = ({
               <SettingsItemCard
                 colorMode={colorMode}
                 item={(
-                  <IconButton colorMode={colorMode} icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />} onClick={handleOnToggleColorModeClick} />
+                  <Switch colorMode={colorMode} checked={colorMode === 'dark'} onChange={handleOnToggleColorModeClick} />
                 )}
-                title={translate('labels.theme')}
+                title={translate('labels.darkMode')}
               />
             </VStack>
           </VStack>

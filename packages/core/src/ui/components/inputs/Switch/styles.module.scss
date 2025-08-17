@@ -102,7 +102,7 @@ $container-padding: 2px;
 
 .label {
   cursor: pointer;
-  display: inline-block;
+  display: flex;
   user-select: none;
 
   &--disabled {
