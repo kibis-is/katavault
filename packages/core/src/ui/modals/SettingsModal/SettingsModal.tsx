@@ -19,7 +19,6 @@ import { DEFAULT_PADDING } from '@/ui/constants';
 
 // hooks
 import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
-import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
 import useSettingsToggleColorMode from '@/ui/hooks/settings/useSettingsToggleColorMode';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
@@ -29,14 +28,16 @@ import InfoIcon from '@/ui/icons/InfoIcon';
 import PaletteIcon from '@/ui/icons/PaletteIcon';
 
 // types
-import type { Props } from './types';
+import type { ModalProps } from '@/ui/types';
 
-const SettingsModal: FunctionComponent<Props> = ({
+const SettingsModal: FunctionComponent<ModalProps> = ({
+  closeOnEscape = true,
+  closeOnInteractOutside = true,
+  colorMode,
   onClose,
   open,
 }) => {
   // hooks
-  const colorMode = useSettingsColorMode();
   const defaultTextColor = useDefaultTextColor(colorMode);
   const toggleColorMode = useSettingsToggleColorMode();
   const translate = useTranslate();
@@ -47,8 +48,8 @@ const SettingsModal: FunctionComponent<Props> = ({
 
   return (
     <Modal
-      closeOnEscape={true}
-      closeOnInteractOutside={true}
+      closeOnEscape={closeOnEscape}
+      closeOnInteractOutside={closeOnInteractOutside}
       colorMode={colorMode}
       body={(
         <VStack align="center" fullWidth={true} grow={true} paddingBottom={DEFAULT_PADDING} paddingX={DEFAULT_PADDING} spacing="md">

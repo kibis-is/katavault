@@ -5,18 +5,20 @@ import { useCallback, useState } from 'preact/hooks';
 import Button from '@/ui/components/buttons/Button';
 
 // modals
-import SettingsModal from './SettingsModal';
+import ConfirmModal from './ConfirmModal';
 
 // types
-import { ModalProps } from '@/ui/types';
+import { Props } from './types';
 
-const meta: Meta<ModalProps> = {
+const meta: Meta<Props> = {
   args: {
+    closeOnEscape: true,
+    closeOnInteractOutside: true,
     colorMode: 'dark',
-    onClose: () => {},
-    open: true,
+    message: 'You are about to reset the world, are you sure?',
+    title: 'Reset the world',
   },
-  component: SettingsModal,
+  component: ConfirmModal,
   decorators: [
     (Story, { args, globals }) => {
       // states
@@ -30,8 +32,9 @@ const meta: Meta<ModalProps> = {
           {Story({
             args: {
               ...args,
-              open,
               onClose,
+              onConfirm: onClose,
+              open,
             },
           })}
 
@@ -45,24 +48,24 @@ const meta: Meta<ModalProps> = {
   globals: {
     theme: 'dark',
   },
-  title: 'Modals/SettingsModal',
+  title: 'Modals/ConfirmModal',
 };
 
-export const WithDarkColorMode: StoryObj<ModalProps> = {
+export const WithDarkColorMode: StoryObj<Props> = {
   globals: {
     theme: 'dark',
   },
   render: (props, { globals }) => (
-    <SettingsModal {...props}  colorMode={globals.theme} />
+    <ConfirmModal {...props} colorMode={globals.theme} />
   ),
 };
 
-export const WithLightColorMode: StoryObj<ModalProps> = {
+export const WithLightColorMode: StoryObj<Props> = {
   globals: {
     theme: 'light',
   },
   render: (props, { globals }) => (
-    <SettingsModal {...props} colorMode={globals.theme} />
+    <ConfirmModal {...props} colorMode={globals.theme} />
   ),
 };
 

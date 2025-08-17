@@ -1,8 +1,10 @@
 export type { default as AppContextState } from './AppContextState';
 export type { default as BaseAppProps } from './BaseAppProps';
 export type { default as BaseComponentProps } from './BaseComponentProps';
+export type { default as ConfirmModalContextState } from './ConfirmModalContextState';
 export type { default as ContextValue } from './ContextValue';
 export type { default as IconProps } from './IconProps';
+export type { default as ModalProps } from './ModalProps';
 export type { default as Sizes } from './Sizes';
 export type { default as StackAlign } from './StackAlign';
 export type { default as StackJustify } from './StackJustify';
