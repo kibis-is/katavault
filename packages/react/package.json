@@ -60,6 +60,7 @@
     "react": "^18.x"
   },
   "dependencies": {
-    "@kibisis/chains": "catalog:"
+    "@kibisis/chains": "catalog:",
+    "@kibisis/utilities": "catalog:"
   }
 }

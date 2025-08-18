@@ -346,6 +346,9 @@ importers:
       '@kibisis/chains':
         specifier: 'catalog:'
         version: 2.5.2
+      '@kibisis/utilities':
+        specifier: 'catalog:'
+        version: 1.0.0
     devDependencies:
       '@eslint/js':
         specifier: 'catalog:'

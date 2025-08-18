@@ -670,7 +670,7 @@ export default class Katavault extends BaseClass {
    * Adds a listener to be invoked upon the event type.
    *
    * @param {'logout'} type - The event type.
-   * @param {LogoutListenerCallback} callback - The callback to be invoked.
+   * @param {() => Promise<void> | void} callback - The callback to be invoked.
    * @returns {string} The ID for the listener.
    * @public
    */
