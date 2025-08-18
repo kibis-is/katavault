@@ -1,5 +1,6 @@
 import { CAIP002Namespace, type Chain, type ChainConstructor } from '@kibisis/chains';
 import { base58, base64, hex } from '@kibisis/encoding';
+import { uuid } from '@stablelib/uuid';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -50,6 +51,8 @@ import type {
   EphemeralAccount,
   EphemeralAccountStoreItem,
   KatavaultParameters,
+  Listener,
+  ListenerTypes,
   PasskeyStoreSchema,
   RenderVaultAppParameters,
   SendRawTransactionParameters,
@@ -90,6 +93,7 @@ export default class Katavault extends BaseClass {
   private _chains: Chain[];
   private _debug: boolean;
   private readonly _clientInformation: ClientInformation;
+  private readonly _listeners: Map<string, Listener<ListenerTypes>>;
   private readonly _signContext: SignContext;
   private readonly _transactionContext: TransactionContext;
   private _vault: Vault | null = null;
@@ -103,62 +107,13 @@ export default class Katavault extends BaseClass {
     this._appManager = new AppManager(commonParams);
     this._balancesContext = new BalancesContext(commonParams);
     this._signContext = new SignContext(commonParams);
+    this._listeners = new Map<string, Listener<ListenerTypes>>();
     this._transactionContext = new TransactionContext(commonParams);
   }
 
   /**
    * private methods
    */
-
-  /**
-   * Updates the balances for all the ephemeral accounts for each chain. A small delay is added between each fetch on
-   * the same chain to avoid rate limits.
-   *
-   * On completion, a `kv:ev:accounts_updated` is sent to let the app know the application has been updated.
-   *
-   * @private
-   * @async
-   */
-  private async _updateBalances(): Promise<void> {
-    const __logPrefix = `${Katavault.displayName}#_updateBalances`;
-    let account: EphemeralAccountStoreItem;
-    let accounts: EphemeralAccountStoreItem[];
-    let username: string;
-
-    if (!this._vault || !this._accountsStore) {
-      return;
-    }
-
-    accounts = (await this._accountsStore.accounts()).filter(
-      ({ __type }) => __type === AccountTypeEnum.Ephemeral
-    ) as EphemeralAccountStoreItem[];
-
-    for (const chain of this._chains) {
-      for (let i = 0; i < accounts.length; i++) {
-        account = accounts[i];
-
-        try {
-          accounts[i].balances[chain.chainID()] = await this._balancesContext.balance({
-            account,
-            chain,
-            delay: i > 0 ? 0 : BALANCE_FETCH_DELAY, // for accounts on the same network, add a small delay to avoid rate limits
-          });
-        } catch (error) {
-          this._logger.error(`${__logPrefix}:`, error);
-        }
-      }
-    }
-
-    // save to the vault store
-    await this._accountsStore.upsert(accounts);
-
-    username = usernameFromVault(this._vault);
-
-    this._logger.debug(`${__logPrefix}: updated balances for user "${username}"`);
-
-    // emit an event for this user
-    window.dispatchEvent(new AccountsUpdatedEvent(username));
-  }
 
   /**
    * Generates a credential account in the wallet. The credential account is an account derived from the user's
@@ -332,6 +287,21 @@ export default class Katavault extends BaseClass {
     }
   }
 
+  /**
+   * Gets all the listeners by type.
+   *
+   * @param {ListenerTypes} type - The type of listeners to filter by.
+   * @returns {[string, Listener<ListenerTypes>][]} An array of tuples whose first element will be the listener ID and
+   * the second element will be the listener.
+   * @private
+   */
+  private _listenersByType<Type extends ListenerTypes>(type: Type): [string, Listener<Type>][] {
+    return Array.from(this._listeners.entries()).filter(([_, { type: listenerType }]) => listenerType === type) as [
+      string,
+      Listener<Type>,
+    ][];
+  }
+
   private _startPollingBalances(): void {
     this._pollingBalanceID = window.setInterval(this._updateBalances.bind(this), BALANCES_UPDATE_TIMEOUT);
   }
@@ -340,6 +310,56 @@ export default class Katavault extends BaseClass {
     if (this._pollingBalanceID) {
       window.clearInterval(this._pollingBalanceID);
     }
+  }
+
+  /**
+   * Updates the balances for all the ephemeral accounts for each chain. A small delay is added between each fetch on
+   * the same chain to avoid rate limits.
+   *
+   * On completion, a `kv:ev:accounts_updated` is sent to let the app know the application has been updated.
+   *
+   * @private
+   * @async
+   */
+  private async _updateBalances(): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#_updateBalances`;
+    let account: EphemeralAccountStoreItem;
+    let accounts: EphemeralAccountStoreItem[];
+    let username: string;
+
+    if (!this._vault || !this._accountsStore) {
+      return;
+    }
+
+    accounts = (await this._accountsStore.accounts()).filter(
+      ({ __type }) => __type === AccountTypeEnum.Ephemeral
+    ) as EphemeralAccountStoreItem[];
+
+    for (const chain of this._chains) {
+      for (let i = 0; i < accounts.length; i++) {
+        account = accounts[i];
+
+        try {
+          accounts[i].balances[chain.chainID()] = await this._balancesContext.balance({
+            account,
+            chain,
+            delay: i > 0 ? 0 : BALANCE_FETCH_DELAY, // for accounts on the same network, add a small delay to avoid rate limits
+          });
+        } catch (error) {
+          this._logger.error(`${__logPrefix}:`, error);
+        }
+      }
+    }
+
+    // save to the vault store
+    await this._accountsStore.upsert(accounts);
+
+    username = usernameFromVault(this._vault);
+
+    this._logger.debug(`${__logPrefix}: updated balances for user "${username}"`);
+
+    // emit an event for this user
+    window.dispatchEvent(new AccountsUpdatedEvent(username));
   }
 
   /**
@@ -549,6 +569,7 @@ export default class Katavault extends BaseClass {
    */
   public async clearVault(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#clearVault`;
+    let listeners: [string, Listener<'vault_cleared'>][];
 
     if (!this.isAuthenticated()) {
       throw new NotAuthenticatedError('not authenticated');
@@ -573,6 +594,11 @@ export default class Katavault extends BaseClass {
     this._authenticationStore = null;
     this._accountsStore = null;
     this._vault = null;
+
+    listeners = this._listenersByType('vault_cleared');
+
+    // invoke listeners
+    listeners.forEach(([_, listener]) => listener.callback());
 
     this._logger.debug(`${__logPrefix} - cleared vault`);
   }
@@ -617,6 +643,7 @@ export default class Katavault extends BaseClass {
    */
   public logout(): void {
     const __logPrefix = `${Katavault.displayName}#logout`;
+    let listeners: [string, Listener<'logout'>][];
 
     // stop polling
     this._stopPollingBalances();
@@ -631,7 +658,31 @@ export default class Katavault extends BaseClass {
     this._accountsStore = null;
     this._vault = null;
 
+    listeners = this._listenersByType('logout');
+
+    // invoke listeners
+    listeners.forEach(([_, listener]) => listener.callback());
+
     this._logger.debug(`${__logPrefix} - logged out`);
+  }
+
+  /**
+   * Adds a listener to be invoked upon the event type.
+   *
+   * @param {'logout'} type - The event type.
+   * @param {LogoutListenerCallback} callback - The callback to be invoked.
+   * @returns {string} The ID for the listener.
+   * @public
+   */
+  public addListener<Type extends ListenerTypes>(type: Type, callback: () => Promise<void> | void): string {
+    const listenerID = uuid();
+
+    this._listeners.set(listenerID, {
+      callback,
+      type,
+    });
+
+    return listenerID;
   }
 
   /**
@@ -698,6 +749,20 @@ export default class Katavault extends BaseClass {
   }
 
   /**
+   * Removes all listeners.
+   * @public
+   */
+  public removeAllListeners(): void {
+    const __logPrefix = `${Katavault.displayName}#_removeAllListeners`;
+    const size = this._listeners.size;
+
+    // clear the map
+    this._listeners.clear();
+
+    this._logger.debug(`${__logPrefix} - removed "${size}" listeners`);
+  }
+
+  /**
    * Removes a chain from the list of supported chains based on the CAIP-002 chain ID.
    *
    * @param {string} chainID - The CAIP-002 chain ID of the chain to be removed.
@@ -705,6 +770,17 @@ export default class Katavault extends BaseClass {
    */
   public removeChainByChainID(chainID: string): void {
     this._chains = this._chains.filter((chain) => chain.chainID() !== chainID);
+  }
+
+  /**
+   * Removes the listener by the supplied ID.
+   *
+   * @param {string} id - The ID of the listener to remove.
+   * @returns {boolean} `true` of the listener existed, `false` otherwise.
+   * @public
+   */
+  public removeListener(id: string): boolean {
+    return this._listeners.delete(id);
   }
 
   /**

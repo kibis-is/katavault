@@ -1,8 +1,8 @@
 ---
-id: clear-vault
-sidebar_label: clearVault
-slug: /core/utilities/clear-vault
-title: clearVault
+id: remove-all-listeners
+sidebar_label: removeAllListeners
+slug: /core/utilities/remove-all-listeners
+title: removeAllListeners
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,15 +11,9 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# clearVault
+# removeAllListeners
 
-> Deletes all accounts, settings and data from the vault.
-
-:::note
-
-Authentication is **REQUIRED**.
-
-:::
+> Removes all listeners.
 
 <SectionBreak />
 
@@ -39,17 +33,12 @@ Authentication is **REQUIRED**.
     const katavault = await createKatavault({
       chains: [Voi],
     });
+    const listenerID = katavault.addListener('logout', () => {
+      console.log('user logged out!');
+    }));
 
-    await katavault.clearVault();
+    katavault.removeAllListeners();
     ```
 
   </TabItem>
 </Tabs>
-
-<SectionBreak />
-
-## Throws
-
-### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
-
-If Katavault has not been authenticated.
