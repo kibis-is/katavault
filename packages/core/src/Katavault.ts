@@ -120,7 +120,7 @@ export default class Katavault extends BaseClass {
    * credential; for passkeys, this is the key material returned from the passkey; for passwords this is the combination
    * of the username, password and hostname.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @returns {Promise<Account>} A promise that resolves to the generated credential account.
    * @throws {EncryptionError} If the account's private key failed to be encrypted.
@@ -369,7 +369,7 @@ export default class Katavault extends BaseClass {
   /**
    * Gets a list of accounts within the vault.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @returns {Promise<Account[]>} A promise that resolves to the accounts stored in the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
@@ -607,7 +607,7 @@ export default class Katavault extends BaseClass {
    * Gets the holding accounts of the vault. If no holding accounts exist, a new one is created from the saved
    * credentials.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @returns {Promise<[Account, ...Account[]]>} A promise that resolves to the holding accounts stored in the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
@@ -698,7 +698,7 @@ export default class Katavault extends BaseClass {
   /**
    * Opens the vault application.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
@@ -730,7 +730,7 @@ export default class Katavault extends BaseClass {
   /**
    * Removes the account from the vault for the specified key if it exists.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @param {string} key - The base58 encoded public key of the account to remove from the vault.
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
@@ -847,7 +847,7 @@ export default class Katavault extends BaseClass {
   /**
    * Updates the name of an account by its key.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @param {SetAccountNameByKeyParameters} params - The key of the account and the new name to set.
    * @param {string} params.key - The base58 encoded public key of the account.
@@ -899,7 +899,7 @@ export default class Katavault extends BaseClass {
    * contain whether the transaction submission was successful, the transaction ID and an error if the transaction
    * submission was unsuccessful. The index of the result array will match that of the supplied transaction array.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
    * ID and the raw transaction to be signed.
@@ -961,7 +961,7 @@ export default class Katavault extends BaseClass {
   /**
    * Signs a message or some arbitrary bytes using the appropriate account and chain.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @param {SignMessageParameters} params - The input parameters.
    * @param {string} params.accountKey - The base58 public key of the account that will be used for signing.
@@ -1043,7 +1043,7 @@ export default class Katavault extends BaseClass {
    * transaction signing was unsuccessful. The index of the result array will match that of the supplied transaction
    * array.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @param {SignRawTransactionParameters[]} parameters - An array containing the base58 encoded account key, the chain
    * ID and the raw transaction to be signed.
@@ -1137,7 +1137,7 @@ export default class Katavault extends BaseClass {
   /**
    * Gets the username for the authenticated user or null if Katavault is not authenticated.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
    *
    * @returns {string} The username of the logged-in user.
    * @throws {NotAuthenticatedError} If the user is not authenticated.
