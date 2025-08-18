@@ -1,3 +1,4 @@
+export { default as Katavault } from './Katavault';
 export * from './constants';
 export * from './decorators';
 export * from './enums';

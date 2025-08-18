@@ -2,7 +2,7 @@ import { CAIP002Namespace, type Chain } from '@kibisis/chains';
 import { createLogger } from '@kibisis/utilities';
 
 // facades
-import { Katavault } from '@/facades';
+import Katavault from '@/Katavault';
 
 // types
 import type { CreateKatavaultParameters } from '@/types';

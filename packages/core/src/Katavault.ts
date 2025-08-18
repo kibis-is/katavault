@@ -33,7 +33,7 @@ import {
 import { AccountsUpdatedEvent } from '@/events';
 
 // facades
-import AppManager from './AppManager';
+import AppManager from '@/facades/AppManager';
 
 // strategies
 import { BalancesContext, SignContext, TransactionContext } from '@/strategies';
