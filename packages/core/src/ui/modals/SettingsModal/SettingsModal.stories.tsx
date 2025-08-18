@@ -8,9 +8,9 @@ import Button from '@/ui/components/buttons/Button';
 import SettingsModal from './SettingsModal';
 
 // types
-import { ModalProps } from '@/ui/types';
+import { Props } from './types';
 
-const meta: Meta<ModalProps> = {
+const meta: Meta<Props> = {
   args: {
     colorMode: 'dark',
     onClose: () => {},
@@ -23,6 +23,7 @@ const meta: Meta<ModalProps> = {
       const [open, setOpen] = useState<boolean>(false);
       // callbacks
       const onClose = useCallback(() => setOpen(false), [setOpen]);
+      const onLogout = useCallback(() => setOpen(false), [setOpen]);
 
       return (
         <>
@@ -32,6 +33,7 @@ const meta: Meta<ModalProps> = {
               ...args,
               open,
               onClose,
+              onLogout,
             },
           })}
 
@@ -48,7 +50,7 @@ const meta: Meta<ModalProps> = {
   title: 'Modals/SettingsModal',
 };
 
-export const WithDarkColorMode: StoryObj<ModalProps> = {
+export const WithDarkColorMode: StoryObj<Props> = {
   globals: {
     theme: 'dark',
   },
@@ -57,7 +59,7 @@ export const WithDarkColorMode: StoryObj<ModalProps> = {
   ),
 };
 
-export const WithLightColorMode: StoryObj<ModalProps> = {
+export const WithLightColorMode: StoryObj<Props> = {
   globals: {
     theme: 'light',
   },

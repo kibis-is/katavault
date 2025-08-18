@@ -452,17 +452,18 @@ export default class Katavault extends BaseClass {
    * Authenticates with a passkey.
    *
    * @param {AuthenticateWithPasskeyParameters} params - The user information.
-   * @param {UserInformation} params.user - The user information.
+   * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+   * address.
    * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * @public
    */
-  public async authenticateWithPasskey({ user }: AuthenticateWithPasskeyParameters): Promise<void> {
+  public async authenticateWithPasskey({ username }: AuthenticateWithPasskeyParameters): Promise<void> {
     const vault = await initializeVault({
       logger: this._logger,
-      username: user.username,
+      username,
     });
 
     this._authenticationStore = {
@@ -470,7 +471,7 @@ export default class Katavault extends BaseClass {
       store: await authenticateWithPasskey({
         clientInformation: this._clientInformation,
         logger: this._logger,
-        user,
+        username,
         vault,
       }),
     };
@@ -490,17 +491,18 @@ export default class Katavault extends BaseClass {
    *
    * @param {AuthenticateWithPasswordParameters} params - The password and user information.
    * @param {string} params.password - The password.
-   * @param {UserInformation} params.user - The user information.
+   * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+   * address.
    * @throws {DecryptionError} If the stored challenge failed to be decrypted.
    * @throws {InvalidPasswordError} If supplied password does not match the stored password.
    * @throws {PasswordTooWeakError} If this is a new sign-up, and the supplied password does not have enough entropy.
    * @public
    * @async
    */
-  public async authenticateWithPassword({ password, user }: AuthenticateWithPasswordParameters): Promise<void> {
+  public async authenticateWithPassword({ password, username }: AuthenticateWithPasswordParameters): Promise<void> {
     const vault = await initializeVault({
       logger: this._logger,
-      username: user.username,
+      username,
     });
 
     this._authenticationStore = {
@@ -509,7 +511,7 @@ export default class Katavault extends BaseClass {
         clientInformation: this._clientInformation,
         logger: this._logger,
         password,
-        user,
+        username,
         vault,
       }),
     };

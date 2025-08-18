@@ -1,9 +1,9 @@
 // types
-import type { ClientInformation, CommonParameters, UserInformation } from '@/types';
+import type { ClientInformation, CommonParameters } from '@/types';
 
 interface RegisterPasskeyParameters extends CommonParameters {
-  client: ClientInformation;
-  user: UserInformation;
+  clientInformation: ClientInformation;
+  username: string;
 }
 
 export default RegisterPasskeyParameters;

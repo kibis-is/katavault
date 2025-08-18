@@ -1,0 +1,48 @@
+---
+id: authenticate
+sidebar_label: authenticate
+slug: /core/authentication/authenticate
+title: authenticate
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# authenticate
+
+> Opens up a modal to allow the user to choose how to authenticate.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.authenticate();
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />

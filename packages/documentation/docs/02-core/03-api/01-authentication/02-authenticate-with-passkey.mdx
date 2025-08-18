@@ -1,0 +1,84 @@
+---
+id: authenticate-with-passkey
+sidebar_label: authenticateWithPasskey
+slug: /core/authentication/authenticate-with-passkey
+title: authenticateWithPasskey
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# authenticate
+
+> Authenticates with a passkey.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { type Account, createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.authenticateWithPasskey({
+      username: 'kibi@kibis.is',
+    });
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+### params
+
+* Type: [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatewithpasskeyparameters)
+
+The input parameters.
+
+### params.username
+
+* Type: `string`
+
+A globally unique identifier for the user. This could be, for example, an email address.
+
+<SectionBreak />
+
+## Throws
+
+### [FailedToAuthenticatePasskeyError](04-glossary/03-errors.mdx#failedtoauthenticatepasskeyerror)
+
+If the passkey did not return the public key credentials.
+
+### [FailedToRegisterPasskeyError](04-glossary/03-errors.mdx#failedtoregisterpasskeyerror)
+
+If the public key credentials failed to be created on the passkey.
+
+### [PasskeyNotSupportedError](04-glossary/03-errors.mdx#passkeynotsupportederror)
+
+If the browser does not support WebAuthn or the authenticator does not support.
+
+### [UserCanceledPasskeyRequestError](04-glossary/03-errors.mdx#usercanceledpasskeyrequesterror)
+
+If the user canceled the request or the request timed out.

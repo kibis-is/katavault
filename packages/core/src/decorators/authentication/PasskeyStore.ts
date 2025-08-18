@@ -198,8 +198,15 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * derive an encryption key.
    *
    * NOTE: this requires PRF extension support and will throw an error if the authenticator does not support it.
-   * @param {RegisterPasskeyParameters} options - The client and user details.
-   * @returns {Promise<PasskeyStore>} A promise that resolves to a registered passkey.
+   *
+   * @param {RegisterPasskeyParameters} params - The input parameters.
+   * @param {ClientInformation} params.clientInformation - Information about the client.
+   * @param {string} params.clientInformation.hostname - The hostname of the client i.e., example.com.
+   * @param {string} [params.clientInformation.icon] - An icon URL for the client.
+   * @param {string} params.clientInformation.name - A human-readable name for the client.
+   * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+   * address.
+   * @returns {Promise<PasskeyStore>} A promise that resolves to an initialized passkey store.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
@@ -208,7 +215,11 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * @static
    * @async
    */
-  public static async register({ client, logger, user }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
+  public static async register({
+    clientInformation,
+    logger,
+    username,
+  }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
     const __logPrefix = `${PasskeyStore.displayName}#register`;
     const salt = randomBytes(PasskeyStore._saltByteSize);
     let _error: string;
@@ -242,13 +253,13 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
             { alg: -257, type: 'public-key' }, // RS256
           ],
           rp: {
-            id: client.hostname,
-            name: client.name,
+            id: clientInformation.hostname,
+            name: clientInformation.name,
           },
           user: {
             id: utf8.decode(generate()),
-            name: user.username,
-            displayName: user.displayName ?? user.username,
+            name: username,
+            displayName: username,
           },
         },
       })) as PublicKeyCredential | null;
