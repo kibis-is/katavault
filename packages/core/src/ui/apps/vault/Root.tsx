@@ -47,7 +47,7 @@ import type { RootProps } from './types';
 import { usernameFromVault } from '@/utilities';
 import { ConfirmModalContext } from '@/ui/contexts';
 
-const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
+const Root: FunctionComponent<RootProps> = ({ onClose, onLogout, vault }) => {
   // contexts
   const confirmModalContextState = useContext(ConfirmModalContext);
   // hooks
@@ -104,6 +104,22 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
 
   return (
     <>
+      <ConnectAccountModal
+        colorMode={colorMode}
+        onClose={handleOnConnectAccountModalClose}
+        open={connectAccountModalOpen}
+      />
+      <TransferFundsModal
+        colorMode={colorMode}
+        onClose={handleOnTransferFundsModalClose}
+        open={transferFundsModalOpen}
+      />
+      <SettingsModal
+        colorMode={colorMode}
+        onClose={handleOnOpenSettingsModalClose}
+        onLogout={onLogout}
+        open={settingsModalOpen}
+      />
       <ConfirmModal
         colorMode={colorMode}
         message={confirmModalContextState?.message ?? ''}
@@ -111,21 +127,6 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
         onConfirm={handleOnConfirmModalConfirm}
         open={confirmModalContextState?.open ?? false}
         title={confirmModalContextState?.title ?? ''}
-      />
-      <ConnectAccountModal
-        colorMode={colorMode}
-        onClose={handleOnConnectAccountModalClose}
-        open={connectAccountModalOpen}
-      />
-      <SettingsModal
-        colorMode={colorMode}
-        onClose={handleOnOpenSettingsModalClose}
-        open={settingsModalOpen}
-      />
-      <TransferFundsModal
-        colorMode={colorMode}
-        onClose={handleOnTransferFundsModalClose}
-        open={transferFundsModalOpen}
       />
 
       <div className={clsx(styles.container)}>

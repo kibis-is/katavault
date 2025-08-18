@@ -2,6 +2,7 @@ import type { FunctionComponent } from 'preact';
 import { useCallback, useMemo } from 'preact/hooks';
 
 // components
+import Divider from '@/ui/components/layouts/Divider';
 import Footer from '@/ui/components/containers/Footer';
 import Heading from '@/ui/components/typography/Heading';
 import HStack from '@/ui/components/layouts/HStack';
@@ -10,6 +11,7 @@ import Modal from '@/ui/components/layouts/Modal';
 import SettingsItemCard from '@/ui/components/settings/SettingsItemCard';
 import SettingsSubHeading from '@/ui/components/settings/SettingsSubHeading';
 import Spacer from '@/ui/components/layouts/Spacer';
+import Stack from '@/ui/components/layouts/Stack';
 import Switch from '@/ui/components/inputs/Switch';
 import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
@@ -19,31 +21,40 @@ import { DEFAULT_PADDING } from '@/ui/constants';
 
 // hooks
 import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
+import useConfirmModal from '@/ui/hooks/layouts/useConfirmModal';
 import useSettingsToggleColorMode from '@/ui/hooks/settings/useSettingsToggleColorMode';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
 import CloseIcon from '@/ui/icons/CloseIcon';
 import InfoIcon from '@/ui/icons/InfoIcon';
+import LogoutIcon from '@/ui/icons/LogoutIcon';
 import PaletteIcon from '@/ui/icons/PaletteIcon';
 
 // types
-import type { ModalProps } from '@/ui/types';
+import type { Props } from './types';
 
-const SettingsModal: FunctionComponent<ModalProps> = ({
+const SettingsModal: FunctionComponent<Props> = ({
   closeOnEscape = true,
   closeOnInteractOutside = true,
   colorMode,
   onClose,
+  onLogout,
   open,
 }) => {
   // hooks
+  const confirmModal = useConfirmModal();
   const defaultTextColor = useDefaultTextColor(colorMode);
   const toggleColorMode = useSettingsToggleColorMode();
   const translate = useTranslate();
   // memos
   const maxWidth = useMemo(() => 380, []);
   // callbacks
+  const handleOnLogoutClick = useCallback(() => confirmModal({
+    message: translate('captions.confirmLogout'),
+    onConfirm: onLogout,
+    title: translate('headings.confirmLogout'),
+  }), [confirmModal, translate]);
   const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
 
   return (
@@ -89,6 +100,21 @@ const SettingsModal: FunctionComponent<ModalProps> = ({
                 title={translate('labels.version')}
               />
             </VStack>
+          </VStack>
+
+          <Stack align="center" fullWidth={true} maxWidth={maxWidth}>
+            <Divider colorMode={colorMode} />
+          </Stack>
+
+          <VStack align="center" fullWidth={true} maxWidth={maxWidth} spacing="sm">
+            {/*logout*/}
+            <SettingsItemCard
+              colorMode={colorMode}
+              item={(
+                <IconButton colorMode={colorMode} icon={<LogoutIcon />} onClick={handleOnLogoutClick} title={translate('buttons.logout')} />
+              )}
+              title={translate('labels.logout')}
+            />
           </VStack>
         </VStack>
       )}

@@ -6,6 +6,7 @@ import type { AuthenticationStore, Vault } from '@/types';
 interface RenderVaultAppParameters {
   authenticationStore: AuthenticationStore;
   chains: Chain[];
+  onLogout: () => void;
   vault: Vault;
 }
 

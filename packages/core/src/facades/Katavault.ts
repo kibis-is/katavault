@@ -18,7 +18,7 @@ import {
 import { AccountStore, CredentialID } from '@/decorators';
 
 // enums
-import { AccountTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
+import { AccountTypeEnum, AppTypeEnum, AuthenticationMethodEnum, EphemeralAccountOriginEnum } from '@/enums';
 
 // errors
 import {
@@ -591,6 +591,29 @@ export default class Katavault extends BaseClass {
   }
 
   /**
+   * Logs the user out and closes the vault.
+   *
+   * @public
+   */
+  public logout(): void {
+    const __logPrefix = `${Katavault.displayName}#logout`;
+
+    this._startPollingBalances();
+
+    // close any open apps
+    [AppTypeEnum.Authentication, AppTypeEnum.Vault].forEach((type) => this._appManager.closeApp(type));
+
+    // close the vault
+    this._vault?.close();
+
+    this._authenticationStore = null;
+    this._accountsStore = null;
+    this._vault = null;
+
+    this._logger.debug(`${__logPrefix} - logged out`);
+  }
+
+  /**
    * Opens the vault application.
    *
    * **NOTE:** Requires authentication.
@@ -608,6 +631,7 @@ export default class Katavault extends BaseClass {
     params = {
       authenticationStore: this._authenticationStore,
       chains: this._chains,
+      onLogout: () => this.logout(),
       vault: this._vault,
     };
 
@@ -1008,7 +1032,7 @@ export default class Katavault extends BaseClass {
    *
    * **NOTE:** Requires authentication.
    *
-   * @returns {string} The username of the logged in user.
+   * @returns {string} The username of the logged-in user.
    * @throws {NotAuthenticatedError} If the user is not authenticated.
    */
   public username(): string {
