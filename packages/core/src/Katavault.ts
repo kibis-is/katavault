@@ -31,7 +31,7 @@ import {
 } from '@/errors';
 
 // events
-import { AccountsUpdatedEvent } from '@/events';
+import { AccountsUpdatedEvent, LogoutEvent } from '@/events';
 
 // facades
 import AppManager from '@/facades/AppManager';
@@ -644,6 +644,7 @@ export default class Katavault extends BaseClass {
   public logout(): void {
     const __logPrefix = `${Katavault.displayName}#logout`;
     let listeners: [string, Listener<'logout'>][];
+    let username: string | null = null;
 
     // stop polling
     this._stopPollingBalances();
@@ -651,16 +652,25 @@ export default class Katavault extends BaseClass {
     // close any open apps
     [AppTypeEnum.Authentication, AppTypeEnum.Vault].forEach((type) => this._appManager.closeApp(type));
 
-    // close the vault
-    this._vault?.close();
+    if (this._vault) {
+      username = usernameFromVault(this._vault);
+
+      // close the vault
+      this._vault.close();
+    }
 
     this._authenticationStore = null;
     this._accountsStore = null;
     this._vault = null;
 
+    // emit an internal event to perform updates
+    if (username) {
+      window.dispatchEvent(new LogoutEvent(username));
+    }
+
     listeners = this._listenersByType('logout');
 
-    // invoke listeners
+    // invoke registered listeners
     listeners.forEach(([_, listener]) => listener.callback());
 
     this._logger.debug(`${__logPrefix} - logged out`);
