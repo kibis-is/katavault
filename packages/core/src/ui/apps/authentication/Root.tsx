@@ -108,10 +108,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
       store = await authenticateWithPasskey({
         clientInformation,
         logger,
-        user: {
-          displayName: usernameInputProps.value,
-          username: usernameInputProps.value,
-        },
+        username: usernameInputProps.value,
         vault,
       });
 
@@ -165,10 +162,7 @@ const Root: FunctionComponent<Pick<BaseAppProps, 'onClose'> & AppProps & RootPro
         clientInformation,
         logger,
         password: passwordInputProps.value,
-        user: {
-          displayName: usernameInputProps.value,
-          username: usernameInputProps.value,
-        },
+        username: usernameInputProps.value,
         vault,
       });
 

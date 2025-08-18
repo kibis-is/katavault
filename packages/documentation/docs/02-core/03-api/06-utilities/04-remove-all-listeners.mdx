@@ -1,0 +1,44 @@
+---
+id: remove-all-listeners
+sidebar_label: removeAllListeners
+slug: /core/utilities/remove-all-listeners
+title: removeAllListeners
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# removeAllListeners
+
+> Removes all listeners.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    const listenerID = katavault.addListener('logout', () => {
+      console.log('user logged out!');
+    }));
+
+    katavault.removeAllListeners();
+    ```
+
+  </TabItem>
+</Tabs>

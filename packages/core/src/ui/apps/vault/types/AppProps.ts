@@ -6,6 +6,7 @@ import type { AuthenticationStore, Vault } from '@/types';
 interface AppProps {
   authenticationStore: AuthenticationStore;
   chains: Chain[];
+  onLogout: () => void;
   vault: Vault;
 }
 

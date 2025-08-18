@@ -1,0 +1,9 @@
+@use "@/ui/styles/mixins";
+
+.container {
+  @include mixins.card-container;
+}
+
+.content {
+  @include mixins.settings-card-content;
+}

@@ -16,7 +16,6 @@ import VStack from '@/ui/components/layouts/VStack';
 import { DEFAULT_PADDING } from '@/ui/constants';
 
 // hooks
-import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
 import useTabletAndUp from '@/ui/hooks/screens/useTabletAndUp';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
@@ -26,15 +25,14 @@ import CloseIcon from '@/ui/icons/CloseIcon';
 
 // types
 import type { ConnectedAccountStoreItem, EphemeralAccountStoreItem } from '@/types';
-import type { StackProps } from '@/ui/types';
-import type { Props } from './types';
+import type { ModalProps, StackProps } from '@/ui/types';
 
-const TransferModal: FunctionComponent<Props> = ({
+const TransferModal: FunctionComponent<ModalProps> = ({
+  colorMode,
   onClose,
   open,
 }) => {
   // hooks
-  const colorMode = useSettingsColorMode();
   const tabletAndUp = useTabletAndUp();
   const translate = useTranslate();
   // states

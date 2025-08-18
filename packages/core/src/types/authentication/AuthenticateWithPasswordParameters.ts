@@ -1,13 +1,10 @@
-// types
-import type { UserInformation } from '@/types';
-
 /**
  * @property {string} password - The password used to encrypt the account private keys.
- * @property {UserInformation} user - The user information.
+ * @property {string} username - A globally unique identifier for the user. This could be, for example, an email address.
  */
 interface AuthenticateWithPasswordParameters {
   password: string;
-  user: UserInformation;
+  username: string;
 }
 
 export default AuthenticateWithPasswordParameters;

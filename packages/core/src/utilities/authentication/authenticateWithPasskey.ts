@@ -6,11 +6,16 @@ import type { AuthenticateWithPasskeyParameters, CommonParameters, WithClientInf
 
 /**
  * Authenticates with a passkey.
- * @param {CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>} params - The client
- * infromation, the user information and an initialized vault.
- * @param {ClientInformation} params.clientInformation - The client information.
+ *
+ * @param {CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>} params - The input
+ * parameters.
+ * @param {ClientInformation} params.clientInformation - Information about the client.
+ * @param {string} params.clientInformation.hostname - The hostname of the client i.e., example.com.
+ * @param {string} [params.clientInformation.icon] - An icon URL for the client.
+ * @param {string} params.clientInformation.name - A human-readable name for the client.
  * @param {ILogger} params.logger - A logger for logging.
- * @param {UserInformation} params.user - The user information.
+ * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+ * address.
  * @param {Vault} params.vault - An initialized vault.
  * @returns {Promise<PasskeyStore>} A promise that resolves to an initialized passkey store.
  * @throws {FailedToAuthenticatePasskeyError} If the authenticator did not return the public key credentials.
@@ -22,14 +27,14 @@ import type { AuthenticateWithPasskeyParameters, CommonParameters, WithClientInf
 export default async function authenticateWithPasskey({
   clientInformation,
   logger,
-  user,
+  username,
   vault,
 }: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasskeyParameters>>): Promise<PasskeyStore> {
   const __logPrefix = `utilities#authenticateWithPasskey`;
   const store = new PasskeyStore({
     hostname: clientInformation.hostname,
     logger,
-    username: user.username,
+    username,
     vault,
   });
   let keyMaterial: Uint8Array;
@@ -40,9 +45,9 @@ export default async function authenticateWithPasskey({
     logger.debug(`${__logPrefix}: no passkey exists, registering new credential`);
 
     passkey = await PasskeyStore.register({
-      client: clientInformation,
+      clientInformation: clientInformation,
       logger,
-      user,
+      username,
     });
 
     await store.setPasskey(passkey);

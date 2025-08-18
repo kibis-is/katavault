@@ -97,7 +97,6 @@ To initialize the user authentication flow, use:
     // opens a modal for the user to authenticate
     await katavault.authenticate();
 
-
     console.log(`is authenticated: ${katavault.isAuthenticated()}`);
     /*
     is authenticated: true
@@ -143,10 +142,7 @@ If the dApp has its own authentication process, Katavault also offers the abilit
 
     ```typescript
     await katavault.authenticateWithPasskey({
-      user: {
-        displayName: 'Kibi', // optional
-        username: 'kibi@kibis.is',
-      },
+      username: 'kibi@kibis.is',
     });
 
     console.log(`is authenticated: ${katavault.isAuthenticated()}`);
@@ -186,10 +182,7 @@ If passkeys are not supported, or the supplied passkey does not support the [PRF
     ```typescript
     await katavault.authenticateWithPassword({
       password: 'mtr*tpv!cbg@dhn9RFH',
-      user: {
-        displayName: 'Kibi', // optional
-        username: 'kibi@kibis.is',
-      },
+      username: 'kibi@kibis.is',
     });
 
     console.log(`is authenticated: ${katavault.isAuthenticated()}`);

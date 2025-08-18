@@ -1,0 +1,158 @@
+---
+id: use-clear-vault
+sidebar_label: useClearVault
+slug: /react/utilities/use-clear-vault
+title: useClearVault
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useClearVault
+
+> Hook to perform a "factory reset." This will remove authentication credentials, settings and all account data.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+:::caution
+
+Use with extreme caution. This is action is irreversible.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="clear-vault"
+  values={[
+    { label: 'ClearVault.tsx', value: 'clear-vault' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="clear-vault">
+
+    ```typescript
+    import { useClearVault } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
+
+    function ClearVault() {
+      const clearVault = useClearVault();
+      const handleOnClearVaultClick = useCallback(() => {
+        clearVault({
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: () => {
+            console.log(`vault cleared!`);
+          },
+        });
+      }, [clearVault]);
+
+      return (
+        <div>
+          <button onClick={handleOnClearVaultClick}>Clear Vault</button>
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import { ClearVault } from './ClearVault';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <ClearVault />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+
+<SectionBreak />
+
+## Returns
+
+`(options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### options.onError
+
+Type: `(error: BaseError) => void | Promise<void>`
+
+This will be invoked if there was an error.
+
+#### options.onSuccess
+
+Type: `() => void | Promise<void>`
+
+This will be invoked if the action was successful.
+
+## See also
+
+* [clearVault](02-core/03-api/06-utilities/02-clear-vault.mdx)

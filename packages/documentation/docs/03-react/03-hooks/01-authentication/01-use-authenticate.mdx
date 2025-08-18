@@ -1,0 +1,181 @@
+---
+id: use-authenticate
+sidebar_label: useAuthenticate
+slug: /react/authentication/use-authenticate
+title: authenticate
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useAuthenticate
+
+> Hook to manage authentication.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="auth"
+  values={[
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        authenticateWithPasskey,
+        authenticateWithPassword,
+        isAuthenticated,
+      } = useAuthenticate();
+      const handleOnAuthenticateClick = useCallback(() => {
+        // opens a modal for the user to authenticate
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'),
+        });
+      }, [authenticate]);
+      const handleOnAuthenticateWithPasskeyClick = useCallback((username: string) => () => {
+        authenticateWithPasskey({
+          username: 'kibi@kibis.is',
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'),
+        });
+      }, [authenticateWithPasskey]);
+      const handleOnAuthenticateWithPasswordClick = useCallback((username: string, password: string) => () => {
+        authenticateWithPassword({
+          password: 'mtr*tpv!cbg@dhn9RFH',
+          username: 'kibi@kibis.is',
+        }, {
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'),
+        });
+      }, [authenticateWithPassword]);
+
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return (
+        <div>
+          <button onClick={handleOnAuthenticateClick}>
+            Authenticate via UI
+          </button>
+
+          <button onClick={handleOnAuthenticateWithPasskeyClick('kibi@kibis.is')}>
+            Authenticate with Passkey
+          </button>
+
+          <button onClick={handleOnAuthenticateWithPasswordClick('kibi@kibis.is', 'mtr*tpv!cbg@dhn9RFH')}>
+            Authenticate with Password
+          </button>
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Algorand, Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Algorand, Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+Type: `UseAuthenticateState`
+
+The list of supported chains stored in the vault.
+
+#### result.authenticate
+
+Type: `(options?: { onError, onSuccess }) => void`
+
+A function used to authenticate the user via the UI and can be called with callbacks that are invoked on error/success.
+
+#### result.authenticateWithPasskey
+
+Type: `(params: AuthenticateWithPasskeyParameters, options?: { onError, onSuccess }) => void`
+
+A function used to authenticate the user with a passkey and can be called with callbacks that are invoked on error/success.
+
+:::note
+
+See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatewithpasskeyparameters) for information on the available parameters.
+
+:::
+
+#### result.authenticateWithPassword
+
+Type: `(params: AuthenticateWithPasswordParameters, options?: { onError, onSuccess }) => void`
+
+A function used to authenticate the user with a password and can be called with callbacks that are invoked on error/success.
+
+:::note
+
+See [`AuthenticateWithPasswordParameters`](04-glossary/02-types.mdx#authenticatewithpasswordparameters) for information on the available parameters.
+
+:::
+
+#### result.isAuthenticated
+
+Type: `boolean`
+
+Whether the user has been authenticated.
+
+#### result.isAuthenticating
+
+Type: `boolean`
+
+Whether the user is currently authenticating.
+
+## See also
+
+* [authenticate](02-core/03-api/01-authentication/01-authenticate.mdx)
+* [authenticateWithPasskey](02-core/03-api/01-authentication/02-authenticate-with-passkey.mdx)
+* [authenticateWithPassword](02-core/03-api/01-authentication/03-authenticate-with-password.mdx)
+* [isAuthenticated](02-core/03-api/01-authentication/04-is-authenticated.mdx)

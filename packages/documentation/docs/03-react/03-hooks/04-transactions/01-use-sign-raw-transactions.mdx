@@ -1,0 +1,173 @@
+---
+id: use-sign-raw-transactions
+sidebar_label: useSignRawTransactions
+slug: /react/transactions/use-sign-raw-transactions
+title: useSignRawTransactions
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useSignRawTransactions
+
+> Hook to sign an array of raw transactions using the appropriate account and chain.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="sign-raw-transctions"
+  values={[
+    { label: 'SignRawTransactions.tsx', value: 'sign-raw-transctions' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="sign-raw-transctions">
+
+    ```typescript
+    import { useAccounts, useSignRawTransactions } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
+
+    function SignRawTransactions() {
+      const accounts = useAccounts();
+      const signRawTransactions = useSignRawTransactions();
+      const handleOnSignRawTransactionsClick = useCallback((key: string) => () => {
+        signRawTransactions([
+          {
+            accountKey: key,
+            chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+            transaction: [36, 9, 22, ...], // the raw transaction data
+          }
+        ], {
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: ([result]) => {
+            if (result.error || !result.success) {
+              console.error(result.error ?? 'signing unsuccessful');
+
+              return;
+            }
+
+            console.log(`signed transaction with signature: ${result.signature}`);
+          },
+        });
+      }, [signRawTransactions]);
+
+      return (
+        <div>
+          {accounts.map(({ key, name }) => (
+            <div>
+              <p>Key: {key}</p>
+              <p>Name: {name ?? '-'}</p>
+              <button onClick={handleOnSignRawTransactionsClick(key)}>Sign</button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import { SignRawTransactions } from './SignRawTransactions';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <SignRawTransactions />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`(params: SignRawTransactionParameters[], options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### options.onError
+
+Type: `(error: BaseError, params: SignRawTransactionParameters[]) => void | Promise<void>`
+
+This will be invoked if there was an error.
+
+#### options.onSuccess
+
+Type: `(result: SignRawTransactionResult[], params: SignRawTransactionParameters[]) => void | Promise<void>`
+
+This will be invoked with an array of results that will contain whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
+signing was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list indices.
+
+## See also
+
+* [signRawTransactions](02-core/03-api/04-transactions/01-sign-raw-transactions.mdx)

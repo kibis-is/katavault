@@ -1,9 +1,9 @@
 @use "palette";
 @use "sass:map";
 
-/* account card */
-$account-card-min-height: 9rem; // 144px
-$account-card-min-width: 18.75rem; // 300px
+/**
+ * base
+ */
 
 /* borders */
 $border-radius: (
@@ -42,3 +42,14 @@ $spacing: (
   xl: 2.5rem,
   xxl: 3rem,
 );
+
+/**
+ * components
+ */
+
+/* account card */
+$account-card-min-height: 9rem; // 144px
+$account-card-min-width: 18.75rem; // 300px
+
+/* cards */
+$card-padding: map.get($spacing, "sm");

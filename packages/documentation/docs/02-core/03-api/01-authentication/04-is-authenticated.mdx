@@ -1,0 +1,48 @@
+---
+id: is-authenticated
+sidebar_label: isAuthenticated
+slug: /core/authentication/is-authenticated
+title: isAuthenticated
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# isAuthenticated
+
+> Checks if Katavault has been authenticated.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    const isAuthenticated = katavault.isAuthenticated();
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Returns
+
+`boolean`
+
+`true` if Katavault has been authenticated, `false` otherwise.

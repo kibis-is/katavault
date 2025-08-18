@@ -25,7 +25,6 @@ import useAddAccounts from '@/ui/hooks/accounts/useAddAccount';
 import useAvailableConnections from '@/ui/hooks/connectors/useAvailableConnections';
 import useConnectors from '@/ui/hooks/connectors/useConnectors';
 import useLogger from '@/ui/hooks/logging/useLogger';
-import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
 import useTabletAndUp from '@/ui/hooks/screens/useTabletAndUp';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
@@ -35,10 +34,10 @@ import WalletIcon from '@/ui/icons/WalletIcon';
 
 // types
 import type { ConnectedAccount, WalletConnection } from '@/types';
-import type { StackProps } from '@/ui/types';
-import type { Props } from './types';
+import type { ModalProps, StackProps } from '@/ui/types';
 
-const ConnectAccountModal: FunctionComponent<Props> = ({
+const ConnectAccountModal: FunctionComponent<ModalProps> = ({
+  colorMode,
   onClose,
   open,
 }) => {
@@ -47,7 +46,6 @@ const ConnectAccountModal: FunctionComponent<Props> = ({
   const availableConnections = useAvailableConnections();
   const connectors = useConnectors();
   const logger = useLogger();
-  const colorMode = useSettingsColorMode();
   const tabletAndUp = useTabletAndUp();
   const translate = useTranslate();
   // states

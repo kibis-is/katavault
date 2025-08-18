@@ -1,0 +1,152 @@
+---
+id: use-open-vault
+sidebar_label: useOpenVault
+slug: /react/utilities/use-open-vault
+title: useOpenVault
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useOpenVault
+
+> Hook to open the vault application.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="open-vault"
+  values={[
+    { label: 'OpenVault.tsx', value: 'open-vault' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="open-vault">
+
+    ```typescript
+    import { useOpenVault } from '@kibisis/katavault-react';
+    import { useCallback } from 'react';
+
+    function OpenVault() {
+      const openVault = useOpenVault();
+      const handleOnOpenVaultClick = useCallback(() => {
+        openVault({
+          onError: (error) => {
+            console.error(error);
+          },
+          onSuccess: () => {
+            console.log(`vault opened!`);
+          },
+        });
+      }, [openVault]);
+
+      return (
+        <div>
+          <button onClick={handleOnOpenVaultClick}>Open Vault</button>
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+    import { OpenVault } from './OpenVault';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <OpenVault />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+
+<SectionBreak />
+
+## Returns
+
+`(options?: { onError, onSuccess }) => void`
+
+The function can be called with callbacks that are invoked on error/success.
+
+#### options.onError
+
+Type: `(error: BaseError) => void | Promise<void>`
+
+This will be invoked if there was an error.
+
+#### options.onSuccess
+
+Type: `() => void | Promise<void>`
+
+This will be invoked if the action was successful.
+
+## See also
+
+* [openVault](02-core/03-api/06-utilities/03-open-vault.mdx)

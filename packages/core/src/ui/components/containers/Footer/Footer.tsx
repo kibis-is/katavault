@@ -7,7 +7,7 @@ import Text from '@/ui/components/typography/Text';
 import VStack from '@/ui/components/layouts/VStack';
 
 // constants
-import { DEFAULT_PADDING, KATAVAULT_URL } from '@/ui/constants';
+import { DEFAULT_PADDING, KATAVAULT_DOCS_URL } from '@/ui/constants';
 
 // hooks
 import useDefaultTextColor from '@/ui/hooks/colors/useDefaultTextColor';
@@ -34,7 +34,7 @@ const Footer: FunctionComponent<BaseComponentProps> = ({ colorMode }) => {
           {translate('captions.poweredBy')}
         </Text>
 
-        <Link colorMode={colorMode} href={KATAVAULT_URL} isExternal={true}>
+        <Link colorMode={colorMode} href={KATAVAULT_DOCS_URL} isExternal={true}>
           <BannerIcon className={styles.footerIcon} color={defaultTextColor} />
         </Link>
       </HStack>

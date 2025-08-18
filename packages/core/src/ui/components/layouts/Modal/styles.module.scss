@@ -26,13 +26,12 @@
   border-radius: map.get(variables.$border-radius, md) map.get(variables.$border-radius, md) 0 0;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: auto;
   width: 100%;
   z-index: 0;
 
   @include media.tablet-and-up {
     border-radius: map.get(variables.$border-radius, md);
-    height: auto;
     max-width: 500px;
   }
 

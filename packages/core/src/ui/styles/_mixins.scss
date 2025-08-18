@@ -2,7 +2,19 @@
 @use "variables";
 @use "sass:map";
 
-@mixin base-account-card-container-styles {
+/**
+ * buttons
+ */
+
+@mixin button-transition {
+  transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease;
+}
+
+/**
+ * cards
+ */
+
+@mixin card-container {
   align-items: center;
   background-color: transparent;
   border-color: palette.border-color("light");
@@ -19,9 +31,14 @@
   }
 }
 
-@mixin button-transition {
-  transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease;
+@mixin settings-card-content {
+  min-height: 4.125rem; // 66px
+  padding: variables.$card-padding;
 }
+
+/**
+ * text
+ */
 
 @mixin reset-text-styles {
   font-family: variables.$font-family;

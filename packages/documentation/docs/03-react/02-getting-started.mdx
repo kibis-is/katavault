@@ -177,10 +177,7 @@ As explained in the [core](02-core/02-getting-started.mdx#2-authentication) docu
 
       useEffect(() => {
         authenticateWithPasskey({
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
+          username: 'kibi@kibis.is',
         }, {
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
@@ -261,10 +258,7 @@ See [`AuthenticateWithPasskeyParameters`](04-glossary/02-types.mdx#authenticatew
       useEffect(() => {
         authenticateWithPassword({
           password: 'mtr*tpv!cbg@dhn9RFH',
-          user: {
-            name: 'Kibi',
-            username: 'kibi@kibis.is',
-          },
+          username: 'kibi@kibis.is',
         }, {
           onError: (error) => console.error(error),
           onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back

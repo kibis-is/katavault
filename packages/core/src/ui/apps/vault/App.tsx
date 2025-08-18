@@ -10,6 +10,7 @@ import { AccountStore, SettingsStore } from '@/decorators';
 import AccountsProvider from '@/ui/providers/AccountsProvider';
 import AppProvider from '@/ui/providers/AppProvider';
 import ChainsProvider from '@/ui/providers/ChainsProvider';
+import ConfirmModalProvider from '@/ui/providers/ConfirmModalProvider';
 import ConnectorsProvider from '@/ui/providers/ConnectorsProvider';
 import SettingsProvider from '@/ui/providers/SettingsProvider';
 import UserProvider from '@/ui/providers/UserProvider';
@@ -41,7 +42,9 @@ const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInforma
           })}>
             <ChainsProvider chains={chains}>
               <ConnectorsProvider chains={chains} debug={debug}>
-                <Root {...rootProps} />
+                <ConfirmModalProvider>
+                  <Root {...rootProps} />
+                </ConfirmModalProvider>
               </ConnectorsProvider>
             </ChainsProvider>
           </AccountsProvider>

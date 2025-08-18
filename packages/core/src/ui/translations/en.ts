@@ -3,7 +3,9 @@ import type { ResourceLanguage } from 'i18next';
 export default {
   buttons: {
     cancel: 'Cancel',
+    confirm: 'Confirm',
     continue: 'Continue',
+    logout: 'Logout',
     retry: 'Retry',
     signInWithPasskey: 'Sign in with a passkey',
     signupWithPasskey: 'Sign-up with a passkey',
@@ -14,6 +16,7 @@ export default {
   },
   captions: {
     chooseConnectionMethod: 'Choose how you would like to connect a new account:',
+    confirmLogout: 'Are you sure you want to logout?',
     connectAnAccount: 'Connect an account',
     connectingWallet: 'Please follow the instructions on {{name}} to connect.',
     copyAccountID: 'Copy account ID',
@@ -40,12 +43,16 @@ export default {
     },
   },
   headings: {
+    about: 'About',
+    appearance: 'Appearance',
+    confirmLogout: 'Logout',
     connectAnAccount: 'Connect an account ',
     connectedAccounts: 'Connected accounts',
     connections: 'Connections',
     finishCreatingANewAccount: 'Finish creating a new account',
     holdingAccounts: 'Holding accounts',
     networks: 'Networks',
+    settings: 'Settings',
     signInOrCreateANewAccount: 'Sign in or create a new account',
     transferFunds: 'Transfer funds',
     welcomeBack: 'Welcome back!',
@@ -54,7 +61,10 @@ export default {
     avm: 'AVM',
     accountID: 'Account ID',
     credentialAccount: 'Credential account',
+    darkMode: 'Dark mode',
+    logout: 'Logout',
     name: 'Name',
+    version: 'Version',
   },
   placeholders: {
     password: 'Password',

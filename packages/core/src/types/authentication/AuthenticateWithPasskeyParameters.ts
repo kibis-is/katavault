@@ -1,11 +1,8 @@
-// types
-import type { UserInformation } from '@/types';
-
 /**
- * @property {UserInformation} user - The user information.
+ * @property {string} username - A globally unique identifier for the user. This could be, for example, an email address.
  */
 interface AuthenticateWithPasskeyParameters {
-  user: UserInformation;
+  username: string;
 }
 
 export default AuthenticateWithPasskeyParameters;
