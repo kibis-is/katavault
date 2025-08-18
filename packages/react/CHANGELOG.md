@@ -1,3 +1,10 @@
+# [@kibisis/katavault-react-v1.5.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.4.0...@kibisis/katavault-react-v1.5.0) (2025-08-18)
+
+
+### Features
+
+* adds logout ([#15](https://github.com/kibis-is/katavault/issues/15)) ([d4b5214](https://github.com/kibis-is/katavault/commit/d4b5214f8a23d3f4079b8bce21060d82a7efa55a))
+
 # [@kibisis/katavault-react-v1.4.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-react-v1.3.0...@kibisis/katavault-react-v1.4.0) (2025-08-15)
 
 

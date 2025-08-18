@@ -1,6 +1,6 @@
 {
   "name": "@kibisis/katavault-react",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "The React implementation of Katavault that allows dApps to create/import embedded wallets.",
   "repository": {
     "type": "git",
