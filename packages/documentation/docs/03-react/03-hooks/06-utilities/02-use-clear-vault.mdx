@@ -1,8 +1,8 @@
 ---
-id: use-sign-message
-sidebar_label: useSignMessage
-slug: /react/data/use-sign-message
-title: useSignMessage
+id: use-clear-vault
+sidebar_label: useClearVault
+slug: /react/utilities/use-clear-vault
+title: useClearVault
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,13 +11,19 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useSignMessage
+# useClearVault
 
-> Hook to sign a message or some arbitrary bytes using the appropriate account and chain.
+> Hook to perform a "factory reset." This will remove authentication credentials, settings and all account data.
 
 :::note
 
 Authentication is **REQUIRED**.
+
+:::
+
+:::caution
+
+Use with extreme caution. This is action is irreversible.
 
 :::
 
@@ -26,47 +32,35 @@ Authentication is **REQUIRED**.
 ## Usage
 
 <Tabs
-  defaultValue="sign-message"
+  defaultValue="clear-vault"
   values={[
-    { label: 'SignMessage.tsx', value: 'sign-message' },
+    { label: 'ClearVault.tsx', value: 'clear-vault' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="sign-message">
+  <TabItem value="clear-vault">
 
     ```typescript
-    import { useAccounts, useSignMessage } from '@kibisis/katavault-react';
+    import { useClearVault } from '@kibisis/katavault-react';
     import { useCallback } from 'react';
 
-    function SignMessage() {
-      const accounts = useAccounts();
-      const signMessage = useSignMessage();
-      const handleOnSignMessageClick = useCallback((key: string) => () => {
-        signMessage({
-          accountKey: key,
-          chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
-          encoding: 'hex',
-          message: 'hello humie!',
-        }, {
+    function ClearVault() {
+      const clearVault = useClearVault();
+      const handleOnClearVaultClick = useCallback(() => {
+        clearVault({
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: (result: string) => {
-            console.log(`signed message with signature: ${result}`);
+          onSuccess: () => {
+            console.log(`vault cleared!`);
           },
         });
-      }, [signMessage]);
+      }, [clearVault]);
 
       return (
         <div>
-          {accounts.map(({ key, name }) => (
-            <div>
-              <p>Key: {key}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnSignMessageClick(key)}>Sign</button>
-            </div>
-          ))}
+          <button onClick={handleOnClearVaultClick}>Clear Vault</button>
         </div>
       );
     }
@@ -78,14 +72,14 @@ Authentication is **REQUIRED**.
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
     import { AuthScript } from './AuthScript';
-    import { SignMessage } from './SignMessage';
+    import { ClearVault } from './ClearVault';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <SignMessage />
+          <ClearVault />
         </KatavaultProvider>
       );
     }
@@ -138,32 +132,27 @@ Authentication is **REQUIRED**.
   </TabItem>
 </Tabs>
 
+
 <SectionBreak />
 
 ## Returns
 
-`(params: SignMessageParameters, options?: { onError, onSuccess }) => void`
+`(options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### options.onError
 
-Type: `(error: BaseError, params: SignMessageParameters) => void | Promise<void>`
+Type: `(error: BaseError) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
 #### options.onSuccess
 
-Type: `(result: string | Uint8Array, params: SignMessageParameters) => void | Promise<void>`
+Type: `() => void | Promise<void>`
 
-This will be invoked with the signature as the result if the message signing was successful.
-
-:::note
-
-If the `params.encoding` is used, the result will be a string in the specified encoding. Otherwise, the raw signature bytes (`Uint8Array`) will be returned.
-
-:::
+This will be invoked if the action was successful.
 
 ## See also
 
-* [signMessage](02-core/06-data/01-sign-message.mdx)
+* [clearVault](02-core/03-api/06-utilities/02-clear-vault.mdx)

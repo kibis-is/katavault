@@ -1,8 +1,8 @@
 ---
-id: use-remove-account-by-key
-sidebar_label: useRemoveAccountByKey
-slug: /react/accounts/use-remove-account-by-key
-title: useRemoveAccountByKey
+id: use-holding-accounts
+sidebar_label: useHoldingAccounts
+slug: /react/accounts/use-holding-accounts
+title: useHoldingAccounts
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,9 +11,9 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useRemoveAccountByKey
+# useHoldingAccounts
 
-> Hook to remove an account by the account key.
+> Hook for getting the list of holding accounts stored in the vault.
 
 :::note
 
@@ -36,34 +36,17 @@ Authentication is **REQUIRED**.
   <TabItem value="accounts">
 
     ```typescript
-    import { useAccounts, useRemoveAccountByKey } from '@kibisis/katavault-react';
-    import { useCallback } from 'react';
+    import { useHoldingAccounts } from '@kibisis/katavault-react';
 
     function Accounts() {
-      const accounts = useAccounts();
-      const removeAccountByKey = useRemoveAccountByKey();
-      const handleOnRemoveAccountByKeyClick = useCallback((key: string) => () => {
-        removeAccountByKey(key, {
-          onError: (error) => {
-            console.error(error);
-          },
-          onSuccess: () => {
-            console.log(`removed account ${key}`);
-          },
-        });
-      }, [useRemoveAccountByKey]);
+      const accounts = useHoldingAccounts();
 
-      return (
+      return accounts.map(({ key, name }) => (
         <div>
-          {accounts.map(({ key, name }) => (
-            <div>
-              <p>Key: {key}</p>
-              <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnRemoveAccountByKeyClick(key)}>Remove</button>
-            </div>
-          ))}
+          <p>Key: {key}</p>
+          <p>Name: {name ?? '-'}</p>
         </div>
-      );
+      ));
     }
     ```
 
@@ -137,22 +120,10 @@ Authentication is **REQUIRED**.
 
 ## Returns
 
-`(params: string, options?: { onError, onSuccess }) => void`
+[`Account[]`](04-glossary/02-types.mdx#account)
 
-The function can be called with callbacks that are invoked on error/success.
-
-#### options.onError
-
-Type: `(error: BaseError, params: string) => void | Promise<void>`
-
-This will be invoked if there was an error.
-
-#### options.onSuccess
-
-Type: `(result: undefined, params: string) => void | Promise<void>`
-
-This will be invoked if the account removal was successful.
+The list of the holding accounts stored in the vault.
 
 ## See also
 
-* [removeAccountByKey](02-core/03-accounts/03-remove-account-by-key.mdx)
+* [holdingAccounts](02-core/03-api/02-accounts/02-holding-accounts.mdx)

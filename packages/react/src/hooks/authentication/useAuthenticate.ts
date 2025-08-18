@@ -16,6 +16,7 @@ import type { HookFunction, HookFunctionWithoutParams, UseAuthenticateState } fr
 
 /**
  * Hook to manage authentication.
+ *
  * @returns {UseAuthenticateState} Authentication methods and authentication state.
  */
 export default function useAuthenticate(): UseAuthenticateState {

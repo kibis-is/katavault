@@ -11,7 +11,7 @@ import { NotInitializedError } from '@/errors';
 import type { HookFunctionWithoutParams } from '@/types';
 
 /**
- * Hook to open the vault UI.
+ * Hook to open the vault application.
  *
  * **NOTE:** Requires authentication.
  *

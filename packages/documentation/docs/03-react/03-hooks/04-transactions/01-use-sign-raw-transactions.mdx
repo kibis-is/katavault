@@ -1,8 +1,8 @@
 ---
-id: use-set-account-name-by-key
-sidebar_label: useSetAccountNameByKey
-slug: /react/accounts/use-set-account-name-by-key
-title: useSetAccountNameByKey
+id: use-sign-raw-transactions
+sidebar_label: useSignRawTransactions
+slug: /react/transactions/use-sign-raw-transactions
+title: useSignRawTransactions
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,9 +11,9 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useSetAccountNameByKey
+# useSignRawTransactions
 
-> Hook to set the name for an account by its key.
+> Hook to sign an array of raw transactions using the appropriate account and chain.
 
 :::note
 
@@ -26,35 +26,44 @@ Authentication is **REQUIRED**.
 ## Usage
 
 <Tabs
-  defaultValue="accounts"
+  defaultValue="sign-raw-transctions"
   values={[
-    { label: 'Accounts.tsx', value: 'accounts' },
+    { label: 'SignRawTransactions.tsx', value: 'sign-raw-transctions' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="accounts">
+  <TabItem value="sign-raw-transctions">
 
     ```typescript
-    import { useAccounts, useSetAccountNameByKey } from '@kibisis/katavault-react';
+    import { useAccounts, useSignRawTransactions } from '@kibisis/katavault-react';
     import { useCallback } from 'react';
 
-    function Accounts() {
+    function SignRawTransactions() {
       const accounts = useAccounts();
-      const setAccountNameByKey = useSetAccountNameByKey();
-      const handleOnUpdateAccountByKeyClick = useCallback((key: string) => () => {
-        setAccountNameByAddress({
-          key,
-          name: 'New name',
-        }, {
+      const signRawTransactions = useSignRawTransactions();
+      const handleOnSignRawTransactionsClick = useCallback((key: string) => () => {
+        signRawTransactions([
+          {
+            accountKey: key,
+            chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
+            transaction: [36, 9, 22, ...], // the raw transaction data
+          }
+        ], {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: ({ name }) => {
-            console.log(`updated account ${key} with name ${name}`);
+          onSuccess: ([result]) => {
+            if (result.error || !result.success) {
+              console.error(result.error ?? 'signing unsuccessful');
+
+              return;
+            }
+
+            console.log(`signed transaction with signature: ${result.signature}`);
           },
         });
-      }, [setAccountNameBykey]);
+      }, [signRawTransactions]);
 
       return (
         <div>
@@ -62,7 +71,7 @@ Authentication is **REQUIRED**.
             <div>
               <p>Key: {key}</p>
               <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnUpdateAccountByKeyClick(key)}>Update</button>
+              <button onClick={handleOnSignRawTransactionsClick(key)}>Sign</button>
             </div>
           ))}
         </div>
@@ -75,15 +84,15 @@ Authentication is **REQUIRED**.
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
-    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
+    import { SignRawTransactions } from './SignRawTransactions';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <Accounts />
+          <SignRawTransactions />
         </KatavaultProvider>
       );
     }
@@ -140,22 +149,25 @@ Authentication is **REQUIRED**.
 
 ## Returns
 
-`(params: SetAccountNameByKeyParameters, options?: { onError, onSuccess }) => void`
+`(params: SignRawTransactionParameters[], options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### options.onError
 
-Type: `(error: BaseError, params: SetAccountNameByKeyParameters) => void | Promise<void>`
+Type: `(error: BaseError, params: SignRawTransactionParameters[]) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
 #### options.onSuccess
 
-Type: `(result: Account, params: SetAccountNameByKeyParameters) => void | Promise<void>`
+Type: `(result: SignRawTransactionResult[], params: SignRawTransactionParameters[]) => void | Promise<void>`
 
-This will be invoked if the account update was successful and will return the updated account.
+This will be invoked with an array of results that will contain whether the transaction was signed successfully, the signature (if successful) and an error if the transaction
+signing was unsuccessful.
+
+Each element's index in the result list corresponds to the supplied parameter list indices.
 
 ## See also
 
-* [setAccountNameByKey](02-core/03-accounts/04-set-account-name-by-key.mdx)
+* [signRawTransactions](02-core/03-api/04-transactions/01-sign-raw-transactions.mdx)

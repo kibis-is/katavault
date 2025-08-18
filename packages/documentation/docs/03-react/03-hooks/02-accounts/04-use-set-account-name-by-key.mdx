@@ -1,8 +1,8 @@
 ---
-id: use-send-raw-transactions
-sidebar_label: useSendRawTransactions
-slug: /react/transactions/use-send-raw-transactions
-title: useSendRawTransactions
+id: use-set-account-name-by-key
+sidebar_label: useSetAccountNameByKey
+slug: /react/accounts/use-set-account-name-by-key
+title: useSetAccountNameByKey
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,9 +11,9 @@ import TabItem from '@theme/TabItem';
 <!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
 
-# useSendRawTransactionsMessage
+# useSetAccountNameByKey
 
-> Hook to send a list of raw transactions, and their signatures, to the specified chains.
+> Hook to set the name for an account by its key.
 
 :::note
 
@@ -26,44 +26,35 @@ Authentication is **REQUIRED**.
 ## Usage
 
 <Tabs
-  defaultValue="send-raw-transctions"
+  defaultValue="accounts"
   values={[
-    { label: 'SendRawTransactions.tsx', value: 'send-raw-transctions' },
+    { label: 'Accounts.tsx', value: 'accounts' },
     { label: 'App.tsx', value: 'app' },
     { label: 'AuthScript.tsx', value: 'auth' },
     { label: 'config.ts', value: 'config' },
   ]}>
-  <TabItem value="send-raw-transctions">
+  <TabItem value="accounts">
 
     ```typescript
-    import { useAccounts, useSendRawTransactions } from '@kibisis/katavault-react';
+    import { useAccounts, useSetAccountNameByKey } from '@kibisis/katavault-react';
     import { useCallback } from 'react';
 
-    function SendRawTransactions() {
+    function Accounts() {
       const accounts = useAccounts();
-      const sendRawTransactions = useSendRawTransactions();
-      const handleOnSignRawTransactionsClick = useCallback((key: string) => () => {
-        sendRawTransactions([
-          {
-            chainID: 'avm:r20fSQI8gWe_kFZziNonSPCXLwcQmH_n',
-            signature: [45, 12, 65, ...], // signature acquired from signing
-            transaction: [36, 9, 22, ...], // the raw transaction data
-          }
-        ], {
+      const setAccountNameByKey = useSetAccountNameByKey();
+      const handleOnUpdateAccountByKeyClick = useCallback((key: string) => () => {
+        setAccountNameByAddress({
+          key,
+          name: 'New name',
+        }, {
           onError: (error) => {
             console.error(error);
           },
-          onSuccess: ([result]) => {
-            if (result.error || !result.success) {
-              console.error(result.error ?? 'failed to send tarnsaction');
-
-              return;
-            }
-
-            console.log(`transaction ${result.transactionID} submitted successfully`);
+          onSuccess: ({ name }) => {
+            console.log(`updated account ${key} with name ${name}`);
           },
         });
-      }, [sendRawTransactions]);
+      }, [setAccountNameBykey]);
 
       return (
         <div>
@@ -71,7 +62,7 @@ Authentication is **REQUIRED**.
             <div>
               <p>Key: {key}</p>
               <p>Name: {name ?? '-'}</p>
-              <button onClick={handleOnSendRawTransactionsClick(key)}>Sign</button>
+              <button onClick={handleOnUpdateAccountByKeyClick(key)}>Update</button>
             </div>
           ))}
         </div>
@@ -84,15 +75,15 @@ Authentication is **REQUIRED**.
 
     ```typescript
     import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { Accounts } from './Accounts';
     import { AuthScript } from './AuthScript';
-    import { SendRawTransactions } from './SendRawTransactions';
     import config from './config';
 
     function App() {
       return (
         <KatavaultProvider config={config}>
           <AuthScript />
-          <SendRawTransactions />
+          <Accounts />
         </KatavaultProvider>
       );
     }
@@ -149,24 +140,22 @@ Authentication is **REQUIRED**.
 
 ## Returns
 
-`(params: SendRawTransactionParameters[], options?: { onError, onSuccess }) => void`
+`(params: SetAccountNameByKeyParameters, options?: { onError, onSuccess }) => void`
 
 The function can be called with callbacks that are invoked on error/success.
 
 #### options.onError
 
-Type: `(error: BaseError, params: SendRawTransactionParameters[]) => void | Promise<void>`
+Type: `(error: BaseError, params: SetAccountNameByKeyParameters) => void | Promise<void>`
 
 This will be invoked if there was an error.
 
 #### options.onSuccess
 
-Type: `(result: SendRawTransactionResult[], params: SendRawTransactionParameters[]) => void | Promise<void>`
+Type: `(result: Account, params: SetAccountNameByKeyParameters) => void | Promise<void>`
 
-This will be invoked with an array of results that will contain whether the transaction submission was successful, the transaction ID and an error if the transaction submission was unsuccessful.
-
-Each element's index in the result list corresponds to the supplied parameter list indices.
+This will be invoked if the account update was successful and will return the updated account.
 
 ## See also
 
-* [sendRawTransactions](02-core/05-transactions/02-send-raw-transactions.mdx)
+* [setAccountNameByKey](02-core/03-api/02-accounts/04-set-account-name-by-key.mdx)

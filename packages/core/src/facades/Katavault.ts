@@ -539,10 +539,13 @@ export default class Katavault extends BaseClass {
   /**
    * Deletes all accounts, settings and data from the vault.
    *
-   * **NOTE:** Requires authentication.
+   * ⚠️ **NOTE:** Requires authentication.
+   *
+   * 🚨 **WARNING:** Use with extreme caution. This is action is irreversible.
    *
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
+   * @async
    */
   public async clearVault(): Promise<void> {
     const __logPrefix = `${Katavault.displayName}#clearVault`;
@@ -598,7 +601,7 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Checks if Katavault is authenticated.
+   * Checks if Katavault has been authenticated.
    *
    * @returns {boolean} True if Katavault is authenticated, false otherwise.
    * @public
