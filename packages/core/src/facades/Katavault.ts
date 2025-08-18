@@ -537,26 +537,41 @@ export default class Katavault extends BaseClass {
   }
 
   /**
-   * Deletes all accounts and settings.
+   * Deletes all accounts, settings and data from the vault.
    *
    * **NOTE:** Requires authentication.
    *
    * @throws {NotAuthenticatedError} If Katavault has not been authenticated.
    * @public
    */
-  public async clear(): Promise<void> {
+  public async clearVault(): Promise<void> {
+    const __logPrefix = `${Katavault.displayName}#clearVault`;
+
     if (!this.isAuthenticated()) {
       throw new NotAuthenticatedError('not authenticated');
     }
 
-    this._authenticationStore = null;
+    // stop polling
+    this._stopPollingBalances();
 
+    // close any open apps
+    [AppTypeEnum.Authentication, AppTypeEnum.Vault].forEach((type) => this._appManager.closeApp(type));
+
+    // clear each store and close connection
     if (this._vault) {
       await this._vault.clear(IDB_ACCOUNTS_STORE_NAME);
       await this._vault.clear(IDB_PASSKEY_STORE_NAME);
       await this._vault.clear(IDB_PASSWORD_STORE_NAME);
       await this._vault.clear(IDB_SETTINGS_STORE_NAME);
+
+      this._vault.close();
     }
+
+    this._authenticationStore = null;
+    this._accountsStore = null;
+    this._vault = null;
+
+    this._logger.debug(`${__logPrefix} - cleared vault`);
   }
 
   /**
@@ -600,7 +615,8 @@ export default class Katavault extends BaseClass {
   public logout(): void {
     const __logPrefix = `${Katavault.displayName}#logout`;
 
-    this._startPollingBalances();
+    // stop polling
+    this._stopPollingBalances();
 
     // close any open apps
     [AppTypeEnum.Authentication, AppTypeEnum.Vault].forEach((type) => this._appManager.closeApp(type));
