@@ -8,11 +8,18 @@ import type { Parameters } from './types';
 /**
  * Converts a `image/svg+xml` data URI into an element.
  * @param {Parameters} params - The `image/svg+xml` data URI and optional parameters.
- * @param {string} params.className - [optional] An optional class name to pass to the prop.
+ * @param {string} [params.className] - An optional class name to pass to the prop.
+ * @param {string} [params.color] - The color of the SVG.
  * @param {string} params.dataURI - The data URI.
+ * @param {string} [params.title] - AN optional title to apply to the SVG.
  * @returns {VNode | null} The parsed `image/svg+xml` data URI or null if it failed to parse the data URI.
  */
-export default function dataURIToImageElement({ className, dataURI, title }: Parameters): VNode<SVGAttributes> | null {
+export default function dataURIToImageElement({
+  className,
+  color,
+  dataURI,
+  title,
+}: Parameters): VNode<SVGAttributes> | null {
   let data: string | undefined;
   let document: Document;
   let element: SVGElement | null;
@@ -67,5 +74,6 @@ export default function dataURIToImageElement({ className, dataURI, title }: Par
     dangerouslySetInnerHTML: {
       __html: title ? `<title>${title}</title>${element.innerHTML}` : element.innerHTML,
     },
+    ...(color && { fill: color }),
   });
 }

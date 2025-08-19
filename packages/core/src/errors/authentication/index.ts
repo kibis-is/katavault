@@ -5,4 +5,5 @@ export { default as InvalidCredentialIDError } from './InvalidCredentialIDError'
 export { default as InvalidPasswordError } from './InvalidPasswordError';
 export { default as NotAuthenticatedError } from './NotAuthenticatedError';
 export { default as PasskeyNotSupportedError } from './PasskeyNotSupportedError';
+export { default as PasswordTooWeakError } from './PasswordTooWeakError';
 export { default as UserCanceledPasskeyRequestError } from './UserCanceledPasskeyRequestError';

@@ -1,0 +1,140 @@
+---
+id: use-add-listener
+sidebar_label: useAddListener
+slug: /react/utilities/use-add-listener
+title: useAddListener
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# useAddListener
+
+> Hook that returns a function that can be used to add a listener.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="logout"
+  values={[
+    { label: 'Logout.tsx', value: 'logout' },
+    { label: 'App.tsx', value: 'app' },
+    { label: 'AuthScript.tsx', value: 'auth' },
+    { label: 'config.ts', value: 'config' },
+  ]}>
+  <TabItem value="logout">
+
+    ```typescript
+    import { useAddListener, useLogout, useRemoveListener } from '@kibisis/katavault-react';
+    import { useCallback, useEffect } from 'react';
+
+    function Logout() {
+      const addListener = useAddListener();
+      const logout = useLogout();
+      const removeListener = useRemoveListener();
+      const handleOnLogoutClick = useCallback(() => {
+        logout();
+      }, [logout]);
+
+      useEffect(() => {
+        const listenerID = addListener('logout', () => {
+          console.log('logged out!'));
+        });
+
+        // remove the listener when the component unmounts
+        return () => {
+          removeListener(listenerID);
+        });
+      }, []);
+
+      return (
+        <div>
+          <button onClick={handleOnLogoutClick}>Logout</button>
+        </div>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="app">
+
+    ```typescript
+    import { KatavaultProvider } from '@kibisis/katavault-react';
+    import { AddListener } from './OpenVault';
+    import { AuthScript } from './AuthScript';
+    import config from './config';
+
+    function App() {
+      return (
+        <KatavaultProvider config={config}>
+          <AuthScript />
+          <Logout />
+        </KatavaultProvider>
+      );
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="auth">
+
+    ```typescript
+    import { useAuthenticate } from '@kibisis/katavault-react';
+    import { useEffect } from 'react';
+
+    export function AuthScript() {
+      const {
+        authenticate,
+        isAuthenticated,
+      } = useAuthenticate();
+
+      useEffect(() => {
+        authenticate({
+          onError: (error) => console.error(error),
+          onSuccess: () => console.log('authenticated successfully!'), // for successful authentication, you can listen to this call back
+        });
+      }, []);
+      useEffect(() => {
+        console.log('is authenticated', isAuthenticated); // ... and/or check this variable
+      }, [isAuthenticated]);
+
+      return null;
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="config">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { CreateKatavaultParameters } from '@kibisis/katavault-core';
+
+    const config: CreateKatavaultParameters = {
+      chains: [Voi],
+      client: {
+        name: 'Awesome App!!',
+      },
+    };
+
+    export default config;
+    ```
+
+  </TabItem>
+</Tabs>
+
+
+<SectionBreak />
+
+## Returns
+
+`(type: ListenerTypes, callback: (() => Promise<void> | void)) => string`
+
+A function that can be used to add a listener.
+
+## See also
+
+* [addListener](02-core/03-api/06-utilities/01-add-listener.mdx)

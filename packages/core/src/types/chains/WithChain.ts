@@ -1,5 +1,5 @@
 import type { Chain } from '@kibisis/chains';
 
-type WithChain<Item> = Item & Record<'chain', Chain>;
+type WithChain<Item, ChainType = Chain> = Item & Record<'chain', ChainType>;
 
 export default WithChain;

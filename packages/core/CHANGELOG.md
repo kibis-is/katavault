@@ -1,3 +1,31 @@
+# [@kibisis/katavault-core-v1.6.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.5.0...@kibisis/katavault-core-v1.6.0) (2025-08-18)
+
+
+### Features
+
+* adds logout ([#15](https://github.com/kibis-is/katavault/issues/15)) ([d4b5214](https://github.com/kibis-is/katavault/commit/d4b5214f8a23d3f4079b8bce21060d82a7efa55a))
+
+# [@kibisis/katavault-core-v1.5.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.4.0...@kibisis/katavault-core-v1.5.0) (2025-08-16)
+
+
+### Features
+
+* derive credentials to allow valid secap256k1 keys ([#13](https://github.com/kibis-is/katavault/issues/13)) ([a76aa75](https://github.com/kibis-is/katavault/commit/a76aa75377a8c7980164682ef5e943b8df24a20f))
+
+# [@kibisis/katavault-core-v1.4.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.3.0...@kibisis/katavault-core-v1.4.0) (2025-08-15)
+
+
+### Features
+
+* use events for settings ([#12](https://github.com/kibis-is/katavault/issues/12)) ([209ab34](https://github.com/kibis-is/katavault/commit/209ab34aab18c58b307534f6fecebaf2b79f657f))
+
+# [@kibisis/katavault-core-v1.3.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.2.0...@kibisis/katavault-core-v1.3.0) (2025-08-15)
+
+
+### Features
+
+* **core:** adds account balances ([#11](https://github.com/kibis-is/katavault/issues/11)) ([47f079b](https://github.com/kibis-is/katavault/commit/47f079b71279f730034d9ddd53204cf7263ad1fc))
+
 # [@kibisis/katavault-core-v1.2.0](https://github.com/kibis-is/katavault/compare/@kibisis/katavault-core-v1.1.0...@kibisis/katavault-core-v1.2.0) (2025-08-10)
 
 

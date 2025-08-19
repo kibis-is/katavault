@@ -1,3 +1,4 @@
+export * from './Authentication';
 export * from './Cryptography';
 export * from './Durations';
 export * from './Errors';

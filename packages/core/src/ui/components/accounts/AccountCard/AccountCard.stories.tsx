@@ -14,7 +14,8 @@ import chain from '@test/mocks/chain';
 import connection from '@test/mocks/connection';
 
 // types
-import { Props } from './types';
+import type { EphemeralAccountStoreItem } from '@/types';
+import type { Props } from './types';
 
 const meta: Meta<Props> = {
   args: {
@@ -23,12 +24,19 @@ const meta: Meta<Props> = {
 
       return {
         __type: AccountTypeEnum.Ephemeral,
+        balances: {
+          [chain.chainID()]: {
+            amount: '12670987',
+            block: '123456789',
+            lastUpdatedAt: new Date().getTime().toString(),
+          },
+        },
         credentialID: base64.encode(randomBytes(64)),
         key: base58.encode(ed25519.getPublicKey(privateKey)),
         keyData: base58.encode(privateKey),
         name: 'Personal',
         origin: EphemeralAccountOriginEnum.Credential,
-      };
+      } satisfies EphemeralAccountStoreItem;
     })(),
     chains: [chain],
     colorMode: 'dark',

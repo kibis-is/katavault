@@ -2,6 +2,7 @@ import {
   type AuthenticateWithPasskeyParameters,
   type AuthenticateWithPasswordParameters,
   BaseError,
+  EventEnum,
 } from '@kibisis/katavault-core';
 import { useCallback, useContext, useEffect, useState } from 'react';
 
@@ -16,11 +17,12 @@ import type { HookFunction, HookFunctionWithoutParams, UseAuthenticateState } fr
 
 /**
  * Hook to manage authentication.
+ *
  * @returns {UseAuthenticateState} Authentication methods and authentication state.
  */
 export default function useAuthenticate(): UseAuthenticateState {
   // contexts
-  const { onUpdate, katavault, timestamp } = useContext(KatavaultContext);
+  const { onUpdate, katavault } = useContext(KatavaultContext);
   // states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
@@ -97,15 +99,20 @@ export default function useAuthenticate(): UseAuthenticateState {
     },
     [katavault, setIsAuthenticated, setIsAuthenticating]
   );
-
-  // on updates, check if authenticated
-  useEffect(() => {
+  const logoutListener = useCallback(() => {
     if (!katavault) {
       return;
     }
 
     setIsAuthenticated(katavault.isAuthenticated());
-  }, [katavault, timestamp]);
+  }, [katavault, setIsAuthenticated]);
+
+  // listen to any logout events
+  useEffect(() => {
+    window.addEventListener(EventEnum.Logout, logoutListener);
+
+    return () => window.removeEventListener(EventEnum.Logout, logoutListener);
+  }, [logoutListener]);
 
   return {
     authenticate,

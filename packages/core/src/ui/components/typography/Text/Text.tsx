@@ -21,7 +21,7 @@ const Text: FunctionComponent<Props> = ({
   minHeight,
   minWidth,
   size = 'md',
-  textAlign = 'center',
+  textAlign = 'inherit',
   title,
   truncate = false,
   width,
@@ -44,13 +44,21 @@ const Text: FunctionComponent<Props> = ({
   }, [size]);
   const textAlignStyle = useMemo(() => {
     switch (textAlign) {
-      case 'left':
-        return styles.textLeft;
-      case 'right':
-        return styles.textRight;
       case 'center':
+        return styles.textAlignCenter;
+      case 'initial':
+        return styles.textAlignInitial;
+      case 'justify':
+        return styles.textAlignJustify;
+      case 'justify-all':
+        return styles.textAlignJustifyAll;
+      case 'left':
+        return styles.textAlignLeft;
+      case 'right':
+        return styles.textAlignRight;
+      case 'inherit':
       default:
-        return styles.textCenter;
+        return styles.textAlignInherit;
     }
   }, [textAlign]);
 

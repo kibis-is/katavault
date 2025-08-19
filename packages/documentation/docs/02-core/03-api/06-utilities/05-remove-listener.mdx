@@ -1,0 +1,66 @@
+---
+id: remove-listener
+sidebar_label: removeListener
+slug: /core/utilities/remove-listener
+title: removeListener
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# removeListener
+
+> Removes the listener by the supplied ID.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+    const listenerID = katavault.addListener('logout', () => {
+      console.log('user logged out!');
+    }));
+    const success = katavault.removeListener(listenerID);
+
+    console.log(`listener removed: ${success}`);
+    /*
+    listener removed: true
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Parameters
+
+#### id
+
+* Type: `string`
+
+The ID of the listener to remove.
+
+<SectionBreak />
+
+## Returns
+
+Type: `boolean`
+
+`true` of the listener existed, `false` otherwise.

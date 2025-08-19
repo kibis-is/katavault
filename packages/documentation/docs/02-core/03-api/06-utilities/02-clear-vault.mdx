@@ -1,0 +1,55 @@
+---
+id: clear-vault
+sidebar_label: clearVault
+slug: /core/utilities/clear-vault
+title: clearVault
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# clearVault
+
+> Deletes all accounts, settings and data from the vault.
+
+:::note
+
+Authentication is **REQUIRED**.
+
+:::
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.clearVault();
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+## Throws
+
+### [NotAuthenticatedError](04-glossary/03-errors.mdx#notauthenticatederror)
+
+If Katavault has not been authenticated.

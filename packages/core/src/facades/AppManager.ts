@@ -33,15 +33,6 @@ export default class AppManager {
    * private methods
    */
 
-  private _closeApp(type: AppTypeEnum): void {
-    const rootElement = window.document.getElementById(this._rootElementID(type));
-
-    // if there is a root element, remove it
-    if (rootElement) {
-      rootElement.remove();
-    }
-  }
-
   private async _getOrInitializeI18n(): Promise<I18n> {
     if (!this._i18n) {
       this._i18n = I18next.createInstance({
@@ -93,6 +84,16 @@ export default class AppManager {
    * public methods
    */
 
+  public closeApp(type: AppTypeEnum): void {
+    const rootElement = window.document.getElementById(this._rootElementID(type));
+
+    // if there is a root element, unmount the app and remove the element
+    if (rootElement) {
+      render(null, rootElement);
+      rootElement.remove();
+    }
+  }
+
   public async renderAuthenticationApp({
     clientInformation,
     debug,
@@ -106,7 +107,7 @@ export default class AppManager {
           debug,
           i18n,
           logger: this._logger,
-          onClose: () => this._closeApp(AppTypeEnum.Authentication),
+          onClose: () => this.closeApp(AppTypeEnum.Authentication),
           onError: reject,
           onSuccess: resolve,
         }),
@@ -120,6 +121,7 @@ export default class AppManager {
     clientInformation,
     chains,
     debug,
+    onLogout,
     vault,
   }: RenderAppParameters & RenderVaultAppParameters): Promise<void> {
     const i18n = await this._getOrInitializeI18n();
@@ -134,7 +136,12 @@ export default class AppManager {
           i18n,
           logger: this._logger,
           onClose: () => {
-            this._closeApp(AppTypeEnum.Vault);
+            this.closeApp(AppTypeEnum.Vault);
+            resolve();
+          },
+          onLogout: () => {
+            onLogout();
+            this.closeApp(AppTypeEnum.Vault);
             resolve();
           },
           vault,

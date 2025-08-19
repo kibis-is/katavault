@@ -1,4 +1,4 @@
-import { CAIP002Namespace } from '@kibisis/chains';
+import { CAIP002Namespace, type Chain } from '@kibisis/chains';
 
 // _base
 import { BaseClass } from '@/_base';
@@ -49,7 +49,12 @@ export default class TransactionContext extends BaseClass {
           return {
             error: null,
             success: true,
-            transactionID: await this._avmTransactionStrategy.sendRawTransaction(parameters),
+            transactionID: await this._avmTransactionStrategy.sendRawTransaction(
+              parameters as WithChain<
+                Record<'signature' | 'transaction', Uint8Array>,
+                Chain<CAIP002Namespace.Algorand | CAIP002Namespace.AVM>
+              >
+            ),
           };
         default:
           return {

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { FunctionComponent } from 'preact';
-import { useCallback, useMemo, useState } from 'preact/hooks';
+import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
 
 // components
 import AccountCard from '@/ui/components/accounts/AccountCard';
@@ -23,18 +23,18 @@ import { AccountTypeEnum } from '@/enums';
 import useAccounts from '@/ui/hooks/accounts/useAccounts';
 import useChains from '@/ui/hooks/chains/useChains';
 import useSettingsColorMode from '@/ui/hooks/settings/useSettingsColorMode';
-import useSettingsToggleColorMode from '@/ui/hooks/settings/useSettingsToggleColorMode';
 import useTranslate from '@/ui/hooks/i18n/useTranslate';
 
 // icons
 import ArrowLeftRightIcon from '@/ui/icons/ArrowLeftRightIcon';
-import MoonIcon from '@/ui/icons/MoonIcon';
-import PlusIcon from '@/ui/icons/PlusIcon';
-import SunnyIcon from '@/ui/icons/SunnyIcon';
 import CloseIcon from '@/ui/icons/CloseIcon';
+import PlusIcon from '@/ui/icons/PlusIcon';
+import SettingsIcon from '@/ui/icons/SettingsIcon';
 
 // modals
+import ConfirmModal from '@/ui/modals/ConfirmModal';
 import ConnectAccountModal from '@/ui/modals/ConnectAccountModal';
+import SettingsModal from '@/ui/modals/SettingsModal';
 import TransferFundsModal from '@/ui/modals/TransferFundsModal';
 
 // styles
@@ -45,17 +45,20 @@ import type { RootProps } from './types';
 
 // utilities
 import { usernameFromVault } from '@/utilities';
+import { ConfirmModalContext } from '@/ui/contexts';
 
-const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
+const Root: FunctionComponent<RootProps> = ({ onClose, onLogout, vault }) => {
+  // contexts
+  const confirmModalContextState = useContext(ConfirmModalContext);
   // hooks
   const accounts = useAccounts();
   const chains = useChains();
   const colorMode = useSettingsColorMode();
   const translate = useTranslate();
-  const toggleColorMode = useSettingsToggleColorMode();
   // states
   const [closing, setClosing] = useState<boolean>(false);
   const [connectAccountModalOpen, setConnectAccountModalOpen] = useState<boolean>(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
   const [transferFundsModalOpen, setTransferFundsModalOpen] = useState<boolean>(false);
   // memos
   const connectedAccounts = useMemo(
@@ -72,21 +75,58 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
     setClosing(true);
     setTimeout(() => onClose(), 300); // allow animation to finish
   }, [closing, onClose, setClosing]);
+  const handleOnConfirmModalClose = useCallback(() => {
+    if (!confirmModalContextState) {
+      return;
+    }
+
+    const { onClose, reset } = confirmModalContextState;
+
+    onClose?.();
+    reset();
+  }, [confirmModalContextState]);
+  const handleOnConfirmModalConfirm = useCallback(() => {
+    if (!confirmModalContextState) {
+      return;
+    }
+
+    const { onConfirm, reset } = confirmModalContextState;
+
+    onConfirm?.();
+    reset();
+  }, [confirmModalContextState]);
   const handleOnConnectAccountClick = useCallback(() => setConnectAccountModalOpen(true), [setConnectAccountModalOpen]);
   const handleOnConnectAccountModalClose = useCallback(() => setConnectAccountModalOpen(false), [setConnectAccountModalOpen]);
-  const handleOnToggleColorModeClick = useCallback(() => toggleColorMode(), [toggleColorMode]);
+  const handleOnOpenSettingsModalClick = useCallback(() => setSettingsModalOpen(true), [setSettingsModalOpen]);
+  const handleOnOpenSettingsModalClose = useCallback(() => setSettingsModalOpen(false), [setSettingsModalOpen]);
   const handleOnTransferFundsClick = useCallback(() => setTransferFundsModalOpen(true), [setTransferFundsModalOpen]);
   const handleOnTransferFundsModalClose = useCallback(() => setTransferFundsModalOpen(false), [setTransferFundsModalOpen]);
 
   return (
     <>
       <ConnectAccountModal
+        colorMode={colorMode}
         onClose={handleOnConnectAccountModalClose}
         open={connectAccountModalOpen}
       />
       <TransferFundsModal
+        colorMode={colorMode}
         onClose={handleOnTransferFundsModalClose}
         open={transferFundsModalOpen}
+      />
+      <SettingsModal
+        colorMode={colorMode}
+        onClose={handleOnOpenSettingsModalClose}
+        onLogout={onLogout}
+        open={settingsModalOpen}
+      />
+      <ConfirmModal
+        colorMode={colorMode}
+        message={confirmModalContextState?.message ?? ''}
+        onClose={handleOnConfirmModalClose}
+        onConfirm={handleOnConfirmModalConfirm}
+        open={confirmModalContextState?.open ?? false}
+        title={confirmModalContextState?.title ?? ''}
       />
 
       <div className={clsx(styles.container)}>
@@ -110,8 +150,8 @@ const Root: FunctionComponent<RootProps> = ({ onClose, vault }) => {
               {/*toggle color mode button*/}
               <IconButton
                 colorMode={colorMode}
-                icon={colorMode === 'dark' ? <MoonIcon /> : <SunnyIcon />}
-                onClick={handleOnToggleColorModeClick}
+                icon={<SettingsIcon />}
+                onClick={handleOnOpenSettingsModalClick}
               />
 
               {/*close button*/}

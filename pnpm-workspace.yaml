@@ -3,7 +3,7 @@ packages:
 
 catalog:
   "@eslint/js": ^9.16.0
-  "@kibisis/chains": ^2.2.0
+  "@kibisis/chains": ^2.5.2
   "@kibisis/encoding": ^1.0.1
   "@kibisis/utilities": ^1.0.0
   "@stablelib/random": ^2.0.1

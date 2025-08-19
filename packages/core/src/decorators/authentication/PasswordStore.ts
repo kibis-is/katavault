@@ -1,13 +1,14 @@
+import { concat } from '@agoralabs-sh/bytes';
 import { base58, base64, utf8 } from '@kibisis/encoding';
+import { sha512 } from '@noble/hashes/sha512';
 import { randomBytes } from '@noble/hashes/utils';
 import { secretbox } from 'tweetnacl';
 
 // constants
-import { IDB_PASSWORD_STORE_NAME } from '@/constants';
+import { IDB_PASSWORD_STORE_NAME, PRIVATE_KEY_BYTE_LENGTH } from '@/constants';
 
 // decorators
-import { CredentialID } from '@/decorators';
-import BaseStore from '@/decorators/_base/BaseStore';
+import { BaseStore, CredentialID } from '@/decorators';
 
 // errors
 import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/errors';
@@ -15,13 +16,13 @@ import { EncryptionError, DecryptionError, NotAuthenticatedError } from '@/error
 // types
 import type {
   AuthenticationStoreInterface,
+  AuthenticationStoreParameters,
   EphemeralAccountStoreItem,
   EphemeralAccountStoreItemWithDecryptedKeyData,
-  StoreParameters,
 } from '@/types';
 
 // utilities
-import { createDerivationKey } from '@/utilities';
+import { createDerivationKey, toValidSecp256k1PrivateKey } from '@/utilities';
 
 export default class PasswordStore extends BaseStore implements AuthenticationStoreInterface {
   /**
@@ -36,10 +37,15 @@ export default class PasswordStore extends BaseStore implements AuthenticationSt
   /**
    * private properties
    */
+  private _hostname: string;
   private _password: string | null = null;
+  private _username: string;
 
-  public constructor(params: StoreParameters) {
-    super(params);
+  public constructor({ hostname, username, ...defaultStoreProps }: AuthenticationStoreParameters) {
+    super(defaultStoreProps);
+
+    this._hostname = hostname;
+    this._username = username;
   }
 
   /**
@@ -145,6 +151,36 @@ export default class PasswordStore extends BaseStore implements AuthenticationSt
       ...account,
       keyData: await this.decryptBytes(base58.decode(account.keyData)),
     };
+  }
+
+  /**
+   * Derives a private key from the provided password credentials.
+   *
+   * The key is derived using the scrypt key derivation function:
+   * * salt = SHA512(hostname + username)
+   * * secret = SHA512(username + password)
+   *
+   * The derived key **SHOULD** be a valid secp256k1 and ed21559 key.
+   *
+   * @returns {Promise<Uint8Array>} A promise that resolves to a private key derived from the password credentials.
+   * @throws {NotAuthenticatedError} If no password is stored.
+   * @public
+   * @async
+   */
+  public async derivePrivateKey(): Promise<Uint8Array> {
+    let derivedKey: Uint8Array;
+
+    if (!this._password) {
+      throw new NotAuthenticatedError('no password found');
+    }
+
+    derivedKey = await createDerivationKey({
+      keyLength: PRIVATE_KEY_BYTE_LENGTH,
+      salt: sha512(concat(utf8.decode(this._hostname), utf8.decode(this._username))),
+      secret: concat(utf8.decode(this._username), utf8.decode(this._password)), // this is hashed in the function
+    });
+
+    return toValidSecp256k1PrivateKey(derivedKey); // ensure the key is a valid secp256k1 key for evm accounts
   }
 
   /**

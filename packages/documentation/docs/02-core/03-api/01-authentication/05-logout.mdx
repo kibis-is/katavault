@@ -1,0 +1,53 @@
+---
+id: logout
+sidebar_label: logout
+slug: /core/authentication/logout
+title: logout
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# logout
+
+> Logs the user out and closes the vault.
+
+<SectionBreak />
+
+## Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    await katavault.authenticate();
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: true
+    */
+
+    katavault.logout();
+
+    console.log(`is authenticated: ${katavault.isAuthenticated()}`);
+    /*
+    is authenticated: false
+    */
+    ```
+
+  </TabItem>
+</Tabs>

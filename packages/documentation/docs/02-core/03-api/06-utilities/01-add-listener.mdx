@@ -1,0 +1,141 @@
+---
+id: add-listener
+sidebar_label: addListener
+slug: /core/utilities/add-listener
+title: addListener
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- components -->
+import SectionBreak from '@site/src/components/SectionBreak';
+
+# addListener
+
+<SectionBreak />
+
+## addListener('logout')
+
+> Adds a listener that will be invoked when the user logs out via the UI or when the [`logout`](02-core/03-api/01-authentication/05-logout.mdx) method is used.
+
+<SectionBreak />
+
+### Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    katavault.addListener('logout', () => {
+      console.log('user logged out!');
+    }));
+
+    // ... some time later
+
+    katavault.logout();
+    /*
+    user logged out!
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+
+<SectionBreak />
+
+### Parameters
+
+#### type
+
+* Type: `logout`
+
+The logout event.
+
+#### callback
+
+* Type: `() => Promise<void> | void`
+
+The callback to be invoked when the user logs out.
+
+<SectionBreak />
+
+### Returns
+
+`string`
+
+The ID of the added listener.
+
+<SectionBreak />
+
+## addListener('vault_cleared')
+
+> Adds a listener that will be invoked when the [`clearVault`](02-core/03-api/06-utilities/02-clear-vault.mdx) method is used.
+
+<SectionBreak />
+
+### Usage
+
+<Tabs
+  defaultValue="main"
+  values={[
+    { label: 'main.ts', value: 'main' },
+  ]}>
+  <TabItem value="main">
+
+    ```typescript
+    import { Voi } from '@kibisis/chains';
+    import { createKatavault } from '@kibisis/katavault-core';
+
+    const katavault = await createKatavault({
+      chains: [Voi],
+    });
+
+    katavault.addListener('vault_cleared', () => {
+      console.log('vault cleared!');
+    }));
+
+    await katavault.clearVault();
+    /*
+    vault cleared!
+    */
+    ```
+
+  </TabItem>
+</Tabs>
+
+<SectionBreak />
+
+### Parameters
+
+#### type
+
+* Type: `vault_cleared`
+
+The vault cleared event.
+
+#### callback
+
+* Type: `() => Promise<void> | void`
+
+The callback to be invoked when the vault is cleared.
+
+<SectionBreak />
+
+### Returns
+
+`string`
+
+The ID of the added listener.

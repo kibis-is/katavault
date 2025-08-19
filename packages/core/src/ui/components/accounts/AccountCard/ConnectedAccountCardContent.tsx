@@ -22,14 +22,14 @@ const ConnectedAccountCardContent: FunctionComponent<ConnectedAccountCardContent
     <VStack className={clsx(styles.footerContent)}>
       <HStack spacing="xs">
         {account.connections.map(({ wallet }) => {
-          const defaultIcon = (<WalletIcon className={clsx(styles.connectorIcon)} />);
+          const defaultIcon = (<WalletIcon className={clsx(styles.circularIcon)} />);
 
           if (!wallet.iconURI) {
             return defaultIcon;
           }
 
           return dataURIToImageElement({
-            className: clsx(styles.connectorIcon),
+            className: clsx(styles.circularIcon),
             dataURI: wallet.iconURI,
             title: wallet.name,
           }) ?? defaultIcon;

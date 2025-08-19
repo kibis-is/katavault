@@ -10,12 +10,17 @@ import { AccountStore, SettingsStore } from '@/decorators';
 import AccountsProvider from '@/ui/providers/AccountsProvider';
 import AppProvider from '@/ui/providers/AppProvider';
 import ChainsProvider from '@/ui/providers/ChainsProvider';
+import ConfirmModalProvider from '@/ui/providers/ConfirmModalProvider';
 import ConnectorsProvider from '@/ui/providers/ConnectorsProvider';
 import SettingsProvider from '@/ui/providers/SettingsProvider';
+import UserProvider from '@/ui/providers/UserProvider';
 
 // types
 import type { BaseAppProps } from '@/ui/types';
 import type { AppProps } from './types';
+
+// utilities
+import { usernameFromVault } from '@/utilities';
 
 const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInformation, debug, i18n, logger, ...rootProps }) => {
   return (
@@ -24,23 +29,27 @@ const App: FunctionComponent<BaseAppProps & AppProps> = ({ chains, clientInforma
       i18n={i18n}
       logger={logger}
     >
-      <SettingsProvider
-        settingsStore={new SettingsStore({
-          logger,
-          vault: rootProps.vault,
-        })}
-      >
-        <AccountsProvider accountsStore={new AccountStore({
-          logger,
-          vault: rootProps.vault,
-        })}>
-          <ChainsProvider chains={chains}>
-            <ConnectorsProvider chains={chains} debug={debug}>
-              <Root {...rootProps} />
-            </ConnectorsProvider>
-          </ChainsProvider>
-        </AccountsProvider>
-      </SettingsProvider>
+      <UserProvider username={usernameFromVault(rootProps.vault)}>
+        <SettingsProvider
+          settingsStore={new SettingsStore({
+            logger,
+            vault: rootProps.vault,
+          })}
+        >
+          <AccountsProvider accountsStore={new AccountStore({
+            logger,
+            vault: rootProps.vault,
+          })}>
+            <ChainsProvider chains={chains}>
+              <ConnectorsProvider chains={chains} debug={debug}>
+                <ConfirmModalProvider>
+                  <Root {...rootProps} />
+                </ConfirmModalProvider>
+              </ConnectorsProvider>
+            </ChainsProvider>
+          </AccountsProvider>
+        </SettingsProvider>
+      </UserProvider>
     </AppProvider>
   );
 };

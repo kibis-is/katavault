@@ -1,32 +1,48 @@
 import { base64, utf8 } from '@kibisis/encoding';
 
 // errors
-import { InvalidPasswordError } from '@/errors';
+import { InvalidPasswordError, PasswordTooWeakError } from '@/errors';
 
 // decorators
 import { PasswordStore } from '@/decorators';
 
 // types
-import type { AuthenticateWithPasswordParameters, CommonParameters, WithVault } from '@/types';
+import type { AuthenticateWithPasswordParameters, CommonParameters, WithClientInformation, WithVault } from '@/types';
+
+// utilities
+import { passwordScore } from '@/utilities';
 
 /**
  * Authenticates with the supplied password.
- * @param {CommonParameters & WithVault<AuthenticateWithPasswordParameters>} params - The password and vault.
+ *
+ * @param {CommonParameters & WithVault<AuthenticateWithPasswordParameters>} params - The input parameters.
+ * @param {ClientInformation} params.clientInformation - Information about the client.
+ * @param {string} params.clientInformation.hostname - The hostname of the client i.e., example.com.
+ * @param {string} [params.clientInformation.icon] - An icon URL for the client.
+ * @param {string} params.clientInformation.name - A human-readable name for the client.
  * @param {ILogger} params.logger - A logger for logging.
- * @param {string} params.password - The password.
+ * @param {string} params.password - The password to authenticate with.
+ * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+ * address.
  * @param {Vault} params.vault - An initialized vault.
  * @returns {Promise<PasswordStore>} A promise that resolves to an initialized password store.
  * @throws {DecryptionError} If the stored challenge failed to be decrypted.
  * @throws {InvalidPasswordError} If supplied password does not match the stored password.
+ * @throws {PasswordTooWeakError} If this is a new sign-up, and the supplied password does not have enough entropy.
+ * @async
  */
 export default async function authenticateWithPassword({
+  clientInformation,
   logger,
   password,
+  username,
   vault,
-}: CommonParameters & WithVault<AuthenticateWithPasswordParameters>): Promise<PasswordStore> {
+}: CommonParameters & WithClientInformation<WithVault<AuthenticateWithPasswordParameters>>): Promise<PasswordStore> {
   const __logPrefix = `utilities#authenticateWithPassword`;
   const store = new PasswordStore({
+    hostname: clientInformation.hostname,
     logger,
+    username,
     vault,
   });
   let encryptedChallenge = await store.challenge();
@@ -50,7 +66,16 @@ export default async function authenticateWithPassword({
     return store;
   }
 
-  // ... otherwise, if there is no stored challenge, encrypt a new one into the store.
+  // ... otherwise, if there is no stored challenge, encrypt a new one into the store
+
+  const { score } = passwordScore(password);
+
+  logger.debug(`${__logPrefix}: password score "${score}"`);
+
+  // ensure the password has at least 128-bit entropy
+  if (score <= 0) {
+    throw new PasswordTooWeakError('password is too weak');
+  }
 
   logger.debug(`${__logPrefix}: initializing new password store`);
 

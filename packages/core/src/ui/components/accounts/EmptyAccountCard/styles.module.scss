@@ -4,7 +4,7 @@
 @use "sass:map";
 
 .container {
-  @include mixins.base-account-card-container-styles;
+  @include mixins.card-container;
   border-style: dashed;
 
   &--clickable {

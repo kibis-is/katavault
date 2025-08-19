@@ -23,16 +23,16 @@ import {
 import type {
   AuthenticatePasskeyParameters,
   AuthenticationStoreInterface,
+  AuthenticationStoreParameters,
   EphemeralAccountStoreItem,
   EphemeralAccountStoreItemWithDecryptedKeyData,
   GenerateEncryptionKeyFromKeyMaterialParameters,
   PasskeyStoreSchema,
   RegisterPasskeyParameters,
-  StoreParameters,
 } from '@/types';
 
 // utilities
-import { bufferSourceToUint8Array } from '@/utilities';
+import { bufferSourceToUint8Array, toValidSecp256k1PrivateKey } from '@/utilities';
 
 export default class PasskeyStore extends BaseStore implements AuthenticationStoreInterface {
   /**
@@ -52,10 +52,15 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
   /**
    * private properties
    */
+  private _hostname: string;
   private _keyMaterial: Uint8Array | null = null;
+  private _username: string;
 
-  public constructor(params: StoreParameters) {
-    super(params);
+  public constructor({ hostname, username, ...defaultStoreProps }: AuthenticationStoreParameters) {
+    super(defaultStoreProps);
+
+    this._hostname = hostname;
+    this._username = username;
   }
 
   /**
@@ -68,10 +73,11 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * @param {GenerateEncryptionKeyFromKeyMaterialParameters} params - The key material and the credential ID.
    * @returns {Promise<CryptoKey>} A promise that resolves to an encryption key that can be used to decrypt/encrypt
    * some bytes.
-   * @public
+   * @private
    * @static
+   * @async
    */
-  public static async _generateEncryptionKeyFromInputKeyMaterial({
+  private static async _generateEncryptionKeyFromInputKeyMaterial({
     credentialID,
     keyMaterial,
   }: GenerateEncryptionKeyFromKeyMaterialParameters): Promise<CryptoKey> {
@@ -114,6 +120,7 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * the PRF extension.
    * @public
    * @static
+   * @async
    */
   public static async authenticate({ logger, ...passkey }: AuthenticatePasskeyParameters): Promise<Uint8Array> {
     const __logPrefix = `${PasskeyStore.displayName}#authenticate`;
@@ -191,16 +198,28 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * derive an encryption key.
    *
    * NOTE: this requires PRF extension support and will throw an error if the authenticator does not support it.
-   * @param {RegisterPasskeyParameters} options - The client and user details.
-   * @returns {Promise<PasskeyStore>} A promise that resolves to a registered passkey.
+   *
+   * @param {RegisterPasskeyParameters} params - The input parameters.
+   * @param {ClientInformation} params.clientInformation - Information about the client.
+   * @param {string} params.clientInformation.hostname - The hostname of the client i.e., example.com.
+   * @param {string} [params.clientInformation.icon] - An icon URL for the client.
+   * @param {string} params.clientInformation.name - A human-readable name for the client.
+   * @param {string} params.username - A globally unique identifier for the user. This could be, for example, an email
+   * address.
+   * @returns {Promise<PasskeyStore>} A promise that resolves to an initialized passkey store.
    * @throws {FailedToRegisterPasskeyError} If the public key credentials failed to be created on the authenticator.
    * @throws {PasskeyNotSupportedError} If the browser does not support WebAuthn or the authenticator does not support.
    * @throws {UserCanceledPasskeyRequestError} If the user canceled the request or the request timed out.
    * the PRF extension.
    * @public
    * @static
+   * @async
    */
-  public static async register({ client, logger, user }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
+  public static async register({
+    clientInformation,
+    logger,
+    username,
+  }: RegisterPasskeyParameters): Promise<PasskeyStoreSchema> {
     const __logPrefix = `${PasskeyStore.displayName}#register`;
     const salt = randomBytes(PasskeyStore._saltByteSize);
     let _error: string;
@@ -234,13 +253,13 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
             { alg: -257, type: 'public-key' }, // RS256
           ],
           rp: {
-            id: client.hostname,
-            name: client.name,
+            id: clientInformation.hostname,
+            name: clientInformation.name,
           },
           user: {
             id: utf8.decode(generate()),
-            name: user.username,
-            displayName: user.displayName ?? user.username,
+            name: username,
+            displayName: username,
           },
         },
       })) as PublicKeyCredential | null;
@@ -291,6 +310,7 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted bytes.
    * @throws {NotAuthenticatedError} If no passkey credentials are stored.
    * @public
+   * @async
    */
   public async decryptBytes(encryptedBytes: Uint8Array): Promise<Uint8Array> {
     const passkey = await this.passkey();
@@ -326,7 +346,8 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * @throws {AuthenticationMethodNotSupportedError} If the authentication method is not supported.
    * @throws {DecryptionError} If there was an issue with decryption, or if the key was encrypted with the incorrect
    * credentials.
-   * @private
+   * @public
+   * @async
    */
   public async decryptEphemeralAccount(
     account: EphemeralAccountStoreItem
@@ -352,12 +373,33 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
   }
 
   /**
+   * Derives a private key from the acquired passkey key material.
+   *
+   * The derived key **SHOULD** be a valid secp256k1 and ed21559 key.
+   *
+   * @returns {Promise<Uint8Array>} A promise that resolves to a private key derived from the acquired passkey key
+   * material.
+   * @throws {NotAuthenticatedError} If no passkey credentials are stored.
+   * @public
+   * @async
+   */
+  public async derivePrivateKey(): Promise<Uint8Array> {
+    if (!this._keyMaterial) {
+      throw new NotAuthenticatedError('no passkey credentials stored');
+    }
+
+    return toValidSecp256k1PrivateKey(this._keyMaterial);
+  }
+
+  /**
    * Encrypts some arbitrary bytes using the input key material fetched from a passkey. This function uses the AES-GCM
    * algorithm to encrypt the bytes.
+   *
    * @param {Uint8Array} bytes - The bytes to encrypt.
    * @returns {Promise<Uint8Array>} A promise that resolves to the encrypted bytes.
    * @throws {NotAuthenticatedError} If no passkey credentials are stored.
    * @public
+   * @async
    */
   public async encryptBytes(bytes: Uint8Array): Promise<Uint8Array> {
     const passkey = await this.passkey();
@@ -386,6 +428,7 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
 
   /**
    * Retrieves the key material associated with the current instance.
+   *
    * @return {Uint8Array | null} A Uint8Array containing the key material if it is set, or null if no key material is
    * available.
    * @public
@@ -396,8 +439,10 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
 
   /**
    * Gets the passkey.
+   *
    * @returns {Promise<PasskeyStoreSchema | null>} A promise that resolves to the passkey or null if no passkey exists.
    * @public
+   * @async
    */
   public async passkey(): Promise<PasskeyStoreSchema | null> {
     const transaction = this._vault.transaction(IDB_PASSKEY_STORE_NAME, 'readonly');
@@ -424,6 +469,7 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
    * Sets the key material from the authenticator used to derive an encryption key.
    *
    * **NOTE:** This does not set the key material to storage, only to runtime memory.
+   *
    * @param {string} keyMaterial - The password to set.
    * @public
    */
@@ -433,9 +479,11 @@ export default class PasskeyStore extends BaseStore implements AuthenticationSto
 
   /**
    * Saves the passkey credential information returned from an authenticator register function.
+   *
    * @param {PasskeyStoreSchema} passkey - The passkey to save.
    * @returns {Promise<PasskeyStoreSchema>} A promise that resolves to the saved passkey.
    * @public
+   * @async
    */
   public async setPasskey(passkey: PasskeyStoreSchema): Promise<PasskeyStoreSchema> {
     const transaction = this._vault.transaction(IDB_PASSKEY_STORE_NAME, 'readwrite');

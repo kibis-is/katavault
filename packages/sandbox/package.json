@@ -1,6 +1,6 @@
 {
   "name": "sandbox",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "The Katavault Sandbox is a React app that explores the features of Katavault from the perspective of a dApp.",
   "repository": {
     "type": "git",

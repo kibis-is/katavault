@@ -1,6 +1,6 @@
 import type { FunctionComponent } from 'preact';
 import type { PropsWithChildren } from 'preact/compat';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 // contexts
 import { AccountsContext } from '@/ui/contexts';
@@ -13,24 +13,14 @@ import type { Props } from './types';
 
 const AccountsProvider: FunctionComponent<PropsWithChildren<Props>> = ({ accountsStore, children }) => {
   // states
-  const [timestamp, setTimestamp] = useState<number>(0);
-  const [state, setState] = useState<AccountStore>(accountsStore);
-  // callbacks
-  const onUpdate = useCallback(() => setTimestamp(Date.now()), [setTimestamp]);
+  const [value, setValue] = useState<AccountStore>(accountsStore);
 
   useEffect(() => {
-    setState(accountsStore);
-    onUpdate();
+    setValue(accountsStore);
   }, [accountsStore]);
 
   return (
-    <AccountsContext.Provider
-      value={{
-        onUpdate,
-        state,
-        timestamp,
-      }}
-    >
+    <AccountsContext.Provider value={value}>
       {children}
     </AccountsContext.Provider>
   );

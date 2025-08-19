@@ -1,1 +1,1 @@
-export const KATAVAULT_URL = 'https://katavault.kibis.is';
+export const KATAVAULT_DOCS_URL = 'https://docs.katavault.kibis.is';

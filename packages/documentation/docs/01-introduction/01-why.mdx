@@ -1,9 +1,15 @@
 ---
+id: why
 sidebar_label: Why
 slug: /
+title: Why
 ---
 
+<!-- components -->
 import SectionBreak from '@site/src/components/SectionBreak';
+
+<!-- constants -->
+import { WEBAUTHN_PRF_EXTENSION_URL } from '@site/src/constants';
 
 # Why
 
@@ -34,13 +40,13 @@ Katavault empowers dApps to embed a secure wallet directly within their website,
 
 While embedding a wallet in a website introduces concerns about the safety of sensitive data, Katavault addresses these challenges by leveraging the latest advancements in web security technology.
 
-A key innovation is the use of [Web Authentication](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API) (WebAuthn). WebAuthn enables the wallet to interact with a user’s passkey through the browser’s native UI, supporting a wide range of authentication methods-from Windows Hello on PCs, to biometrics like fingerprint or FaceID on mobile devices, and even hardware security keys such as Yubikey.
+A key innovation is the use of <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API" rel="noopener noreferrer" target="_blank">Web Authentication</a> (WebAuthn). WebAuthn enables the wallet to interact with a user’s passkey through the browser’s native UI, supporting a wide range of authentication methods-from Windows Hello on PCs, to biometrics like fingerprint or FaceID on mobile devices, and even hardware security keys such as Yubikey.
 
-Katavault utilizes the [PRF extension](https://github.com/w3c/webauthn/wiki/Explainer:-PRF-extension) of WebAuthn to deterministically derive encryption key material from the user’s passkey. This key is then used to encrypt the wallet’s private keys using AES-GCM, ensuring robust protection.
+Katavault utilizes the <a href={WEBAUTHN_PRF_EXTENSION_URL} rel="noopener noreferrer" target="_blank">PRF extension</a> of WebAuthn to deterministically derive encryption key material from the user’s passkey. This key is then used to encrypt the wallet’s private keys using AES-GCM, ensuring robust protection.
 
-For users who prefer or require a more traditional approach, Katavault also supports password-based encryption. In this mode, a user’s password is transformed into a strong cryptographic key using PBKDF2, and private keys are encrypted using the XSalsa20-Poly1305 algorithm-a modern, high-security cipher that provides both confidentiality and integrity.
+For users who prefer or require a more traditional approach, Katavault also supports password-based encryption. In this mode, a user’s password is transformed into a strong cryptographic key using the <a href="https://www.tarsnap.com/scrypt.html" rel="noopener noreferrer" target="_blank">scrypt</a> key derivation function (KDF). Private keys are encrypted using NaCl's <a href="https://nacl.cr.yp.to/valid.html" rel="noopener noreferrer" target="_blank">XSalsa20-Poly1305</a> algorithm — a modern, high-security cipher that provides both confidentiality and integrity.
 
-Regardless of the authentication method, all encrypted private keys are securely stored using [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), which offers stronger isolation and security guarantees than alternatives like `localStorage`.
+Regardless of the authentication method, all encrypted private keys are securely stored using <a href="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API" rel="noopener noreferrer" target="_blank">IndexedDB</a>, which offers stronger isolation and security guarantees than alternatives like `localStorage`.
 
 By supporting both passkey-based and password-based encryption, Katavault ensures that users can choose the authentication method that best fits their needs, without compromising on security or usability.
 
